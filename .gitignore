@@ -1,0 +1,12 @@
+target/**
+.project
+.settings/
+.classpath
+.factorypath
+# Java class files
+*.class
+nb-configuration.xml
+.idea/
+*.iml
+*.bak
+/target/
