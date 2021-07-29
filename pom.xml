@@ -10,7 +10,7 @@
   <packaging>war</packaging>
 
   <name>RestAPI</name>
-  <url>https://api.bymmc.com</url>
+  <url>https://bymmc.com/api</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
