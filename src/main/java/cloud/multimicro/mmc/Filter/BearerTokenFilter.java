@@ -7,6 +7,10 @@
  */
 package cloud.multimicro.mmc.Filter;
 
+import java.io.IOException;
+
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.HttpHeaders;
@@ -14,14 +18,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.jboss.logging.Logger;
 
-import cloud.multimicro.mmc.Util.Constant;
 import cloud.multimicro.mmc.Util.Jwt;
-
-import javax.ws.rs.container.ContainerRequestContext;
-
-import java.io.IOException;
-
-import javax.ws.rs.NotAuthorizedException;
 
 @Provider
 @PreMatching
@@ -55,14 +52,14 @@ public class BearerTokenFilter implements ContainerRequestFilter {
         
         String authHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
         if(context.getMethod() != "OPTIONS"){
-        if (authHeader == null) {
-            throw new NotAuthorizedException("Bearer error=\"token_expected\"");
-        }
-        String token = parseToken(authHeader);
-        if (verifyToken(token) == false) {
-            throw new NotAuthorizedException("Bearer error=\"invalid_token\"");
+            if (authHeader == null) {
+                throw new NotAuthorizedException("Bearer error=\"token_expected\"");
+            }
+            String token = parseToken(authHeader);
+            if (verifyToken(token) == false) {
+                throw new NotAuthorizedException("Bearer error=\"invalid_token\"");
+            } 
         } 
-    } 
     } 
     
 

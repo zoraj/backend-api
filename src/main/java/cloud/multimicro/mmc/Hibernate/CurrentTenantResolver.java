@@ -37,9 +37,9 @@ public class CurrentTenantResolver implements CurrentTenantIdentifierResolver {
             }
             return dbName;
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(CurrentTenantResolver.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error(ex.getMessage());
         } catch (Exception ex) {
-            java.util.logging.Logger.getLogger(CurrentTenantResolver.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error(ex.getMessage());
         }
         return null;
     }
