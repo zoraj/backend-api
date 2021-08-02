@@ -5,6 +5,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import org.jboss.logging.Logger;
 
 /**
@@ -64,4 +68,17 @@ public class Util {
         return generatedString;
     }
 
+    public static String getEnvString(String key) {
+        String result = "";
+        try {
+            Context context = new InitialContext();
+            Context env = (Context) context.lookup("java:comp/env");
+
+            result = (String) env.lookup(key);
+            return result;
+        } catch (NamingException e) {
+            //todo: handle exception
+        }
+        return result;
+   }    
 }

@@ -5,20 +5,20 @@
  */
 package cloud.multimicro.mmc.Dao;
 
+import java.util.Date;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.validation.ConstraintViolationException;
+
 import cloud.multimicro.mmc.Entity.TPosClientVae;
 import cloud.multimicro.mmc.Entity.TPosPrestation;
 import cloud.multimicro.mmc.Entity.TPosRevervation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
-import cloud.multimicro.mmc.Util.Constant;
-import java.util.Date;
-import java.util.List;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.validation.ConstraintViolationException;
-import cloud.multimicro.mmc.Util.Constant;
 import cloud.multimicro.mmc.Util.Util;
-import javax.persistence.NoResultException;
 
 
 /**
@@ -41,7 +41,8 @@ public class VaeDao {
     }
 
     public TPosClientVae checkCredentials(String nom, String pass) {
-        String hashedPassword = Util.sha256(Constant.MMC_PEPPER + pass);
+        final String pepper = Util.getEnvString("pepper");
+        String hashedPassword = Util.sha256(pepper + pass);
         try {
             TPosClientVae user = (TPosClientVae) entityManager.createQuery("FROM TPosClientVae WHERE nom =:nom and  pass =:pass and dateDeletion = null").setParameter("nom", nom).setParameter("pass", hashedPassword).getSingleResult();
             return user;
@@ -53,37 +54,38 @@ public class VaeDao {
     
     public TPosClientVae create(TPosClientVae client) throws CustomConstraintViolationException {
         try{
-        String hashedPassword = Util.sha256(Constant.MMC_PEPPER + client.getPass());
-        client.setPass(hashedPassword);
-        entityManager.persist(client);
-        return client;
+            final String pepper = Util.getEnvString("pepper");
+            String hashedPassword = Util.sha256(pepper + client.getPass());
+            client.setPass(hashedPassword);
+            entityManager.persist(client);
+            return client;
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
     }
     
-     public void setPosRevervation(TPosRevervation reservation) throws CustomConstraintViolationException {
+    public void setPosRevervation(TPosRevervation reservation) throws CustomConstraintViolationException {
         try{
-        entityManager.persist(reservation);
+            entityManager.persist(reservation);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
     }
-     public TPosClientVae updateClient(TPosClientVae vae) throws CustomConstraintViolationException{
+    public TPosClientVae updateClient(TPosClientVae vae) throws CustomConstraintViolationException{
         try{
-         return entityManager.merge(vae);
-         } catch (ConstraintViolationException ex) {
+            return entityManager.merge(vae);
+        } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
     }
-     public TPosRevervation updatePosRevervation(TPosRevervation PosRevervation) throws CustomConstraintViolationException{
+    public TPosRevervation updatePosRevervation(TPosRevervation PosRevervation) throws CustomConstraintViolationException{
         try{
-         return entityManager.merge(PosRevervation);
-         } catch (ConstraintViolationException ex) {
+            return entityManager.merge(PosRevervation);
+        } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
     }
-    
+
     public TPosClientVae getByIdCustomer(int id) {
         TPosClientVae customer = entityManager.find(TPosClientVae.class, id);
         return customer;

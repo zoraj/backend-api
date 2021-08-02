@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+  <display-name>MMC REST API</display-name>
+  <listener>
+      <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
+  </listener>
+  <servlet>
+      <servlet-name>Resteasy</servlet-name>
+      <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
+  </servlet>
+  <servlet-mapping>
+      <servlet-name>Resteasy</servlet-name>
+      <url-pattern>/*</url-pattern>
+  </servlet-mapping>
+  <context-param>
+        <param-name>resteasy.scan</param-name>
+        <param-value>true</param-value>
+  </context-param>  
+  <context-param>
+        <param-name>resteasy.servlet.mapping.prefix</param-name>
+        <param-value>/</param-value>
+  </context-param>  
+  <env-entry>
+      <env-entry-name>jwt-secret-key</env-entry-name>
+      <env-entry-type>java.lang.String</env-entry-type>
+      <env-entry-value>$JWT-SECRET-KEY</env-entry-value> 
+  </env-entry>
+  <env-entry>
+      <env-entry-name>pepper</env-entry-name>
+      <env-entry-type>java.lang.String</env-entry-type>
+      <env-entry-value>$PEPPER</env-entry-value> 
+    <!-- TODO DRY - Same value with env-entry, this one is used inside jspf -->
+  </env-entry>
+</web-app>

@@ -1,18 +1,16 @@
 package cloud.multimicro.mmc.Dao;
 
-import cloud.multimicro.mmc.Entity.TMmcTypeClient;
+import java.util.List;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.validation.ConstraintViolationException;
 
 import cloud.multimicro.mmc.Entity.TMmcUser;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
-import cloud.multimicro.mmc.Util.Constant;
 import cloud.multimicro.mmc.Util.Util;
-import java.util.Date;
-import java.util.List;
-import javax.validation.ConstraintViolationException;
 
 /**
  * UserDao
@@ -29,8 +27,9 @@ public class UserDao {
     
     public TMmcUser checkCredentials(String login, String password) {
         try {
+            final String pepper = Util.getEnvString("pepper");
             TMmcUser user = (TMmcUser) entityManager.createQuery("FROM TMmcUser WHERE login =:login and dateDeletion = null").setParameter("login", login).getSingleResult();
-            String hashedPassword = Util.sha256(Constant.MMC_PEPPER + password + user.getSalt());
+            String hashedPassword = Util.sha256(pepper + password + user.getSalt());
             if (user.getPassword().equals(hashedPassword)) {
                 return user;
             }
@@ -46,9 +45,10 @@ public class UserDao {
     
     public TMmcUser create(TMmcUser user) throws CustomConstraintViolationException { 
         try {
-            String salt = Util.randomSalt();
+            final String salt = Util.randomSalt();
+            final String pepper = Util.getEnvString("pepper");
             user.setSalt(salt);
-            String hashedPassword = Util.sha256(Constant.MMC_PEPPER + user.getPassword() + user.getSalt());
+            String hashedPassword = Util.sha256(pepper + user.getPassword() + user.getSalt());
             user.setPassword(hashedPassword);
             entityManager.persist(user);
             return user;
@@ -63,7 +63,8 @@ public class UserDao {
         try {
             TMmcUser user = getUsersById(pUser.getId());
             if(pUser.getPassword().trim().length() > 0){
-                pUser.setPassword(Util.sha256(Constant.MMC_PEPPER + pUser.getPassword() + user.getSalt()));
+                final String pepper = Util.getEnvString("pepper");
+                pUser.setPassword(Util.sha256(pepper + pUser.getPassword() + user.getSalt()));
                 pUser.setSalt(user.getSalt());
             }
             else {
