@@ -163,12 +163,12 @@ public class VaeService {
     @POST
     @Path("/signin")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
+    //@Consumes(MediaType.APPLICATION_JSON)
     public Response checkCredentials(TPosClientVae u) throws AuthenticationException {
-        String nom = u.getNom();
+        String email = u.getEmail();
         String pass = u.getPass();
-
-        TPosClientVae user = VaeDao.checkCredentials(nom, pass);
+        TPosClientVae user = VaeDao.checkCredentials(email, pass);
+        
         if (user == null) {
             throw new AuthenticationException();
         }

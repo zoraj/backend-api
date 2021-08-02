@@ -40,11 +40,11 @@ public class VaeDao {
         return reservation;
     }
 
-    public TPosClientVae checkCredentials(String nom, String pass) {
+    public TPosClientVae checkCredentials(String email, String pass) {
         final String pepper = Util.getEnvString("pepper");
         String hashedPassword = Util.sha256(pepper + pass);
         try {
-            TPosClientVae user = (TPosClientVae) entityManager.createQuery("FROM TPosClientVae WHERE nom =:nom and  pass =:pass and dateDeletion = null").setParameter("nom", nom).setParameter("pass", hashedPassword).getSingleResult();
+            TPosClientVae user = (TPosClientVae) entityManager.createQuery("FROM TPosClientVae WHERE email =:email and  pass =:pass and dateDeletion = null").setParameter("email", email).setParameter("pass", hashedPassword).getSingleResult();
             return user;
         } catch (NoResultException e) {
             return null;
