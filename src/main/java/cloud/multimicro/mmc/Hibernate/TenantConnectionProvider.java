@@ -20,7 +20,6 @@ import org.hibernate.service.spi.Startable;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collections;
 
 
@@ -38,7 +37,7 @@ public class TenantConnectionProvider extends AbstractMultiTenantConnectionProvi
         connectionProvider.configure(Collections.singletonMap(Environment.DATASOURCE, dataSource));
         //initDatasource(dataSource);
     }
-
+    /*
     private void initDatasource(DataSource dataSource) {
         //log.info("Initializing database schema");
         try (Connection connection = dataSource.getConnection();
@@ -47,7 +46,7 @@ public class TenantConnectionProvider extends AbstractMultiTenantConnectionProvi
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize database", e);
         }
-    }
+    }*/
 
     @InjectService
     public void setConfigurationProvider(ConfigurationService configurationService) {
