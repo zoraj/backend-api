@@ -30,9 +30,11 @@
       <env-entry-type>java.lang.String</env-entry-type>
       <env-entry-value>6EcMrpeCShLEscWxWMb6fm</env-entry-value> 
   </env-entry>
+  <!--
   <servlet>
       <servlet-name>Startup</servlet-name>
       <servlet-class>cloud.multimicro.mmc.Servlet.Startup</servlet-class>
       <load-on-startup>1</load-on-startup>  
   </servlet>
+  -->        
 </web-app>
