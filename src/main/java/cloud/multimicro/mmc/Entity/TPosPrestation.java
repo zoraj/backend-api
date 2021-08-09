@@ -145,6 +145,10 @@ public class TPosPrestation implements Serializable {
 
     @Column(name = "nature")
     private String nature;
+    
+    @Size(max = 200)
+    @Column(name = "description")
+    private String description;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     @JsonbTransient
