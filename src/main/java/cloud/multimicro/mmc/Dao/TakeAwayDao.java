@@ -13,10 +13,8 @@ import cloud.multimicro.mmc.Entity.TPosNoteDetailCommande;
 import cloud.multimicro.mmc.Entity.TPosNoteEntete;
 import cloud.multimicro.mmc.Entity.TPosPrestation;
 import cloud.multimicro.mmc.Entity.TPosPrestationGroupe;
-import cloud.multimicro.mmc.Entity.TPosRevervation;
+import cloud.multimicro.mmc.Entity.TPosReservation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
-import cloud.multimicro.mmc.Exception.DataException;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,14 +22,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
-import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 import javax.validation.ConstraintViolationException;
 
 /**
@@ -170,9 +166,23 @@ public class TakeAwayDao {
         
     }
      
-     public void setPosRevervation(TPosRevervation reservation) throws CustomConstraintViolationException {
-        try{
-        entityManager.persist(reservation);
+     public void setPosReservation(TPosReservation reservation) throws CustomConstraintViolationException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalTime currentTime = LocalTime.now();
+
+        TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate dateLogicielle = LocalDate.parse(settingData.getValeur(), formatter);
+        LocalDateTime dateTimeLogicielle = currentTime.atDate(dateLogicielle);
+
+        try {
+            
+            if ((reservation.getDateReservation()).isBefore(dateTimeLogicielle)) {
+                 throw new CustomConstraintViolationException("Invalid date reservation");
+            }
+            else {
+               entityManager.persist(reservation);
+            }
+            
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }

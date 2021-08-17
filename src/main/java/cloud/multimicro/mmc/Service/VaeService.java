@@ -9,7 +9,7 @@ import cloud.multimicro.mmc.Dao.VaeDao;
 import cloud.multimicro.mmc.Entity.TPosClientVae;
 
 import cloud.multimicro.mmc.Entity.TPosPrestation;
-import cloud.multimicro.mmc.Entity.TPosRevervation;
+import cloud.multimicro.mmc.Entity.TPosReservation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -55,7 +55,7 @@ public class VaeService {
     @Path("/reservation")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllPosRevervation() {
-        List<TPosRevervation> reservation = VaeDao.getAllPosRevervation();
+        List<TPosReservation> reservation = VaeDao.getAllPosReservation();
         if (reservation.isEmpty()) {
             throw new NotFoundException();
         }
@@ -78,7 +78,7 @@ public class VaeService {
     @Path("/reservation/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getByIdPosRevervation(@PathParam("id") int id) {
-        TPosRevervation reservation = VaeDao.getByIdPosRevervation(id);        
+        TPosReservation reservation = VaeDao.getByIdPosReservation(id);        
         if (reservation == null) {
             throw new NotFoundException();
             //return Response.status(Response.Status.NOT_FOUND).entity("Object not found.").build();  
@@ -103,9 +103,12 @@ public class VaeService {
     @Path("/reservation")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response setPosRevervation(TPosRevervation reservation) {
+    public Response setPosReservation(TPosReservation reservation) {
+       // LOGGER.info(" reservation " + reservation);
         try {
-            VaeDao.setPosRevervation(reservation);
+
+            VaeDao.setPosReservation(reservation);
+            
             return Response.status(Response.Status.CREATED).entity(reservation).build();
         } catch (CustomConstraintViolationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -127,9 +130,9 @@ public class VaeService {
     @Path("/reservation")
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updatePosRevervation(TPosRevervation reservation) {
+    public Response updatePosReservation(TPosReservation reservation) {
         try {
-            VaeDao.updatePosRevervation(reservation);
+            VaeDao.updatePosReservation(reservation);
             return Response.status(Response.Status.OK).entity(reservation).build();
         } catch (CustomConstraintViolationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -153,7 +156,7 @@ public class VaeService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response deletePosRevervation(@PathParam("id") int id) {
         try {
-           VaeDao.deletePosRevervation(id);
+           VaeDao.deletePosReservation(id);
            return Response.ok(id, MediaType.APPLICATION_JSON).build();
         } catch (CustomConstraintViolationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -164,13 +167,15 @@ public class VaeService {
     @Path("/signin")
     @Produces(MediaType.APPLICATION_JSON)
     //@Consumes(MediaType.APPLICATION_JSON)
-    public Response checkCredentials(TPosClientVae u) throws AuthenticationException {
+    public Response checkCredentials(TPosClientVae u) throws AuthenticationException, CustomConstraintViolationException {
         String email = u.getEmail();
         String pass = u.getPass();
         TPosClientVae user = VaeDao.checkCredentials(email, pass);
         
         if (user == null) {
-            throw new AuthenticationException();
+            String e = "Invalid data";
+            //throw new CustomConstraintViolationException("Invalid data");
+            return Response.status(Response.Status.BAD_REQUEST).entity(e).build();
         }
         // Return a JWT token if everything is ok
         //String token = Jwt.generateToken();
