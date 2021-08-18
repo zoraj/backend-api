@@ -16,7 +16,6 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.validation.ConstraintViolationException;
-import cloud.multimicro.mmc.Util.Constant;
 import cloud.multimicro.mmc.Util.Util;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -46,8 +45,8 @@ public class VaeDao {
     }
 
     public TPosClientVae checkCredentials(String email, String pass) {
-
-        String hashedPassword = Util.sha256(Constant.MMC_PEPPER + pass);
+        String pepper = Util.getEnvString("pepper");
+        String hashedPassword = Util.sha256(pepper + pass);
         try {
             TPosClientVae user = (TPosClientVae) entityManager.createQuery("FROM TPosClientVae WHERE email =:email and  pass =:pass and dateDeletion = null").setParameter("email", email).setParameter("pass", hashedPassword).getSingleResult();
             return user;
@@ -59,7 +58,8 @@ public class VaeDao {
 
     public TPosClientVae create(TPosClientVae client) throws CustomConstraintViolationException {
         try {
-            String hashedPassword = Util.sha256(Constant.MMC_PEPPER + client.getPass());
+            String pepper = Util.getEnvString("pepper");
+            String hashedPassword = Util.sha256(pepper + client.getPass());
             client.setPass(hashedPassword);
             entityManager.persist(client);
             return client;
