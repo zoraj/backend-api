@@ -6,12 +6,14 @@
 package cloud.multimicro.mmc.Dao;
 
 import cloud.multimicro.mmc.Entity.TMmcTache;
+import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.logging.Level;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.validation.ConstraintViolationException;
 
 /**
  *
@@ -29,6 +31,15 @@ public class TaskDao {
                 .setParameter("module", module)
                 .getResultList();
         return tache;
+    }
+    
+    public void newTask(TMmcTache tache) throws CustomConstraintViolationException {
+    try {
+        entityManager.persist(tache);
+    }
+    catch(ConstraintViolationException ex) {
+        throw new CustomConstraintViolationException(ex);
+    }
     }
     
 }

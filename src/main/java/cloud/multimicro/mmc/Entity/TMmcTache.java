@@ -47,6 +47,9 @@ public class TMmcTache implements Serializable {
     @Column(name = "action")
     private String action;
     
+    @Column(name = "module")
+    private String module;
+    
     @Column(name = "DATE_DELETION")
     @Temporal(TemporalType.DATE)
     private Date dateDeletion;
