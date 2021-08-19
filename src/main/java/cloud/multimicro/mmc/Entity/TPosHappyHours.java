@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import java.time.LocalDate;
+import javax.json.bind.annotation.JsonbDateFormat;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -50,13 +51,13 @@ public class TPosHappyHours implements Serializable {
     private String posActiviteLibelle; 
     
     @Column(name = "heure_debut")
-    private LocalTime heureDebut;
+    private String heureDebut;
      
     @Column(name = "heure_fin")
-    private LocalTime heureFin;
+    private String heureFin;
     
-    @Column(name = "montant")
-    private BigDecimal montant;
+    @Column(name = "pourcentage")
+    private BigDecimal pourcentage;
     
     @Column(name = "active")
     private Boolean active;
