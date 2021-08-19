@@ -4,7 +4,10 @@
  * and open the template in the editor.
  */
 package cloud.multimicro.mmc.Service;
+
 import cloud.multimicro.mmc.Dao.TakeAwayDao;
+import cloud.multimicro.mmc.Dao.TaskDao;
+import cloud.multimicro.mmc.Entity.TMmcTache;
 import cloud.multimicro.mmc.Entity.TPosAccompagnement;
 import cloud.multimicro.mmc.Entity.TPosCuisson;
 import cloud.multimicro.mmc.Entity.TPosPrestation;
@@ -31,8 +34,12 @@ import javax.ws.rs.core.Response;
 @Stateless
 @Path("takeway")
 public class TakeAwayService {
+
     @Inject
     TakeAwayDao takeAwayDao;
+
+    @Inject
+    TaskDao taskDao;
     
     @Path("/group-products")
     @GET
@@ -44,7 +51,7 @@ public class TakeAwayService {
         }
         return Response.ok(productGroups, MediaType.APPLICATION_JSON).build();
     }
-    
+
     @GET
     @Path("/products")
     @Produces(MediaType.APPLICATION_JSON)
@@ -55,7 +62,7 @@ public class TakeAwayService {
         }
         return Response.ok(products, MediaType.APPLICATION_JSON).build();
     }
-    
+
     // Cuisson
     @GET
     @Path("/cuisson")
@@ -67,7 +74,7 @@ public class TakeAwayService {
         }
         return Response.ok(cuisson, MediaType.APPLICATION_JSON).build();
     }
-    
+
     // Accompagnement
     @GET
     @Path("/accompagnement")
@@ -79,26 +86,29 @@ public class TakeAwayService {
         }
         return Response.ok(accompagnement, MediaType.APPLICATION_JSON).build();
     }
-    
+
     @Path("/detailscommande")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response addPosNoteDetailCommande(JsonObject jsonObject) {
-        JsonArray listeCommande = jsonObject.getJsonArray("listeCommande");
-        for (int i = 0; i < listeCommande.size(); i++) {
-            
+
         try {
-                takeAwayDao.addCommandeTakeAway(listeCommande.getJsonObject(i));
-                
-               
+            takeAwayDao.addCommandeTakeAway(jsonObject);
+            TMmcTache tache = new TMmcTache();
+            tache.setTache("Une VAE vient d'être passée");
+            tache.setPourcentage(0);
+            tache.setAction("/pos/vente-emporter");
+            tache.setModule("POS");
+            taskDao.newTask(tache);
+
+            return Response.status(Response.Status.CREATED).entity(jsonObject).build();
+
         } catch (CustomConstraintViolationException ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
-        }
-    return Response.status(Response.Status.CREATED).entity(listeCommande).build();
-    
+
     }
-    
+
     @Path("/reservation")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -110,6 +120,5 @@ public class TakeAwayService {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
-    
-    
+
 }
