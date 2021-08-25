@@ -43,7 +43,7 @@ import cloud.multimicro.mmc.Entity.TPosNoteEntete;
 import cloud.multimicro.mmc.Entity.VPosNoteDetailVenteEmportee;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
-import static org.jboss.resteasy.plugins.providers.jaxb.i18n.LogMessages.LOGGER;
+
 
 
 /**
@@ -56,7 +56,8 @@ public class NoteDao {
 
     @PersistenceContext
     EntityManager entityManager;
-
+    private static final org.jboss.logging.Logger LOGGER = org.jboss.logging.Logger.getLogger(NoteDao.class);
+    
     public void setPosNoteEntete(TPosNoteEntete headerNote) throws CustomConstraintViolationException {
         String action = "POS-ADD-NOTE-HEADER";
 
@@ -390,23 +391,6 @@ public class NoteDao {
             array.add(Integer.parseInt(s));
         }
         return array;
-    }
-
-    public Date getDateLogicielle() {
-        TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
-        Date dateen = getStringToDate(parametrageDateLogicielle.getValeur());
-        return dateen;
-    }
-
-    public Date getStringToDate(String value) {
-        final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        Date daten = null;
-        try {
-            daten = format.parse(value);
-        } catch (ParseException ex) {
-            Logger.getLogger(NoteDao.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return daten;
     }
 
     // NOTE APPROVISION POS
