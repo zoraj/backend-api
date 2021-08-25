@@ -136,7 +136,10 @@ public class TPosNoteEntete implements Serializable {
 
     @Column(name = "cb_cvv")
     private String cbCvv;
-
+    
+    @Column(name = "statut_vae")
+    private String statutVae;
+    
     @Column(name = "date_reservation")
     private LocalDate dateReservation;
 

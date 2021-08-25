@@ -43,6 +43,7 @@ import cloud.multimicro.mmc.Entity.TPosNoteEntete;
 import cloud.multimicro.mmc.Entity.VPosNoteDetailVenteEmportee;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
+import static org.jboss.resteasy.plugins.providers.jaxb.i18n.LogMessages.LOGGER;
 
 
 /**
@@ -200,11 +201,14 @@ public class NoteDao {
 
     }
 
-    public List<TPosNoteEntete> getPosVaeNote() {
-        List<TPosNoteEntete> noteEntete = entityManager.createQuery("FROM TPosNoteEntete head WHERE poste_uuid = '_VAE_' ")
-                .getResultList();
-        return noteEntete;
-
+    public List<TPosNoteEntete> getPosVaeNote() {       
+        TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        String dateLogiciel = parametrageDateLogicielle.getValeur();
+        LOGGER.info(" dateLogiciel " + dateLogiciel);
+        
+        List<TPosNoteEntete> noteEntete = entityManager.createQuery("FROM TPosNoteEntete WHERE poste_uuid = '_VAE_' AND date_note >= :dateLogiciel ")
+                .setParameter("dateLogiciel", dateLogiciel).getResultList();      
+        return noteEntete;   
     }
 
     public List<TPosNoteDetail> getPosNoteDetailByNoteHeaderId(Integer noteHeaderId) {
@@ -922,10 +926,31 @@ public class NoteDao {
         entityManager.createNativeQuery(" DELETE FROM `t_pms_note_detail` WHERE id=:id").setParameter("id", id)
                 .executeUpdate();
     }
-
-    private void build() {
-        throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
-                                                                       // Tools | Templates.
+   
+    public TPosNoteEntete getPosNoteHeaderId(int id) {
+        TPosNoteEntete product = entityManager.find(TPosNoteEntete.class, id);
+        return product;
     }
+    public TPosNoteEntete updatePosNoteVaeStatutDelivre(Integer id) throws CustomConstraintViolationException {
+        TPosNoteEntete prestationStop = getPosNoteHeaderId(id);
+        prestationStop.setStatutVae("DELIVRE");
+        try {
+            return entityManager.merge(prestationStop);
+        } catch (ConstraintViolationException ex) {
+            throw new CustomConstraintViolationException(ex);
+        }
+    }
+    public TPosNoteEntete updatePosNoteVaeStatutAnnule(Integer id) throws CustomConstraintViolationException {
+        TPosNoteEntete prestationStop = getPosNoteHeaderId(id);
+        prestationStop.setStatutVae("ANNULE");
+        try {
+            return entityManager.merge(prestationStop);
+        } catch (ConstraintViolationException ex) {
+            throw new CustomConstraintViolationException(ex);
+        }
+    }
+   
+    
+  
 
 }

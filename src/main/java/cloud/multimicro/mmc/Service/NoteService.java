@@ -41,8 +41,6 @@ import cloud.multimicro.mmc.Exception.DataException;
 
 import javax.json.JsonObject;
 import javax.json.JsonArray;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.PUT;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
@@ -70,7 +68,42 @@ public class NoteService {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }
-
+    
+    /*@Path("/pos/header")
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updatePosNoteHeader(TPosNoteEntete headerNote) {
+        try {            
+            noteDao.updatePosNoteVaeStatut(headerNote);
+            return Response.status(Response.Status.CREATED).entity(headerNote).build();
+        } catch (CustomConstraintViolationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    } */   
+    
+    @Path("/pos/header/{id}")
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updatePosNoteVaeStatutAnnule(@PathParam("id") Integer id) {
+        try {
+            noteDao.updatePosNoteVaeStatutAnnule(id);
+            return Response.status(Response.Status.CREATED).entity(id).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+    @Path("/pos/header/delivre/{id}")
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updatePosNoteVaeStatutDelivre(@PathParam("id") Integer id) {
+        try {
+            noteDao.updatePosNoteVaeStatutDelivre(id);
+            return Response.status(Response.Status.CREATED).entity(id).build();
+        } catch (CustomConstraintViolationException ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+        }
+    }
+    
     @Path("/pos/details")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
