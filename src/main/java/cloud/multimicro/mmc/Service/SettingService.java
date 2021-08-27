@@ -55,11 +55,11 @@ public class SettingService {
     @Path("/{key}/{valeur}")
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateByKey(@PathParam("key") String key, @PathParam("valeur") String valeur)
+    public Response updateByKey(@PathParam("key") String key, @PathParam("valeur") String valeur, String siteCode)
             throws DataException, ParseException {
         try {
             String capitalKey = key.toUpperCase();
-            settingDao.updateSettingByKey(capitalKey, valeur);
+            settingDao.updateSettingByKey(capitalKey, valeur, siteCode);
             TMmcParametrage setting = new TMmcParametrage();
             setting.setCle(key);
             setting.setValeur(valeur);
