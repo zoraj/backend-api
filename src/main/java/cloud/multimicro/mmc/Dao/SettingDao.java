@@ -19,6 +19,12 @@ import javax.transaction.UserTransaction;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
+import cloud.multimicro.mmc.Util.Util;
+import java.io.StringReader;
+import java.time.LocalDateTime;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.ForbiddenException;
@@ -33,6 +39,10 @@ import org.jboss.logging.Logger;
 public class SettingDao {
     @PersistenceContext
     EntityManager entityManager;
+    
+    @PersistenceContext(unitName = "cloud.multimicro_Establishement_PU")
+    private EntityManager entityManagerEstablishement;
+    
     private static final Logger LOGGER = Logger.getLogger(SettingDao.class);
     private void init() {
         try {
@@ -368,6 +378,11 @@ public class SettingDao {
             settingAutomaticRecoching.setCle("AUTOMATIC_RECOUCHING");
             settingAutomaticRecoching.setValeur("0");
             entityManager.persist(settingAutomaticRecoching);
+            
+            TMmcParametrage settingActiveVae = new TMmcParametrage();
+            settingActiveVae.setCle("TAKEAWAY_ACTIVATED");
+            settingActiveVae.setValeur("0");
+            entityManager.persist(settingActiveVae);
                  
         } catch (Exception e) {
             LOGGER.error("Setting initialization went wrong");
@@ -388,8 +403,16 @@ public class SettingDao {
         }
         return setting;
     }
+    
+     private static JsonObject stringToJsonObject(String jsonString) {
+        JsonObject object;
+        try ( JsonReader jsonReader = Json.createReader(new StringReader(jsonString))) {
+            object = jsonReader.readObject();
+        }
+        return object;
+    }
 
-    public void updateSettingByKey(String key, String valeur)
+    public void updateSettingByKey(String key, String valeur, String siteCode)
             throws CustomConstraintViolationException, NotFoundException, ParseException {
         try {
             if (key.equals("NEXT_CLOSURE_DATE")) {
@@ -398,6 +421,22 @@ public class SettingDao {
                 TMmcParametrage setting = getSettingByKey(key);
                 setting.setValeur(valeur);
                 entityManager.merge(setting);
+            }
+            
+            if (key.equals("TAKEAWAY_ACTIVATED")){
+                if(valeur.equals("1")){
+                    JsonObject siteCodeObject = stringToJsonObject(siteCode);
+                    siteCode = siteCodeObject.getString("siteCode");
+                    String name                                = "VAE";
+                    String site_code                           = siteCode;
+                    String uuid                                = Util.generateRandomUUID();
+                    String currency                            = "€";
+                    String language                            = "FR_fr";
+                    int invoice_current_num                    = 1;
+                    String invoice_prefix                      = "VAE";
+                    entityManagerEstablishement.createNativeQuery("INSERT INTO t_device(uuid, site_code, name, currency, language, invoice_current_num, invoice_prefix) VALUES('"+uuid+"','"+site_code+"','"+name+"','"+currency+"','"+language+"','"+invoice_current_num+"','"+invoice_prefix+"')").executeUpdate();
+                }
+
             }
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);

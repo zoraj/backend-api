@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -51,6 +52,10 @@ public class Util {
     public static String randomSalt() {
         String randomStr = randomString(10);
         return sha256(randomStr);
+    }
+    
+    public static String generateRandomUUID() {
+        return UUID.randomUUID().toString();
     }
     
     public static String generateNameString(int length) {
