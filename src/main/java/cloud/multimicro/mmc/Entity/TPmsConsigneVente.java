@@ -6,7 +6,9 @@
 package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
+import javax.json.bind.annotation.JsonbDateFormat;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,13 +40,13 @@ public class TPmsConsigneVente implements Serializable {
 
     @NotNull
     @Column(name = "date_debut")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateDebut;
+    @JsonbDateFormat("yyyy-MM-dd")
+    private LocalDate dateDebut;
 
     @NotNull
     @Column(name = "date_fin")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateFin;
+    @JsonbDateFormat("yyyy-MM-dd")
+    private LocalDate dateFin;
 
     @Size(min = 1, max = 255)
     @NotNull
@@ -53,14 +55,11 @@ public class TPmsConsigneVente implements Serializable {
     private String message;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
-    @Temporal(TemporalType.DATE)
-    private Date dateCreation;
+    private LocalDate dateCreation;
 
     @Column(name = "DATE_MODIFICATION", insertable = false, updatable = false)
-    @Temporal(TemporalType.DATE)
-    private Date dateModification;
+    private LocalDate dateModification;
 
     @Column(name = "DATE_DELETION")
-    @Temporal(TemporalType.DATE)
-    private Date dateDeletion;
+    private LocalDate dateDeletion;
 }
