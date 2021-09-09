@@ -95,10 +95,10 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response checkCredentials(TMmcUser u) throws AuthenticationException {
-        String login = u.getLogin();
-        String password = u.getPassword();
+        //String login = u.getLogin();
+        String pinCode = u.getPinCode();
 
-        TMmcUser user = userDao.checkCredentials(login, password);
+        TMmcUser user = userDao.checkCredentials(pinCode);
         if (user == null) {
             throw new AuthenticationException();
         }
