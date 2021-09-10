@@ -95,7 +95,8 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response checkCredentials(TMmcUser u) throws AuthenticationException {
-        //String login = u.getLogin();
+        try{
+           //String login = u.getLogin();
         String pinCode = u.getPinCode();
 
         TMmcUser user = userDao.checkCredentials(pinCode);
@@ -105,6 +106,11 @@ public class UserService {
         // Return a JWT token if everything is ok
         String token = Jwt.generateToken();
         user.setToken(token);
-        return Response.ok(user, MediaType.APPLICATION_JSON).build();  
+        return Response.ok(user, MediaType.APPLICATION_JSON).build();   
+        }
+        catch (Exception e){
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+        
     }
 }

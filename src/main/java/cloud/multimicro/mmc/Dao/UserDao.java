@@ -19,6 +19,7 @@ import cloud.multimicro.mmc.Util.Util;
 public class UserDao {
     @PersistenceContext
     EntityManager entityManager;
+     private static final org.jboss.logging.Logger LOGGER = org.jboss.logging.Logger.getLogger(UserDao.class);
     
     public List<TMmcUser> getUsers() {
          List<TMmcUser> users = entityManager.createQuery("FROM TMmcUser u where u.dateDeletion = null").getResultList();
@@ -26,20 +27,20 @@ public class UserDao {
     }
     
     public TMmcUser checkCredentials(String pinCode) {
-        try {
-            
+        try {           
             final String pepper = Util.getEnvString("pepper");
-            String hashedpinCode = Util.sha256(pepper + pinCode);
-            
+            String hashedpinCode = Util.sha256(pepper + pinCode);           
             TMmcUser user = (TMmcUser) entityManager.createQuery("FROM TMmcUser WHERE pinCode =:hashedPinCode AND dateDeletion = null").setParameter("hashedPinCode", hashedpinCode ).getSingleResult();                  
-            if (user.getPinCode().equals(hashedpinCode)) {
+            return user;
+            /*if (user.getPinCode().equals(hashedpinCode)) {
                 return user;
-            }
+            }*/
 
         } catch (NoResultException e) {
+            LOGGER.info("test d'enter");
             return null;
         }
-        return null;
+        //return null;
     }
 
     public TMmcUser getUsersById(int id){
