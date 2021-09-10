@@ -37,19 +37,12 @@ public class TMmcUser implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Size(min = 1, max = 45)
-    @NotNull
-    @NotBlank
-    @Column(name = "login")
-    private String login;
 
+    @Column(name = "pin_code")
     @Size(min = 1, max = 64)
     @NotNull
-    private String password;
+    private String pinCode;
 
-    @Size(max = 64)
-    @NotNull
-    private String salt;
 
     @NotNull
     @Size(min = 1, max = 45)
@@ -67,9 +60,6 @@ public class TMmcUser implements Serializable {
     @NotNull
     @Size(min = 1, max = 250)
     private String moduleAuthorized;
-
-    @Column(name = "code_waiter")
-    private String codeWaiter;
 
     @Transient
     private String token;

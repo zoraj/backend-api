@@ -19,24 +19,28 @@ import cloud.multimicro.mmc.Util.Util;
 public class UserDao {
     @PersistenceContext
     EntityManager entityManager;
+     private static final org.jboss.logging.Logger LOGGER = org.jboss.logging.Logger.getLogger(UserDao.class);
     
     public List<TMmcUser> getUsers() {
          List<TMmcUser> users = entityManager.createQuery("FROM TMmcUser u where u.dateDeletion = null").getResultList();
         return users;
     }
     
-    public TMmcUser checkCredentials(String login, String password) {
-        try {
+    public TMmcUser checkCredentials(String pinCode) {
+        try {           
             final String pepper = Util.getEnvString("pepper");
-            TMmcUser user = (TMmcUser) entityManager.createQuery("FROM TMmcUser WHERE login =:login and dateDeletion = null").setParameter("login", login).getSingleResult();
-            String hashedPassword = Util.sha256(pepper + password + user.getSalt());
-            if (user.getPassword().equals(hashedPassword)) {
+            String hashedpinCode = Util.sha256(pepper + pinCode);           
+            TMmcUser user = (TMmcUser) entityManager.createQuery("FROM TMmcUser WHERE pinCode =:hashedPinCode AND dateDeletion = null").setParameter("hashedPinCode", hashedpinCode ).getSingleResult();                  
+            return user;
+            /*if (user.getPinCode().equals(hashedpinCode)) {
                 return user;
-            }
+            }*/
+
         } catch (NoResultException e) {
+            LOGGER.info("test d'enter");
             return null;
         }
-        return null;
+        //return null;
     }
 
     public TMmcUser getUsersById(int id){
@@ -45,11 +49,10 @@ public class UserDao {
     
     public TMmcUser create(TMmcUser user) throws CustomConstraintViolationException { 
         try {
-            final String salt = Util.randomSalt();
+            //final String salt = Util.randomSalt();
             final String pepper = Util.getEnvString("pepper");
-            user.setSalt(salt);
-            String hashedPassword = Util.sha256(pepper + user.getPassword() + user.getSalt());
-            user.setPassword(hashedPassword);
+            String hashedPassword = Util.sha256(pepper + user.getPinCode());
+            user.setPinCode(hashedPassword);
             entityManager.persist(user);
             return user;
         }
@@ -62,14 +65,15 @@ public class UserDao {
     public void update(TMmcUser pUser) throws CustomConstraintViolationException {   
         try {
             TMmcUser user = getUsersById(pUser.getId());
-            if(pUser.getPassword().trim().length() > 0){
+            if(pUser.getPinCode().trim().length() > 0){
                 final String pepper = Util.getEnvString("pepper");
-                pUser.setPassword(Util.sha256(pepper + pUser.getPassword() + user.getSalt()));
-                pUser.setSalt(user.getSalt());
+                String hashedPassword = Util.sha256(pepper + user.getPinCode());
+                pUser.setPinCode(hashedPassword);
+                //pUser.setSalt(user.getSalt());
             }
             else {
-                pUser.setPassword(user.getPassword());
-                pUser.setSalt(user.getSalt());
+                pUser.setPinCode(user.getPinCode());
+                //pUser.setSalt(user.getSalt());
             }
             entityManager.merge(pUser);
         }
