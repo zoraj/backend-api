@@ -16,12 +16,6 @@
   </properties>
   <profiles>
     <profile>
-        <id>local</id>
-        <properties>
-          <webXmlPath>src/main/webapp/WEB-INF/local/web.xml</webXmlPath>
-        </properties>
-    </profile>
-    <profile>
         <id>prod-a</id>
         <properties>
           <webXmlPath>src/main/webapp/WEB-INF/prod-a/web.xml</webXmlPath>

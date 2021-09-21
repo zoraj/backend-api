@@ -23,12 +23,18 @@
   <env-entry>
       <env-entry-name>jwt-secret-key</env-entry-name>
       <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>$JWT-SECRET-KEY</env-entry-value> 
+      <env-entry-value>mnQWM84EdocoK7Vd72Nke7HGDrL8zWteUQdE9DULLGVhVZ3oxAb3fxrLVgeZt5jprz4KVvAhuQs2zCGP4R9gmv2MimAunr</env-entry-value> 
   </env-entry>
   <env-entry>
       <env-entry-name>pepper</env-entry-name>
       <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>$PEPPER</env-entry-value> 
-    <!-- TODO DRY - Same value with env-entry, this one is used inside jspf -->
+      <env-entry-value>6EcMrpeCShLEscWxWMb6fm</env-entry-value> 
   </env-entry>
+  <!--
+  <servlet>
+      <servlet-name>Startup</servlet-name>
+      <servlet-class>cloud.multimicro.mmc.Servlet.Startup</servlet-class>
+      <load-on-startup>1</load-on-startup>  
+  </servlet>
+  -->        
 </web-app>
