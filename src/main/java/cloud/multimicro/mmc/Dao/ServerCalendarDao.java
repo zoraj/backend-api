@@ -44,7 +44,7 @@ public class ServerCalendarDao {
     // GET ALL
     public List<TPosCalendrierServeur> getAll() {
         List<Object[]> calendrierServeur = entityManager.createQuery(
-                "FROM TPosCalendrierServeur cS LEFT JOIN TMmcUser u ON  cS.mmcUserId = u.id where u.codeWaiter != null ")
+                "FROM TPosCalendrierServeur cS LEFT JOIN TMmcUser u ON  cS.mmcUserId = u.id where u.dateDeletion = null ")
                 .getResultList();
         List<TPosCalendrierServeur> result = new ArrayList<TPosCalendrierServeur>();
         // Retrieve the corresponding sub-family
@@ -62,7 +62,7 @@ public class ServerCalendarDao {
     // GET ALL
     public List<TMmcUser> getServeur() {
         List<TMmcUser> users = entityManager
-                .createQuery("FROM TMmcUser u where u.dateDeletion = null and u.codeWaiter != null ").getResultList();
+                .createQuery("FROM TMmcUser u where u.dateDeletion = null ").getResultList();
         return users;
     }
 
