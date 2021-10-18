@@ -6,7 +6,10 @@
 package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,8 +42,7 @@ public class TPmsCalendrierNettoyage implements Serializable {
 
     @NotNull
     @Column(name = "date_nettoyage")
-    @Temporal(javax.persistence.TemporalType.DATE)
-    private Date dateNettoyage;
+    private LocalDate dateNettoyage;
 
     @NotNull
     @Column(name = "mmc_user_id")
@@ -59,15 +61,15 @@ public class TPmsCalendrierNettoyage implements Serializable {
     private TMmcUser mmcUser;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
-    @Temporal(TemporalType.DATE)
-    private Date dateCreation;
+    @JsonbTransient
+    private LocalDateTime dateCreation;
 
     @Column(name = "DATE_MODIFICATION", insertable = false, updatable = false)
-    @Temporal(TemporalType.DATE)
-    private Date dateModification;
+    @JsonbTransient
+    private LocalDateTime dateModification;
 
     @Column(name = "DATE_DELETION")
-    @Temporal(TemporalType.DATE)
-    private Date dateDeletion;
+    @JsonbTransient
+    private LocalDateTime dateDeletion;
 
 }
