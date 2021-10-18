@@ -7,6 +7,7 @@ package cloud.multimicro.mmc.Dao;
 
 import cloud.multimicro.mmc.Entity.TPmsCalendrierNettoyage;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Date;
 import javax.ejb.Stateless;
@@ -52,7 +53,7 @@ public class CleaningScheduleDao {
     
       public void deleteCleaningSchedule(Integer id) throws CustomConstraintViolationException { 
          TPmsCalendrierNettoyage pmsCalendrierNettoyage = getById(id);
-         Date dateDel = new Date();
+         LocalDateTime dateDel = LocalDateTime.now();
          pmsCalendrierNettoyage.setDateDeletion(dateDel);
          try {
          entityManager.merge(pmsCalendrierNettoyage);
