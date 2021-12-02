@@ -7,6 +7,7 @@ package cloud.multimicro.mmc.Dao;
 
 import cloud.multimicro.mmc.Entity.TMmcDeviceCloture;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
+import cloud.multimicro.mmc.Entity.TPosNoteEntete;
 import cloud.multimicro.mmc.Entity.VPosCa;
 import cloud.multimicro.mmc.Entity.VPosEncaissement;
 import java.math.BigInteger;
@@ -17,7 +18,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.jboss.logging.Logger;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
+import cloud.multimicro.mmc.Exception.DataException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -93,13 +98,13 @@ public class ClosureDao {
             throw new CustomConstraintViolationException(ex);
         }
     }
-
-    public TMmcDeviceCloture update(TMmcDeviceCloture cloture) throws CustomConstraintViolationException {
-        try {
-            return entityManager.merge(cloture);
-        } catch (ConstraintViolationException ex) {
-            throw new CustomConstraintViolationException(ex);
+    
+    public TMmcDeviceCloture update(TMmcDeviceCloture cloture) throws DataException {
+        List<TPosNoteEntete> openNote = entityManager.createQuery("FROM TPosNoteEntete WHERE etat = 'ENCOURS' ").getResultList();
+        if (openNote.size() > 0) {
+            throw new DataException("Lecture de caisse impossible, il reste des notes ouvertes.");
         }
+        return entityManager.merge(cloture);
     }
 
     public void delete(int id) {
@@ -113,8 +118,8 @@ public class ClosureDao {
                 .createNativeQuery("SELECT COUNT(*) FROM t_mmc_device_cloture WHERE status = 'ENCOURS' ")
                 .getSingleResult();
     }
-    
-    public JsonArray getAllListCaByActivity() {
+        
+    public JsonArray getAllListCaByActivity() {      
         TMmcParametrage valueDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
         LocalDate dateLogicielle = LocalDate.parse(valueDateLogicielle.getValeur());
         List<VPosCa> listCa = entityManager
@@ -123,16 +128,22 @@ public class ClosureDao {
 
         var caResults = Json.createArrayBuilder();
         var activityResults = Json.createArrayBuilder();
-        
+        System.out.println("listCa"+listCa);
         if (listCa.size() > 0) {
             VPosCa valueListCa = listCa.get(0);
+            System.out.println("valueListCa"+valueListCa);
             Integer idActiviteInitial = valueListCa.getPosActiviteId();
             Integer idSousfamilleInitial = valueListCa.getIdSousFamille();
-
+            String serviceInitial = valueListCa.getService();
+            System.out.println("idActiviteInitial"+idActiviteInitial);
+            System.out.println("idSousfamilleInitial"+idSousfamilleInitial);
+            System.out.println("serviceInitial"+serviceInitial);
             var libelleSousFamille = "";
             var libelleActivite = "";
             var txTva = new BigDecimal("0");
             var service = "";
+            
+            
             
             libelleActivite = valueListCa.getLibelleActivite();
             libelleSousFamille = valueListCa.getLibelleSousFamille();
@@ -148,6 +159,11 @@ public class ClosureDao {
             var totalTvaSF = new BigDecimal("0");
             var totalRemiseSF = new BigDecimal("0");
             var totalOffertSF = new BigDecimal("0");
+            var nbcouvertmidi = new BigDecimal("0");
+            var nbcouvertsoir = new BigDecimal("0");
+            //var nbcouvert = new BigDecimal("0");
+            var service1 = "";
+            
 
             for (VPosCa caList : listCa) {
                 if (idActiviteInitial.equals(caList.getPosActiviteId())) {                              
@@ -156,6 +172,12 @@ public class ClosureDao {
                     totalTvaSF = totalTvaSF.add(caList.getTva());
                     totalRemiseSF = totalRemiseSF.add(caList.getRemise());
                     totalOffertSF = totalOffertSF.add(caList.getOffert());
+                    service1 = caList.getService();
+                    if(service1.equals("M")){
+                        nbcouvertmidi = nbcouvertmidi.add(caList.getNbCouvert());                           
+                    }else if(service1.equals("S")){                           
+                        nbcouvertsoir = nbcouvertsoir.add(caList.getNbCouvert());
+                    }
                     
                     if(idSousfamilleInitial.equals(caList.getIdSousFamille())){                        
                         //cumulena ny CA par sous famille
@@ -166,7 +188,9 @@ public class ClosureDao {
                         tvaSF = tvaSF.add(caList.getTva());
                         remiseSF = remiseSF.add(caList.getRemise());
                         offertSF = offertSF.add(caList.getOffert());
+
                     }
+                    
                     else{
                         var caJson = Json.createObjectBuilder()
                             .add("libelleSousFamille", libelleSousFamille)
@@ -210,7 +234,11 @@ public class ClosureDao {
                             .add("totalCaHtSF", totalCaHtSF)
                             .add("totalTvaSF", totalTvaSF)
                             .add("totalRemiseSF", totalRemiseSF)
-                            .add("totalOffertSF", totalOffertSF).build();
+                            .add("totalOffertSF", totalOffertSF)
+                            .add("nbcouvertmidi", nbcouvertmidi)
+                            .add("nbcouvertsoir", nbcouvertsoir)
+                            
+                            .build();
 
                     caResults.add(object);
                    
@@ -221,6 +249,9 @@ public class ClosureDao {
                     totalTvaSF = new BigDecimal("0");
                     totalRemiseSF = new BigDecimal("0");
                     totalOffertSF = new BigDecimal("0");
+                    nbcouvertmidi = new BigDecimal("0");
+                    nbcouvertsoir = new BigDecimal("0");
+                    
                     
                     idActiviteInitial       = caList.getPosActiviteId();
                     libelleActivite         = caList.getLibelleActivite();                   
@@ -232,6 +263,13 @@ public class ClosureDao {
                     totalTvaSF = totalTvaSF.add(caList.getTva());
                     totalRemiseSF = totalRemiseSF.add(caList.getRemise());
                     totalOffertSF = totalOffertSF.add(caList.getOffert());
+                    service1 = caList.getService();
+                    if(service1.equals("M")){
+                        System.out.println("service1"+service1);
+                        nbcouvertmidi = nbcouvertmidi.add(caList.getNbCouvert());                           
+                    }else if(service1.equals("S")){                           
+                        nbcouvertsoir = nbcouvertsoir.add(caList.getNbCouvert());
+                    }
                     
                     txTva           = caList.getTxTva();
                     service         = caList.getService();                    
@@ -241,6 +279,8 @@ public class ClosureDao {
                     remiseSF        = caList.getRemise();
                     offertSF        = caList.getOffert();
                 }
+                
+                
             }
             
             var caJson = Json.createObjectBuilder()
@@ -261,7 +301,12 @@ public class ClosureDao {
                         .add("totalCaHtSF", totalCaHtSF)
                         .add("totalTvaSF", totalTvaSF)
                         .add("totalRemiseSF", totalRemiseSF)
-                        .add("totalOffertSF", totalOffertSF).build();
+                        .add("totalOffertSF", totalOffertSF)
+                        .add("nbcouvertmidi", nbcouvertmidi)
+                        .add("nbcouvertsoir", nbcouvertsoir)
+                        .add("nbcouvertmidi", nbcouvertmidi)
+                    .add("nbcouvertsoir", nbcouvertsoir)
+                    .build();
             
             caResults.add(object);
         }
@@ -364,6 +409,7 @@ public class ClosureDao {
             var libelleModeCashing = "";
             var libelleActivite = "";
             var service = "";
+            
             
             libelleActivite = valueListCashing.getLibelleActivite();
             libelleModeCashing = valueListCashing.getLibelleModeEncaissement();
