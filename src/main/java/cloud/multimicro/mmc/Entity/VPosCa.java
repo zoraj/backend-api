@@ -79,6 +79,11 @@ public class VPosCa implements Serializable {
     
     @Column(name = "service")
     private String service;
+    
+    @Column(name = "nb_couvert")
+    private BigDecimal nbCouvert;
+
+    
 
     public VPosCa() {
 

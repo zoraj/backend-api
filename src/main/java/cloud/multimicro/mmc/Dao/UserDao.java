@@ -67,7 +67,7 @@ public class UserDao {
             TMmcUser user = getUsersById(pUser.getId());
             if(pUser.getPinCode().trim().length() > 0){
                 final String pepper = Util.getEnvString("pepper");
-                String hashedPassword = Util.sha256(pepper + user.getPinCode());
+                String hashedPassword = Util.sha256(pepper + pUser.getPinCode());
                 pUser.setPinCode(hashedPassword);
                 //pUser.setSalt(user.getSalt());
             }

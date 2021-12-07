@@ -22,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
+import cloud.multimicro.mmc.Exception.DataException;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -51,6 +52,7 @@ public class ClosureService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDateLogicielleIncrement() {
         BigInteger postNotClosed = closureDao.countPostNotClosed();
+
         if (postNotClosed.equals(new BigInteger("0"))) {
             TMmcParametrage dateLogicielle = closureDao.getDateLogicielleIncrement();
             return Response.ok(dateLogicielle, MediaType.APPLICATION_JSON).build();
@@ -111,12 +113,14 @@ public class ClosureService {
     public Response update(TMmcDeviceCloture object) {
         try {
             closureDao.update(object);
-            return Response.status(Response.Status.OK).entity(object).build();
-        } catch (CustomConstraintViolationException e) {
+        return Response.status(Response.Status.OK).entity(object).build();
+        } catch (DataException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
+        }       
     }
 
+
+    
     @Path("/{id}")
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
