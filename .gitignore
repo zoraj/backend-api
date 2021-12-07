@@ -10,3 +10,5 @@ nb-configuration.xml
 *.iml
 *.bak
 /target/
+src/main/webapp/WEB-INF/web.develop.xml
+src/main/webapp/WEB-INF/web.prod.xml

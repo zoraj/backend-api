@@ -23,12 +23,12 @@
   <env-entry>
       <env-entry-name>jwt-secret-key</env-entry-name>
       <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>$JWT_TOKEN</env-entry-value> 
+      <env-entry-value>TO_BE_COMPLETED</env-entry-value> 
   </env-entry>
   <env-entry>
       <env-entry-name>pepper</env-entry-name>
       <env-entry-type>java.lang.String</env-entry-type>
-      <env-entry-value>$PEPPER</env-entry-value> 
+      <env-entry-value>TO_BE_COMPLETED</env-entry-value> 
   </env-entry>
   <!--
   <servlet>

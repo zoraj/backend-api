@@ -13,34 +13,23 @@
   <url>https://bymmc.com/api</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
   </properties>
-  <profiles>
-    <profile>
-        <id>prod-a</id>
-        <properties>
-          <webXmlPath>src/main/webapp/WEB-INF/prod-a/web.xml</webXmlPath>
-        </properties>
-    </profile>
-    <profile>
-        <id>prod-b</id>
-        <properties>
-          <webXmlPath>src/main/webapp/WEB-INF/prod-b/web.xml</webXmlPath>
-        </properties>
-    </profile>
-    <profile>
-        <id>develop</id>
-        <properties>
-          <webXmlPath>src/main/webapp/WEB-INF/develop/web.xml</webXmlPath>
-        </properties>
-    </profile>
-    <profile>
-        <id>staging</id>
-        <properties>
-          <webXmlPath>src/main/webapp/WEB-INF/staging/web.xml</webXmlPath>
-        </properties>
-    </profile>
- </profiles>
- <dependencies>
+   <profiles>
+     <profile>
+         <id>develop</id>
+         <properties>
+           <webXmlPath>src/main/webapp/WEB-INF/web.develop.xml</webXmlPath>
+         </properties>
+     </profile>
+     <profile>
+         <id>prod</id>
+         <properties>
+           <webXmlPath>src/main/webapp/WEB-INF/web.prod.xml</webXmlPath>
+         </properties>
+     </profile>
+   </profiles>  
+  <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
