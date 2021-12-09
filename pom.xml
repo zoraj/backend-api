@@ -13,7 +13,7 @@
   <url>https://bymmc.com/api</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
+    <webXmlPath>src/main/webapp/WEB-INF/web.develop.xml</webXmlPath>
   </properties>
    <profiles>
      <profile>
