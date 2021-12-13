@@ -43,6 +43,9 @@ import cloud.multimicro.mmc.Entity.TPosNoteEntete;
 import cloud.multimicro.mmc.Entity.VPosNoteDetailVenteEmportee;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 
 
@@ -841,7 +844,13 @@ public class NoteDao {
     }
 
     public void addPmsNoteHeader(TPmsNoteEntete note) throws CustomConstraintViolationException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalTime currentTime = LocalTime.now();
+        TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate dateLogicielle = LocalDate.parse(settingData.getValeur(), formatter);
+        LocalDateTime dateTimeLogicielle = currentTime.atDate(dateLogicielle);
         try {
+            note.setDateNote(dateTimeLogicielle);
             entityManager.persist(note);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
@@ -934,7 +943,22 @@ public class NoteDao {
         }
     }
    
-    
+    public BigDecimal openNotesBalances(String dateReference) {
+        TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        String dateLogicielle = settingData.getValeur();
+        BigDecimal valueOpenNotes = new BigDecimal("0");
+        if (!Objects.isNull(dateReference)) {
+            valueOpenNotes = (BigDecimal) entityManager.createNativeQuery("SELECT SUM(det.pu * det.qte) FROM t_pms_note_entete ent "
+                + "INNER JOIN t_pms_note_detail det ON det.pms_note_entete_id = ent.id "
+                + "WHERE ent.date_note =:dateReference AND ent.date_etat_solde >:dateReference OR ent.date_etat_solde is null ")
+                .setParameter("dateReference", dateReference).getSingleResult(); 
+        }else{
+            valueOpenNotes = (BigDecimal) entityManager.createNativeQuery("SELECT SUM(det.pu * det.qte) FROM t_pms_note_entete ent "
+                + "INNER JOIN t_pms_note_detail det ON det.pms_note_entete_id = ent.id "
+                + "WHERE ent.date_note ='"+dateLogicielle+"' AND ent.date_etat_solde >'"+dateLogicielle+"' OR ent.date_etat_solde is null ")
+                .getSingleResult();
+        }
+        return valueOpenNotes;
+    }
   
-
 }
