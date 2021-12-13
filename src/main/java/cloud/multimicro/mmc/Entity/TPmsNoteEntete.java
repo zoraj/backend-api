@@ -46,11 +46,16 @@ public class TPmsNoteEntete  implements Serializable {
     @NotNull
     @Column(name = "etat")
     private String etat;
-
+    
+    @NotNull
+    @Column(name = "date_note")
+    private LocalDateTime dateNote;
+    
+    @Column(name = "date_etat_solde")
+    private LocalDateTime dateEtatSolde;
 
     @Column(name = "num_facture")
     private String numFacture;
-
 
     @Column(name = "date_facture")
     private LocalDate dateFacture;

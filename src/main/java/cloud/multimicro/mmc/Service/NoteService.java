@@ -467,4 +467,16 @@ public class NoteService {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }   
     }
+    
+    @GET
+    @Path("/pms/open-note")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllListCashing(@Context UriInfo info) {
+        String dateReference = info.getQueryParameters().getFirst("dateReference");
+        BigDecimal openNote = noteDao.openNotesBalances(dateReference);
+        if (openNote == null) {
+            openNote = new BigDecimal(0.0);
+        }
+        return Response.ok(openNote, MediaType.APPLICATION_JSON).build();
+    }
 }
