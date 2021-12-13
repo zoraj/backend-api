@@ -13,12 +13,14 @@ import cloud.multimicro.mmc.Entity.TPmsEncaissement;
 import cloud.multimicro.mmc.Entity.TPosEncaissement;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -175,9 +177,11 @@ public class CashingService {
     @Path("/pms")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addPmsEncaissement(TPmsEncaissement encaissement) throws ParseException {
+    public Response addPmsEncaissement(List<TPmsEncaissement> encaissement) throws ParseException {
         try {
-            cashingDao.setPmsEncaissement(encaissement);
+            for(int i = 0; i < encaissement.size(); i++){
+                cashingDao.setPmsEncaissement(encaissement.get(i));
+            }
             return Response.status(Response.Status.CREATED).entity(encaissement).build();
         } catch (CustomConstraintViolationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -255,6 +259,31 @@ public class CashingService {
         } catch (CustomConstraintViolationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
+    }
+    
+    //Cloture provisoire PMS
+    @GET
+    @Path("/provisional-closure")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllListCashing(@Context UriInfo info) {
+        String dateReference = info.getQueryParameters().getFirst("dateReference");
+        JsonArray caList = cashingDao.getAllListCashing(dateReference);
+        if (caList.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(caList, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
+    @Path("/pms/debit-balance")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDebitBalanceCashing(@Context UriInfo info) {
+        String dateReference = info.getQueryParameters().getFirst("dateReference");
+        BigDecimal openNote = cashingDao.totalDebitBalance(dateReference);
+        if (openNote == null) {
+            openNote = new BigDecimal(0.0);
+        }
+        return Response.ok(openNote, MediaType.APPLICATION_JSON).build();
     }
 
 }
