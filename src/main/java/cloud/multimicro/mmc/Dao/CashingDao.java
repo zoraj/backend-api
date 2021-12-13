@@ -7,17 +7,29 @@ package cloud.multimicro.mmc.Dao;
 
 import cloud.multimicro.mmc.Entity.RemittanceInBank;
 import cloud.multimicro.mmc.Entity.RemittanceInBankDetail;
+import cloud.multimicro.mmc.Entity.TMmcDeviceCloture;
 import cloud.multimicro.mmc.Entity.TMmcJournalOperation;
 import cloud.multimicro.mmc.Entity.TMmcModeEncaissement;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Entity.TPmsArrhe;
 import cloud.multimicro.mmc.Entity.TPmsEncaissement;
+import cloud.multimicro.mmc.Entity.TPmsFacture;
+import cloud.multimicro.mmc.Entity.TPmsFactureDetail;
+import cloud.multimicro.mmc.Entity.TPmsNoteDetail;
 import cloud.multimicro.mmc.Entity.TPmsNoteEntete;
+import cloud.multimicro.mmc.Entity.TPmsPrestation;
 import cloud.multimicro.mmc.Entity.TPosEncaissement;
+import cloud.multimicro.mmc.Entity.TPosFacture;
+import cloud.multimicro.mmc.Entity.TPosFactureDetail;
+import cloud.multimicro.mmc.Entity.TPosNoteDetail;
+import cloud.multimicro.mmc.Entity.TPosNoteDetailCommande;
 import cloud.multimicro.mmc.Entity.TPosNoteEntete;
+import cloud.multimicro.mmc.Entity.TPosPrestation;
+import cloud.multimicro.mmc.Entity.VPosCa;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +43,8 @@ import java.util.Objects;
 import javax.ejb.Stateless;
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.validation.ConstraintViolationException;
@@ -99,29 +113,93 @@ public class CashingDao {
         TPmsEncaissement collection = entityManager.find(TPmsEncaissement.class, id);
         return collection;
     }
+    
 
     public void setPmsEncaissement(TPmsEncaissement encaissement)
             throws CustomConstraintViolationException, ParseException {
         String action = "PMS-ADD-CASHING";
+        //
         TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
         LocalDate daten = LocalDate.parse(parametrageDateLogicielle.getValeur());
-
+        //
+        List<TPmsNoteDetail> noteDetail = entityManager.createQuery("FROM TPmsNoteDetail WHERE dateDeletion = null ").getResultList();
+        List<TPmsPrestation> Prestation = entityManager.createQuery("FROM TPmsPrestation WHERE dateDeletion = null ").getResultList();
+        List<TMmcDeviceCloture> mmcDeviceClotureList = entityManager
+                .createQuery("SELECT deviceUuid FROM TMmcDeviceCloture WHERE dateStatus=:parameter")
+                .setParameter("parameter", daten).getResultList();
+        String DeviceUuid = "";
+        DeviceUuid = mmcDeviceClotureList.toString().replace("[","");
+        DeviceUuid = DeviceUuid.replace("]","");
+        
+        TPmsFacture facture = new TPmsFacture();
+        TPmsFactureDetail factureDetail = new TPmsFactureDetail();
         if (encaissement.getPmsNoteEnteteId() != null) {
             TPmsNoteEntete noteHeader = entityManager.find(TPmsNoteEntete.class, encaissement.getPmsNoteEnteteId()); 
+            for (TPmsNoteDetail noteDetailList : noteDetail) {
+                if(noteDetailList.getPmsNoteEnteteId().equals(encaissement.getPmsNoteEnteteId())){
+                    //BigDecimal oneHundred = new BigDecimal(100);
+                    BigDecimal noteDetailPu = noteDetailList.getPu();
+                    BigDecimal noteDetailqte = new BigDecimal(noteDetailList.getQte());
+                    BigDecimal montantHt = noteDetailqte.multiply(noteDetailPu);
+                    facture.setMontantHt(montantHt);
+                    factureDetail.setMontantHt(montantHt);
+                    /*BigDecimal tauxTva = montantHt.divide(oneHundred).multiply(noteDetailList.getTauxTva());
+                    BigDecimal tauxCommission = montantHt.divide(oneHundred).multiply(noteDetailList.getTauxCommission());
+                    BigDecimal tauxRemise = montantHt.divide(oneHundred).multiply(noteDetailList.getTauxRemise());*/
+                    BigDecimal montantTtc =  new BigDecimal(0);
+                    montantTtc = montantTtc.add(noteDetailList.getTauxTva());
+                    montantTtc = montantTtc.add(noteDetailList.getTauxCommission());
+                    montantTtc = montantTtc.add(noteDetailList.getTauxRemise());
+                    montantTtc = montantTtc.add(montantHt);                   
+                    facture.setMontantTtc(montantTtc);
+                    factureDetail.setMontantTtc(montantTtc);
+                    //tauxRemise = tauxRemise.add(montantHt);
+                    //BigDecimal montantRemise = montantHt.multiply(noteDetailList.getTauxRemise());
+                    facture.setMontantRemise(noteDetailList.getTauxRemise());
+                }
+                for(TPmsPrestation PrestationList : Prestation ){
+                    if(noteDetailList.getPmsPrestationId().equals(PrestationList.getId())){
+                       factureDetail.setLibellePrestation(PrestationList.getLibelle()); 
+                    }
+                }
+            }           
             String dateLogicielle = parametrageDateLogicielle.getValeur();
             String[] data = dateLogicielle.split("-", 2);
             String numFact = getInvoiceNumber("INVOICE_INDEX", data[0]);
             noteHeader.setNumFacture(numFact);
             noteHeader.setDateFacture(daten);
+            //
+            facture.setNumero(numFact);
+            facture.setDateFacture(daten);
+            facture.setDateEcheance(daten);
+            facture.setEntete1("Adresse: "+ "<br>" +"CP Ville:"+ "<br>" +"Téléphone"+ "<br>" +"Références Internet: ");
+            facture.setEntete2(" Référence: "+ "<br>" +"Date"+ "<br>" +"N°client");
+            facture.setEntete3("Société et/ou Nom du client "+ "<br>" +" Adresse  "+ "<br>" +" CP Ville");
+            facture.setBas1("En votre aimable règlement,"+ "<br>" +"Cordialement,");
+            facture.setBas2("Conditions de paiement : paiement à réception de facture, à 30 jours..."+ "<br>" +" Aucun escomptè consenti pour le règlement anticipé"+ "<br>" +
+            "Tout incident de paiement est passible d'intérêt de retard. Le montant des pénalités résulte de l'application"+ "<br>" +
+            "aux sommes restant dues d'un taux d'intérêt légal en vigueur au moment de l'incident.Indemnité forfaitaire pour frais de recouvrement due au créancier en cas de retard de "+ "<br>" +"paiement: 40 €");
+            facture.setBas3("N° Siret 210.890.764 00015 RCS Monpelier "+ "<br>" +"Code APE 947A-N°TVA intracom FR 77825696764000     ");             
+            facture.setDeviceUuid(DeviceUuid);
+            facture.setUtilisateur("herizo");
+            //
+            factureDetail.setPmsFactureNumero(numFact);
+            factureDetail.setQteCde(2);           
+            
+            
             try {
                 entityManager.merge(noteHeader);
+                entityManager.persist(facture);
+                entityManager.persist(factureDetail);
             } catch (ConstraintViolationException ex) {
                 throw new CustomConstraintViolationException(ex);
             }
         }
+        
         try {
             encaissement.setDateEncaissement(daten);
             entityManager.persist(encaissement);
+            
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
@@ -246,15 +324,71 @@ public class CashingDao {
         TPosEncaissement collection = entityManager.find(TPosEncaissement.class, id);
         return collection;
     }
+    public List<TPosNoteDetailCommande> getTPosNoteDetailCommande() {
+        List<TPosNoteDetailCommande> NoteDetailCommande = entityManager.createQuery("FROM TPosNoteDetailCommande WHERE dateDeletion = null ").getResultList();
+        
+        return NoteDetailCommande;
+    }
+    
 
     public void setPosEncaissement(TPosEncaissement encaissement) throws CustomConstraintViolationException {
+        TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate daten = LocalDate.parse(parametrageDateLogicielle.getValeur());
         
+        //
+        List<TPosNoteDetail> noteDetail = entityManager.createQuery("FROM TPosNoteDetail WHERE dateDeletion = null ").getResultList();
+        List<TPosPrestation> Prestation = entityManager.createQuery("FROM TPosPrestation WHERE dateDeletion = null ").getResultList();
+        List<TMmcDeviceCloture> mmcDeviceClotureList = entityManager
+                .createQuery("SELECT deviceUuid FROM TMmcDeviceCloture WHERE dateStatus=:parameter")
+                .setParameter("parameter", daten).getResultList();
+        String DeviceUuid = "";
+        DeviceUuid = mmcDeviceClotureList.toString().replace("[","");
+        DeviceUuid = DeviceUuid.replace("]","");
+        TPosFacture facturePos = new TPosFacture();
+        TPosFactureDetail factureDetailPos = new TPosFactureDetail();
         if (encaissement.getPosNoteEnteteId() != null) {
-            TPosNoteEntete noteHeader = entityManager.find(TPosNoteEntete.class, encaissement.getPosNoteEnteteId());         
+            TPosNoteEntete noteHeader = entityManager.find(TPosNoteEntete.class, encaissement.getPosNoteEnteteId()); 
+            for (TPosNoteDetail noteDetailList : noteDetail) {
+                if(noteDetailList.getPosNoteEnteteId().equals(encaissement.getPosNoteEnteteId())){
+                    BigDecimal noteDetailPu = noteDetailList.getPosPrestationPrix();
+                    BigDecimal noteDetailqte = new BigDecimal(noteDetailList.getQte());
+                    BigDecimal montantHt = noteDetailqte.multiply(noteDetailPu);
+                    facturePos.setMontantHt(montantHt);
+                    factureDetailPos.setMontantHt(montantHt);
+                    facturePos.setMontantTtc(montantHt);
+                    factureDetailPos.setQteCde(noteDetailList.getQteCdeMarche());
+                }
+                for(TPosPrestation PrestationList : Prestation ){
+                    if(noteDetailList.getPosPrestationId().equals(PrestationList.getId())){
+                       factureDetailPos.setLibellePrestation(PrestationList.getLibelle()); 
+                    }
+                }
+            } 
             String numFact = getInvoiceNumberPos(noteHeader.getPosteUuid());
             noteHeader.setNumFacture(numFact);
+            facturePos.setNumero(numFact);
+            facturePos.setDateFacture(daten);
+            facturePos.setDateEcheance(daten);
+            facturePos.setEntete1("Adresse: "+ "<br>" +"CP Ville:"+ "<br>" +"Téléphone"+ "<br>" +"Références Internet: ");
+            facturePos.setEntete2(" Référence: "+ "<br>" +"Date"+ "<br>" +"N°client");
+            facturePos.setEntete3("Société et/ou Nom du client "+ "<br>" +" Adresse  "+ "<br>" +" CP Ville");
+            facturePos.setBas1("En votre aimable règlement,"+ "<br>" +"Cordialement,");
+            facturePos.setBas2("Conditions de paiement : paiement à réception de facture, à 30 jours..."+ "<br>" +" Aucun escomptè consenti pour le règlement anticipé"+ "<br>" +
+            "Tout incident de paiement est passible d'intérêt de retard. Le montant des pénalités résulte de l'application"+ "<br>" +
+            "aux sommes restant dues d'un taux d'intérêt légal en vigueur au moment de l'incident.Indemnité forfaitaire pour frais de recouvrement due au créancier en cas de retard de "+ "<br>" +"paiement: 40 €");
+            facturePos.setBas3("N° Siret 210.890.764 00015 RCS Monpelier "+ "<br>" +"Code APE 947A-N°TVA intracom FR 77825696764000     ");                     
+            facturePos.setMontantRemise(new BigDecimal(0));
+            facturePos.setDeviceUuid(DeviceUuid);
+            facturePos.setUtilisateur("herizo");
+             //
+            factureDetailPos.setPosFactureNumero(numFact);
+                    
+            
+            factureDetailPos.setMontantTtc(new BigDecimal(0));
             try {
                 entityManager.merge(noteHeader);
+                entityManager.persist(facturePos);
+                entityManager.persist(factureDetailPos);
             } catch (ConstraintViolationException ex) {
                 throw new CustomConstraintViolationException(ex);
             }
