@@ -383,6 +383,39 @@ public class SettingDao {
             settingActiveVae.setCle("TAKEAWAY_ACTIVATED");
             settingActiveVae.setValeur("0");
             entityManager.persist(settingActiveVae);
+            
+            TMmcParametrage settingInvoiceHeader1 = new TMmcParametrage();
+            settingInvoiceHeader1.setCle("INVOICE_HEADER_1");
+            settingInvoiceHeader1.setValeur("Adresse: "+ "<br>" +"CP Ville:"+ "<br>" +"Téléphone"+ "<br>" +"Références Internet: ");
+            entityManager.persist(settingInvoiceHeader1);
+            
+            TMmcParametrage settingInvoiceHeader2 = new TMmcParametrage();
+            settingInvoiceHeader2.setCle("INVOICE_HEADER_2");
+            settingInvoiceHeader2.setValeur("Adresse: "+ "<br>" +"CP Ville:"+ "<br>" +"Téléphone"+ "<br>" +"Références Internet: ");
+            entityManager.persist(settingInvoiceHeader2);
+            
+            TMmcParametrage settingInvoiceHeader3 = new TMmcParametrage();
+            settingInvoiceHeader3.setCle("INVOICE_HEADER_3");
+            settingInvoiceHeader3.setValeur("Société et/ou Nom du client "+ "<br>" +" Adresse  "+ "<br>" +" CP Ville");
+            entityManager.persist(settingInvoiceHeader3);
+            
+            TMmcParametrage settingInvoiceFooter1 = new TMmcParametrage();
+            settingInvoiceFooter1.setCle("INVOICE_FOOTER_1");
+            settingInvoiceFooter1.setValeur("En votre aimable règlement,"+ "<br>" +"Cordialement,");
+            entityManager.persist(settingInvoiceFooter1);
+            
+            TMmcParametrage settingInvoiceFooter2 = new TMmcParametrage();
+            settingInvoiceFooter2.setCle("INVOICE_FOOTER_2");
+            settingInvoiceFooter2.setValeur("Conditions de paiement : paiement à réception de facture, à 30 jours..."+ "<br>" +" Aucun escomptè consenti pour le règlement anticipé"+ "<br>" +
+            "Tout incident de paiement est passible d'intérêt de retard. Le montant des pénalités résulte de l'application"+ "<br>" +
+            "aux sommes restant dues d'un taux d'intérêt légal en vigueur au moment de l'incident.Indemnité forfaitaire pour frais de recouvrement due au créancier en cas de retard de "+ "<br>" +"paiement: 40 €");
+            entityManager.persist(settingInvoiceFooter2);
+                                   
+            TMmcParametrage settingInvoiceFooter3 = new TMmcParametrage();
+            settingInvoiceFooter3.setCle("INVOICE_FOOTER_3");
+            settingInvoiceFooter3.setValeur("N° Siret 210.890.764 00015 RCS Monpelier "+ "<br>" +"Code APE 947A-N°TVA intracom FR 77825696764000     ");
+            entityManager.persist(settingInvoiceFooter3);
+            
                  
         } catch (Exception e) {
             LOGGER.error("Setting initialization went wrong");
