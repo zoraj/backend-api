@@ -116,8 +116,14 @@ public class CashingDao {
         String action = "PMS-ADD-CASHING";
         LocalTime currentTime = LocalTime.now();      
         TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
-        LocalDate daten = LocalDate.parse(parametrageDateLogicielle.getValeur());
-        LocalDateTime dateEtatSolde = currentTime.atDate(daten);       
+        TMmcParametrage invoiceHeader1 = entityManager.find(TMmcParametrage.class, "INVOICE_HEADER_1");
+        TMmcParametrage invoiceHeader2 = entityManager.find(TMmcParametrage.class, "INVOICE_HEADER_2");
+        TMmcParametrage invoiceHeader3 = entityManager.find(TMmcParametrage.class, "INVOICE_HEADER_3");
+        TMmcParametrage invoiceFooter1 = entityManager.find(TMmcParametrage.class, "INVOICE_FOOTER_1");
+        TMmcParametrage invoiceFooter2 = entityManager.find(TMmcParametrage.class, "INVOICE_FOOTER_2");
+        TMmcParametrage invoiceFooter3 = entityManager.find(TMmcParametrage.class, "INVOICE_FOOTER_3");
+        LocalDate dateLogiciel = LocalDate.parse(parametrageDateLogicielle.getValeur());
+        LocalDateTime dateEtatSolde = currentTime.atDate(dateLogiciel);       
         BigDecimal amountCashed = encaissement.getMontant();
         BigDecimal totalNote = totalMontantByNoteHeaderId(encaissement.getPmsNoteEnteteId());
         BigDecimal amountAlreadyCashed = totalMontantExistingCashed(encaissement.getPmsNoteEnteteId());
@@ -126,7 +132,7 @@ public class CashingDao {
         List<TPmsPrestation> Prestation = entityManager.createQuery("FROM TPmsPrestation WHERE dateDeletion = null ").getResultList();
         List<TMmcDeviceCloture> mmcDeviceClotureList = entityManager
                 .createQuery("SELECT deviceUuid FROM TMmcDeviceCloture WHERE dateStatus=:parameter")
-                .setParameter("parameter", daten).getResultList();
+                .setParameter("parameter", dateLogiciel).getResultList();      
         String DeviceUuid = "";
         DeviceUuid = mmcDeviceClotureList.toString().replace("[","");
         DeviceUuid = DeviceUuid.replace("]","");
@@ -168,19 +174,17 @@ public class CashingDao {
             String[] data = dateLogicielle.split("-", 2);
             String numFact = getInvoiceNumber("INVOICE_INDEX", data[0]);
             noteHeader.setNumFacture(numFact);
-            noteHeader.setDateFacture(daten);
+            noteHeader.setDateFacture(dateLogiciel);
             //
             facture.setNumero(numFact);
-            facture.setDateFacture(daten);
-            facture.setDateEcheance(daten);
-            facture.setEntete1("Adresse: "+ "<br>" +"CP Ville:"+ "<br>" +"Téléphone"+ "<br>" +"Références Internet: ");         
-            facture.setEntete2(" Référence: "+ "<br>" +"Date"+ "<br>" +"N°client");
-            facture.setEntete3("Société et/ou Nom du client "+ "<br>" +" Adresse  "+ "<br>" +" CP Ville");
-            facture.setBas1("En votre aimable règlement,"+ "<br>" +"Cordialement,");
-            facture.setBas2("Conditions de paiement : paiement à réception de facture, à 30 jours..."+ "<br>" +" Aucun escomptè consenti pour le règlement anticipé"+ "<br>" +
-            "Tout incident de paiement est passible d'intérêt de retard. Le montant des pénalités résulte de l'application"+ "<br>" +
-            "aux sommes restant dues d'un taux d'intérêt légal en vigueur au moment de l'incident.Indemnité forfaitaire pour frais de recouvrement due au créancier en cas de retard de "+ "<br>" +"paiement: 40 €");           
-            facture.setBas3("N° Siret 210.890.764 00015 RCS Monpelier "+ "<br>" +"Code APE 947A-N°TVA intracom FR 77825696764000     ");             
+            facture.setDateFacture(dateLogiciel);
+            facture.setDateEcheance(dateLogiciel);
+            facture.setEntete1(invoiceHeader1.getValeur());         
+            facture.setEntete2(invoiceHeader2.getValeur());
+            facture.setEntete3(invoiceHeader3.getValeur());
+            facture.setBas1(invoiceFooter1.getValeur());
+            facture.setBas2(invoiceFooter2.getValeur());           
+            facture.setBas3(invoiceFooter3.getValeur());             
             facture.setDeviceUuid(DeviceUuid);
             facture.setUtilisateur("herizo");
             //
@@ -201,7 +205,7 @@ public class CashingDao {
             }
         }
         try {
-            encaissement.setDateEncaissement(daten);
+            encaissement.setDateEncaissement(dateLogiciel);
             entityManager.persist(encaissement);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
