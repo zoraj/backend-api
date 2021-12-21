@@ -407,13 +407,12 @@ public class SettingDao {
             TMmcParametrage settingInvoiceFooter2 = new TMmcParametrage();
             settingInvoiceFooter2.setCle("INVOICE_FOOTER_2");
             settingInvoiceFooter2.setValeur("Conditions de paiement : paiement à réception de facture, à 30 jours..."+ "<br>" +" Aucun escomptè consenti pour le règlement anticipé"+ "<br>" +
-            "Tout incident de paiement est passible d'intérêt de retard. Le montant des pénalités résulte de l'application"+ "<br>" +
-            "aux sommes restant dues d'un taux d'intérêt légal en vigueur au moment de l'incident.Indemnité forfaitaire pour frais de recouvrement due au créancier en cas de retard de "+ "<br>" +"paiement: 40 €");
+            "Tout incident de paiement est passible d'intérêt de retard.");
             entityManager.persist(settingInvoiceFooter2);
                                    
             TMmcParametrage settingInvoiceFooter3 = new TMmcParametrage();
             settingInvoiceFooter3.setCle("INVOICE_FOOTER_3");
-            settingInvoiceFooter3.setValeur("N° Siret 210.890.764 00015 RCS Monpelier "+ "<br>" +"Code APE 947A-N°TVA intracom FR 77825696764000     ");
+            settingInvoiceFooter3.setValeur("N° Siret 210.890.764 00015 RCS Monpelier "+ "<br>" +"Code APE 947A-N°TVA intracom FR 77825696764000");
             entityManager.persist(settingInvoiceFooter3);
             
                  
