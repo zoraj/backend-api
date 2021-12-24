@@ -192,6 +192,10 @@ public class RevenueDao {
                     montantCaMois           = BigDecimal.ZERO;
                     montantCaAnnee          = BigDecimal.ZERO;
                     
+                    montantCaJour           = sumCaDayBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry);
+                    montantCaMois           = sumCaMonthBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry, dateMonthEntry);
+                    montantCaAnnee          = sumCaYearBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry, dateYearEntry);
+                    
                     totalMontantCaJour      = BigDecimal.ZERO;
                     //totalMontantCaPeriode   = BigDecimal.ZERO;
                     totalMontantCaMois      = BigDecimal.ZERO;

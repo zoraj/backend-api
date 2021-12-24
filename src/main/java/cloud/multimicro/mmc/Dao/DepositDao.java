@@ -87,4 +87,8 @@ public class DepositDao {
         List<VPmsArrhesClient> depositsClients = entityManager.createQuery("FROM VPmsArrhesClient").getResultList();
         return depositsClients;
     }
+    
+    public BigDecimal totalDepositBalance() {
+        return (BigDecimal) entityManager.createNativeQuery("SELECT SUM(montant) FROM t_pms_arrhes WHERE is_consomme = 0 OR is_consomme is null ").getSingleResult(); 
+    }
 }

@@ -61,6 +61,9 @@ public class TPmsArrhe implements Serializable{
     
     @Column(name = "date_remboursement")
     private LocalDate dateRemboursement;
+    
+    @Column(name = "is_consomme")
+    private Integer isConsomme;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     @Temporal(TemporalType.DATE)

@@ -10,6 +10,7 @@ import cloud.multimicro.mmc.Entity.TMmcModeEncaissement;
 import cloud.multimicro.mmc.Entity.TPmsArrhe;
 import cloud.multimicro.mmc.Entity.VPmsArrhesClient;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
+import java.math.BigDecimal;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -20,8 +21,10 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.jboss.logging.Logger;
 
 /**
@@ -70,5 +73,16 @@ public class DepositService {
             throw new NotFoundException();
         }
         return Response.ok(deposits, MediaType.APPLICATION_JSON).build();       
+    }
+    
+    @GET
+    @Path("/debit-balance")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDepositBalance() {
+        BigDecimal depositBalance = depositDao.totalDepositBalance();
+        if (depositBalance == null) {
+            depositBalance = new BigDecimal(0.0);
+        }
+        return Response.ok(depositBalance, MediaType.APPLICATION_JSON).build();
     }
 }
