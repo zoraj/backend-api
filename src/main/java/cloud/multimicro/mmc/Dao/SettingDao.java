@@ -391,7 +391,7 @@ public class SettingDao {
             
             TMmcParametrage settingInvoiceHeader2 = new TMmcParametrage();
             settingInvoiceHeader2.setCle("INVOICE_HEADER_2");
-            settingInvoiceHeader2.setValeur("Adresse: "+ "<br>" +"CP Ville:"+ "<br>" +"Téléphone"+ "<br>" +"Références Internet: ");
+            settingInvoiceHeader2.setValeur("Références " + "<br> " + "Date " + " <br>" + " N°client");
             entityManager.persist(settingInvoiceHeader2);
             
             TMmcParametrage settingInvoiceHeader3 = new TMmcParametrage();
