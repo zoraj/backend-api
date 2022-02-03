@@ -384,36 +384,68 @@ public class SettingDao {
             settingActiveVae.setValeur("0");
             entityManager.persist(settingActiveVae);
             
-            TMmcParametrage settingInvoiceHeader1 = new TMmcParametrage();
-            settingInvoiceHeader1.setCle("INVOICE_HEADER_1");
-            settingInvoiceHeader1.setValeur("Adresse: "+ "<br>" +"CP Ville:"+ "<br>" +"Téléphone"+ "<br>" +"Références Internet: ");
-            entityManager.persist(settingInvoiceHeader1);
+            TMmcParametrage settingPmsInvoiceHeader1 = new TMmcParametrage();
+            settingPmsInvoiceHeader1.setCle("PMS_INVOICE_HEADER_1");
+            settingPmsInvoiceHeader1.setValeur("Adresse: "+ "<br>" +"CP Ville:"+ "<br>" +"Téléphone"+ "<br>" +"Références Internet: ");
+            entityManager.persist(settingPmsInvoiceHeader1);
             
-            TMmcParametrage settingInvoiceHeader2 = new TMmcParametrage();
-            settingInvoiceHeader2.setCle("INVOICE_HEADER_2");
-            settingInvoiceHeader2.setValeur("Références " + "<br> " + "Date " + " <br>" + " N°client");
-            entityManager.persist(settingInvoiceHeader2);
+            TMmcParametrage settingPmsInvoiceHeader2 = new TMmcParametrage();
+            settingPmsInvoiceHeader2.setCle("PMS_INVOICE_HEADER_2");
+            settingPmsInvoiceHeader2.setValeur("Références " + "<br> " + "Date " + " <br>" + " N°client");
+            entityManager.persist(settingPmsInvoiceHeader2);
             
-            TMmcParametrage settingInvoiceHeader3 = new TMmcParametrage();
-            settingInvoiceHeader3.setCle("INVOICE_HEADER_3");
-            settingInvoiceHeader3.setValeur("Société et/ou Nom du client "+ "<br>" +" Adresse  "+ "<br>" +" CP Ville");
-            entityManager.persist(settingInvoiceHeader3);
+            TMmcParametrage settingPmsInvoiceHeader3 = new TMmcParametrage();
+            settingPmsInvoiceHeader3.setCle("PMS_INVOICE_HEADER_3");
+            settingPmsInvoiceHeader3.setValeur("Société et/ou Nom du client "+ "<br>" +" Adresse  "+ "<br>" +" CP Ville");
+            entityManager.persist(settingPmsInvoiceHeader3);
             
-            TMmcParametrage settingInvoiceFooter1 = new TMmcParametrage();
-            settingInvoiceFooter1.setCle("INVOICE_FOOTER_1");
-            settingInvoiceFooter1.setValeur("En votre aimable règlement,"+ "<br>" +"Cordialement,");
-            entityManager.persist(settingInvoiceFooter1);
+            TMmcParametrage settingPmsInvoiceFooter1 = new TMmcParametrage();
+            settingPmsInvoiceFooter1.setCle("PMS_INVOICE_FOOTER_1");
+            settingPmsInvoiceFooter1.setValeur("En votre aimable règlement,"+ "<br>" +"Cordialement,");
+            entityManager.persist(settingPmsInvoiceFooter1);
             
-            TMmcParametrage settingInvoiceFooter2 = new TMmcParametrage();
-            settingInvoiceFooter2.setCle("INVOICE_FOOTER_2");
-            settingInvoiceFooter2.setValeur("Conditions de paiement : paiement à réception de facture, à 30 jours..."+ "<br>" +" Aucun escomptè consenti pour le règlement anticipé"+ "<br>" +
+            TMmcParametrage settingPmsInvoiceFooter2 = new TMmcParametrage();
+            settingPmsInvoiceFooter2.setCle("PMS_INVOICE_FOOTER_2");
+            settingPmsInvoiceFooter2.setValeur("Conditions de paiement : paiement à réception de facture, à 30 jours..."+ "<br>" +" Aucun escomptè consenti pour le règlement anticipé"+ "<br>" +
             "Tout incident de paiement est passible d'intérêt de retard.");
-            entityManager.persist(settingInvoiceFooter2);
+            entityManager.persist(settingPmsInvoiceFooter2);
                                    
             TMmcParametrage settingInvoiceFooter3 = new TMmcParametrage();
-            settingInvoiceFooter3.setCle("INVOICE_FOOTER_3");
+            settingInvoiceFooter3.setCle("PMS_INVOICE_FOOTER_3");
             settingInvoiceFooter3.setValeur("N° Siret 210.890.764 00015 RCS Monpelier "+ "<br>" +"Code APE 947A-N°TVA intracom FR 77825696764000");
             entityManager.persist(settingInvoiceFooter3);
+            
+            //MODEL FACTURE POS
+            TMmcParametrage settingPosInvoiceHeader1 = new TMmcParametrage();
+            settingPosInvoiceHeader1.setCle("POS_INVOICE_HEADER_1");
+            settingPosInvoiceHeader1.setValeur("Adresse: "+ "<br>" +"CP Ville:"+ "<br>" +"Téléphone"+ "<br>" +"Références Internet: ");
+            entityManager.persist(settingPosInvoiceHeader1);
+            
+            TMmcParametrage settingPosInvoiceHeader2 = new TMmcParametrage();
+            settingPosInvoiceHeader2.setCle("POS_INVOICE_HEADER_2");
+            settingPosInvoiceHeader2.setValeur("Références " + "<br> " + "Date " + " <br>" + " N°client");
+            entityManager.persist(settingPosInvoiceHeader2);
+            
+            TMmcParametrage settingPosInvoiceHeader3 = new TMmcParametrage();
+            settingPosInvoiceHeader3.setCle("POS_INVOICE_HEADER_3");
+            settingPosInvoiceHeader3.setValeur("Société et/ou Nom du client "+ "<br>" +" Adresse  "+ "<br>" +" CP Ville");
+            entityManager.persist(settingPosInvoiceHeader3);
+            
+            TMmcParametrage settingPosInvoiceFooter1 = new TMmcParametrage();
+            settingPosInvoiceFooter1.setCle("POS_INVOICE_FOOTER_1");
+            settingPosInvoiceFooter1.setValeur("En votre aimable règlement,"+ "<br>" +"Cordialement,");
+            entityManager.persist(settingPosInvoiceFooter1);
+            
+            TMmcParametrage settingPosInvoiceFooter2 = new TMmcParametrage();
+            settingPosInvoiceFooter2.setCle("POS_INVOICE_FOOTER_2");
+            settingPosInvoiceFooter2.setValeur("Conditions de paiement : paiement à réception de facture, à 30 jours..."+ "<br>" +" Aucun escomptè consenti pour le règlement anticipé"+ "<br>" +
+            "Tout incident de paiement est passible d'intérêt de retard.");
+            entityManager.persist(settingPosInvoiceFooter2);
+                                   
+            TMmcParametrage settingPosInvoiceFooter3 = new TMmcParametrage();
+            settingPosInvoiceFooter3.setCle("POS_INVOICE_FOOTER_3");
+            settingPosInvoiceFooter3.setValeur("N° Siret 210.890.764 00015 RCS Monpelier "+ "<br>" +"Code APE 947A-N°TVA intracom FR 77825696764000");
+            entityManager.persist(settingPosInvoiceFooter3);
             
                  
         } catch (Exception e) {
