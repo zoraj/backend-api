@@ -493,7 +493,7 @@ public class SettingDao {
                     siteCode = siteCodeObject.getString("siteCode");
                     String name                                = "VAE";
                     String site_code                           = siteCode;
-                    String uuid                                = Util.generateRandomUUID();
+                    String uuid                                = "_VAE_";
                     String currency                            = "€";
                     String language                            = "FR_fr";
                     int invoice_current_num                    = 1;

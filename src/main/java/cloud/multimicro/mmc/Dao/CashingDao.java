@@ -11,6 +11,7 @@ import cloud.multimicro.mmc.Entity.TMmcDeviceCloture;
 import cloud.multimicro.mmc.Entity.TMmcJournalOperation;
 import cloud.multimicro.mmc.Entity.TMmcModeEncaissement;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
+import cloud.multimicro.mmc.Entity.TMmcUser;
 import cloud.multimicro.mmc.Entity.TPmsArrhe;
 import cloud.multimicro.mmc.Entity.TPmsEncaissement;
 import cloud.multimicro.mmc.Entity.TPmsFacture;
@@ -130,6 +131,8 @@ public class CashingDao {
         BigDecimal totalAmount = amountCashed.add(amountAlreadyCashed);
         List<TPmsNoteDetail> noteDetail = entityManager.createQuery("FROM TPmsNoteDetail WHERE dateDeletion = null ").getResultList();
         List<TPmsPrestation> Prestation = entityManager.createQuery("FROM TPmsPrestation WHERE dateDeletion = null ").getResultList();
+        
+        List<TMmcUser> User = entityManager.createQuery("FROM TPmsPrestation WHERE dateDeletion = null ").getResultList();
         List<TMmcDeviceCloture> mmcDeviceClotureList = entityManager
                 .createQuery("SELECT deviceUuid FROM TMmcDeviceCloture WHERE dateStatus=:parameter")
                 .setParameter("parameter", dateLogiciel).getResultList();      
@@ -186,8 +189,11 @@ public class CashingDao {
             facture.setBas2(invoiceFooter2.getValeur());           
             facture.setBas3(invoiceFooter3.getValeur());             
             facture.setDeviceUuid(DeviceUuid);
-            facture.setUtilisateur("herizo");
-            //
+            for (TMmcUser userList : User) {
+                if(userList.getId().equals(encaissement.getMmcUserId())){
+                    facture.setUtilisateur(userList.getFirstname());
+                }
+            }
             factureDetail.setPmsFactureNumero(numFact);
             factureDetail.setQteCde(2);           
             if(amountCashed.equals(totalNote) || amountCashed.compareTo(totalNote) == 1 || totalAmount.equals(totalNote) || totalAmount.compareTo(totalNote) == 1){
