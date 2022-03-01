@@ -138,7 +138,7 @@ public class ClientService {
         try {
             customerDao.setClient(client);
             return Response.status(Response.Status.CREATED).entity(client).build();
-        } catch (CustomConstraintViolationException e) {
+        } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
