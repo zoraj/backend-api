@@ -66,12 +66,21 @@ public class TMmcClient implements Serializable {
 
     @Column(name = "pms_prescripteur_id")
     private Integer pmsPrescripteurId;
+    @JoinColumn(name = "pms_prescripteur_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @OneToOne
+    private TPmsPrescripteur pmsPrescripteur;
 
     @Column(name = "mmc_type_client_id")
     private Integer mmcTypeClientId;
+    @JoinColumn(name = "mmc_type_client_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @OneToOne
+    private TMmcTypeClient mmcTypeClient;
 
     @Column(name = "mmc_segment_client_id")
     private Integer mmcSegmentClientId;
+    @JoinColumn(name = "mmc_segment_client_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @OneToOne
+    private TMmcSegmentClient mmcSegmentClient;
 
     @Column(name = "compte_comptable")
     private String compteComptable;
