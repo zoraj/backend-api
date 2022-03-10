@@ -131,7 +131,7 @@ public class ProductService {
         try {
             productDao.setPosPrestation(prestation);
             return Response.status(Response.Status.CREATED).entity(prestation).build();
-        } catch (CustomConstraintViolationException ex) {
+        } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }
@@ -220,7 +220,7 @@ public class ProductService {
         try {
             productDao.setProductGroup(prestationGroupe);
             return Response.status(Response.Status.CREATED).entity(prestationGroupe).build();
-        } catch (CustomConstraintViolationException ex) {
+        } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }
@@ -549,7 +549,7 @@ public class ProductService {
         try {
             productDao.setCuisson(cuisson);
             return Response.status(Response.Status.CREATED).entity(cuisson).build();
-        } catch (CustomConstraintViolationException ex) {
+        } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }
