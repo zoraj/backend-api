@@ -9,7 +9,7 @@ package cloud.multimicro.mmc.Service;
 
 import cloud.multimicro.mmc.Dao.ReservationDao;
 import cloud.multimicro.mmc.Entity.TPmsReservation;
-import cloud.multimicro.mmc.Entity.TPmsReservationVentillation;
+import cloud.multimicro.mmc.Entity.TPmsReservationVentilation;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarif;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarifPrestation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
@@ -138,10 +138,10 @@ public class ReservationService {
 
     //reservation facture
     @GET
-    @Path("/ventillation")  
+    @Path("/ventilation")  
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllReservationVentillation() {
-        List<TPmsReservationVentillation> reservation = reservationDao.getAllReservationVentillation();
+    public Response getAllReservationVentilation() {
+        List<TPmsReservationVentilation> reservation = reservationDao.getAllReservationVentilation();
         if (reservation.isEmpty()) {
             throw new NotFoundException();
         }
@@ -149,10 +149,10 @@ public class ReservationService {
     }
 
     @GET
-    @Path("/ventillation/{id}")
+    @Path("/ventilation/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getReservationVentillationByReservation(@PathParam("id") Integer id) {
-        List<TPmsReservationVentillation> reservation = reservationDao.getReservationVentillationByReservation(id);        
+    public Response getReservationVentilationByReservation(@PathParam("id") Integer id) {
+        List<TPmsReservationVentilation> reservation = reservationDao.getReservationVentilationByReservation(id);        
         if (reservation.isEmpty()) {
             throw new NotFoundException();
         }
@@ -160,11 +160,11 @@ public class ReservationService {
     }
     
     @POST
-    @Path("/ventillation")
+    @Path("/ventilation")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addReservationVentillation(JsonObject object) {
+    public Response addReservationVentilation(JsonObject object) {
         try {
-            reservationDao.addReservationVentillation(object);
+            reservationDao.addReservationVentilation(object);
             return Response.status(Response.Status.CREATED).entity(object).build();
         } catch (CustomConstraintViolationException ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
@@ -172,24 +172,24 @@ public class ReservationService {
     }
     
     
-    @Path("/ventillation")
+    @Path("/ventilation")
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateReservationFacture(TPmsReservationVentillation pmsReservation) {
+    public Response updateReservationFacture(TPmsReservationVentilation pmsReservation) {
         try {
-            reservationDao.updateReservationVentillation(pmsReservation);
+            reservationDao.updateReservationVentilation(pmsReservation);
             return Response.status(Response.Status.OK).entity(pmsReservation).build();
         } catch (CustomConstraintViolationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
     
-    @Path("/ventillation/{id}")
+    @Path("/ventilation/{id}")
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteReservationVentillation(@PathParam("id") int id) {
+    public Response deleteReservationVentilation(@PathParam("id") int id) {
         try {
-            reservationDao.deleteReservationVentillation(id);
+            reservationDao.deleteReservationVentilation(id);
            return Response.ok(id, MediaType.APPLICATION_JSON).build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();

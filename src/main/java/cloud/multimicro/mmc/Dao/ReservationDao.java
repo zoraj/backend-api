@@ -28,7 +28,7 @@ import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Entity.TPmsReservation;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarif;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarifPrestation;
-import cloud.multimicro.mmc.Entity.TPmsReservationVentillation;
+import cloud.multimicro.mmc.Entity.TPmsReservationVentilation;
 import cloud.multimicro.mmc.Entity.TPmsTarifGrilleDetail;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 
@@ -205,7 +205,7 @@ public class ReservationDao {
                 try {
                     TMmcClient client = entityManager.find(TMmcClient.class, Integer.parseInt(settingData.getValeur()));
                     List<Map> reservationTarif = (List) object.get("reservationTarif");
-                    List<Map> ventillationList = (List) object.get("ventillation");
+                    List<Map> ventilationList = (List) object.get("ventilation");
 
                     TMmcParametrage bookingRateGridParameterId = entityManager.find(TMmcParametrage.class, "BOOKING_GRILLE_TARIF");
                     reservation.setPmsTarifGrilleId(Integer.parseInt(bookingRateGridParameterId.getValeur()));
@@ -250,7 +250,7 @@ public class ReservationDao {
                     reservation.setPosteUuid(object.getString("posteUuid"));
 
                     entityManager.persist(reservation);
-                    //addReservationVentillation(ventillationList, reservation.getId());
+                    //addReservationVentilation(ventilationList, reservation.getId());
                     //addReservationRate(reservationTarif, reservation.getNom(), dateArrivee, dateDepart, reservation.getId());
                 } catch (ConstraintViolationException ex) {
                     throw new CustomConstraintViolationException(ex);
@@ -277,73 +277,73 @@ public class ReservationDao {
                 .setParameter("id", id).executeUpdate();
     }
 
-    // CRUD RESERVATION VENTILLATION
-    public List<TPmsReservationVentillation> getAllReservationVentillation() {
-        List<TPmsReservationVentillation> pmsReservationVentillation = entityManager
-                .createQuery("FROM TPmsReservationVentillation  WHERE dateDeletion = null").getResultList();
-        return pmsReservationVentillation;
+    // CRUD RESERVATION VENTILATION
+    public List<TPmsReservationVentilation> getAllReservationVentilation() {
+        List<TPmsReservationVentilation> pmsReservationVentilation = entityManager
+                .createQuery("FROM TPmsReservationVentilation  WHERE dateDeletion = null").getResultList();
+        return pmsReservationVentilation;
     }
 
-    public List<TPmsReservationVentillation> getReservationVentillationByReservation(Integer pmsReservationId) {
-        List<TPmsReservationVentillation> pmsReservationVentillation = entityManager
-                .createQuery("FROM TPmsReservationVentillation  WHERE pmsReservationId=:pmsReservationId")
+    public List<TPmsReservationVentilation> getReservationVentilationByReservation(Integer pmsReservationId) {
+        List<TPmsReservationVentilation> reservationVentilation = entityManager
+                .createQuery("FROM TPmsReservationVentilation  WHERE pmsReservationId=:pmsReservationId")
                 .setParameter("pmsReservationId", pmsReservationId).getResultList();
-        return pmsReservationVentillation;
+        return reservationVentilation;
     }
 
-    public TPmsReservationVentillation getReservationVentillationById(int id) {
-        TPmsReservationVentillation pmsReservationVentillation = entityManager.find(TPmsReservationVentillation.class,
+    public TPmsReservationVentilation getReservationVentilationById(int id) {
+        TPmsReservationVentilation reservationVentilation = entityManager.find(TPmsReservationVentilation.class,
                 id);
-        return pmsReservationVentillation;
+        return reservationVentilation;
     }
 
-    public void addReservationVentillation(JsonObject object) throws CustomConstraintViolationException {
+    public void addReservationVentilation(JsonObject object) throws CustomConstraintViolationException {
         Integer pmsReservationId = object.getInt("pmsReservationId");
-        JsonArray jsonArray = object.getJsonArray("ventillation");
-        TPmsReservationVentillation reservationVentillation = null;
+        JsonArray jsonArray = object.getJsonArray("ventilation");
+        TPmsReservationVentilation reservationVentilation = null;
         for (int i = 0; i < jsonArray.size(); i++) {
-            reservationVentillation = new TPmsReservationVentillation();
+            reservationVentilation = new TPmsReservationVentilation();
             JsonObject rowObject = jsonArray.getJsonObject(i);
-            reservationVentillation.setPmsReservationId(pmsReservationId);
-            reservationVentillation.setPmsTypeChambreId(rowObject.getInt("pmsTypeChambreId"));
-            reservationVentillation.setPmsTypeChambreId(rowObject.getInt("pmsChambreId"));
+            reservationVentilation.setPmsReservationId(pmsReservationId);
+            reservationVentilation.setPmsTypeChambreId(rowObject.getInt("pmsTypeChambreId"));
+            reservationVentilation.setPmsTypeChambreId(rowObject.getInt("pmsChambreId"));
             // 1 par defaut
-            reservationVentillation.setQteChb(1);
+            reservationVentilation.setQteChb(1);
 
             try {
-                entityManager.persist(reservationVentillation);
+                entityManager.persist(reservationVentilation);
             } catch (ConstraintViolationException ex) {
                 throw new CustomConstraintViolationException(ex);
             }
         }
     }
 
-    public TPmsReservationVentillation updateReservationVentillation(
-            TPmsReservationVentillation pmsReservationVentillation) throws CustomConstraintViolationException {
+    public TPmsReservationVentilation updateReservationVentilation(
+            TPmsReservationVentilation reservationVentilation) throws CustomConstraintViolationException {
         try {
-            return entityManager.merge(pmsReservationVentillation);
+            return entityManager.merge(reservationVentilation);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
     }
 
-    public void deleteReservationVentillation(int id) {
+    public void deleteReservationVentilation(int id) {
         entityManager
                 .createNativeQuery(
-                        "UPDATE t_pms_reservation_ventillation SET date_deletion = CURRENT_TIMESTAMP WHERE id=:id")
+                        "UPDATE t_pms_reservation_ventilation SET date_deletion = CURRENT_TIMESTAMP WHERE id=:id")
                 .setParameter("id", id).executeUpdate();
     }
 
     // ReservationTarif
     public List<TPmsReservationTarif> getAllReservationRate() {
-        List<TPmsReservationTarif> pmsReservationVentillation = entityManager
+        List<TPmsReservationTarif> reservationTarif = entityManager
                 .createQuery("FROM TPmsReservationTarif  WHERE dateDeletion = null").getResultList();
-        return pmsReservationVentillation;
+        return reservationTarif;
     }
 
     public TPmsReservationTarif getReservationRateById(int id) {
-        TPmsReservationTarif pmsReservationVentillation = entityManager.find(TPmsReservationTarif.class, id);
-        return pmsReservationVentillation;
+        TPmsReservationTarif reservationTarif = entityManager.find(TPmsReservationTarif.class, id);
+        return reservationTarif;
     }
 
     public void addReservationRate(List<Map> pmsReservationTarifList ,String nom, Date dateStart, Date dateEnd, Integer pmsReservationId) throws CustomConstraintViolationException {

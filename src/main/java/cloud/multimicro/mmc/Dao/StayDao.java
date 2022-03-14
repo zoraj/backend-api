@@ -91,13 +91,13 @@ public class StayDao {
 
     //SejourTarif
     public List<TPmsSejourTarif> getAllStayRate(){
-        List<TPmsSejourTarif> pmsSejourVentillation = entityManager.createQuery("FROM TPmsSejourTarif").getResultList();
-        return pmsSejourVentillation;
+        List<TPmsSejourTarif> sejourTarif = entityManager.createQuery("FROM TPmsSejourTarif").getResultList();
+        return sejourTarif;
     }
 
     public TPmsSejourTarif getStayRateById(int id) {
-        TPmsSejourTarif pmsSejourVentillation = entityManager.find(TPmsSejourTarif.class, id);
-        return pmsSejourVentillation;
+        TPmsSejourTarif sejourTarif = entityManager.find(TPmsSejourTarif.class, id);
+        return sejourTarif;
     }
 
     public void addStayRate(JsonObject pmsSejourTarif) throws CustomConstraintViolationException {

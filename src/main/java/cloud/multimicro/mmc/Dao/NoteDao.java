@@ -872,13 +872,13 @@ public class NoteDao {
 
     // Note Detail
     public List<TPmsNoteDetail> getAllPmsNoteDetailed() {
-        List<TPmsNoteDetail> pmsSejourVentillation = entityManager.createQuery("FROM TPmsNoteDetail").getResultList();
-        return pmsSejourVentillation;
+        List<TPmsNoteDetail> detailNote = entityManager.createQuery("FROM TPmsNoteDetail").getResultList();
+        return detailNote;
     }
 
     public TPmsNoteDetail getPmsNoteDetailedById(int id) {
-        TPmsNoteDetail pmsSejourVentillation = entityManager.find(TPmsNoteDetail.class, id);
-        return pmsSejourVentillation;
+        TPmsNoteDetail detailNote = entityManager.find(TPmsNoteDetail.class, id);
+        return detailNote;
     }
 
     public void addPmsNoteDetailed(JsonObject pmsSejourTarif) throws CustomConstraintViolationException {

@@ -25,11 +25,11 @@ import lombok.Data;
  * @author Tsiory
  */
 @Entity
-@Table(name = "t_pms_reservation_ventillation",uniqueConstraints={
+@Table(name = "t_pms_reservation_ventilation",uniqueConstraints={
     @UniqueConstraint(columnNames = {"pms_reservation_id", "qte_chb", "pms_type_chambre_id"})
 })
 @Data
-public class TPmsReservationVentillation implements Serializable {
+public class TPmsReservationVentilation implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,7 +63,7 @@ public class TPmsReservationVentillation implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date dateDeletion;
 
-    public TPmsReservationVentillation() {
+    public TPmsReservationVentilation() {
 
     }
     
