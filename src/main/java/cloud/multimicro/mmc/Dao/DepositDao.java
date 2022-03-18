@@ -46,9 +46,8 @@ public class DepositDao {
         final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         TPmsArrhe pmsArrheToModify = getByIdDeposit(Integer.parseInt(request.get("id").toString()));
         TPmsArrhe depositToModify = new TPmsArrhe();
-        LocalDate daten = LocalDate.parse(request.getString("dateReglement"));
-        depositToModify.setPmsReservationId(Integer.parseInt(request.get("pmsReservationId").toString()));
-        depositToModify.setDateReglement(daten);
+        LocalDate dateReglement = LocalDate.parse(request.getString("dateReglement"));
+        depositToModify.setDateReglement(dateReglement);
         depositToModify.setMmcClientId(pmsArrheToModify.getMmcClientId());
         depositToModify.setMontant((pmsArrheToModify.getMontant()).multiply(new BigDecimal(-1.00)));
         depositToModify.setMmcModeEncaissementId(Integer.parseInt(request.get("mmcModeEncaissementId").toString()));
@@ -60,14 +59,39 @@ public class DepositDao {
             throw new CustomConstraintViolationException(ex);
         }
         TPmsArrhe newDeposit = new TPmsArrhe();
-
-        newDeposit.setPmsReservationId(Integer.parseInt(request.get("pmsReservationId").toString()));
-        newDeposit.setDateReglement(daten);
+        newDeposit.setDateReglement(dateReglement);
         newDeposit.setMmcClientId(pmsArrheToModify.getMmcClientId());
         newDeposit.setMontant(new BigDecimal(request.get("montant").toString()));
         newDeposit.setMmcModeEncaissementId(Integer.parseInt(request.get("mmcModeEncaissementId").toString()));
-        newDeposit.setPmsReservationId(pmsArrheToModify.getPmsReservationId());
-
+        if(pmsArrheToModify.getPmsReservationId() != null){
+            newDeposit.setPmsReservationId(pmsArrheToModify.getPmsReservationId());
+        }else{
+            if(!request.containsKey("pmsReservationId")){
+               newDeposit.setPmsReservationId(pmsArrheToModify.getPmsReservationId());
+            }else{
+               newDeposit.setPmsReservationId(Integer.parseInt(request.get("pmsReservationId").toString()));
+            }
+        }
+        
+        if(!request.containsKey("observation")){
+            newDeposit.setObservation(pmsArrheToModify.getObservation());
+        }else{
+            newDeposit.setObservation(request.getString("observation"));
+        }
+        
+        if(!request.containsKey("dateRemboursement")){
+            newDeposit.setDateRemboursement(pmsArrheToModify.getDateRemboursement());
+        }else{
+            LocalDate datRemboursement = LocalDate.parse(request.getString("dateRemboursement"));
+            newDeposit.setDateRemboursement(datRemboursement);
+        }
+        
+        if(!request.containsKey("isConsomme")){
+            newDeposit.setIsConsomme(pmsArrheToModify.getIsConsomme());
+        }else{
+            newDeposit.setIsConsomme(Integer.parseInt(request.get("isConsomme").toString()));
+        }
+       
         try {
         entityManager.persist(newDeposit);
         } catch (ConstraintViolationException ex) {
