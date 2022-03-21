@@ -300,13 +300,12 @@ public class ReservationDao {
     public void addReservationVentilation(JsonObject object) throws CustomConstraintViolationException {
         Integer pmsReservationId = object.getInt("pmsReservationId");
         JsonArray jsonArray = object.getJsonArray("ventilation");
-        TPmsReservationVentilation reservationVentilation = null;
         for (int i = 0; i < jsonArray.size(); i++) {
-            reservationVentilation = new TPmsReservationVentilation();
+            var reservationVentilation = new TPmsReservationVentilation();
             JsonObject rowObject = jsonArray.getJsonObject(i);
             reservationVentilation.setPmsReservationId(pmsReservationId);
             reservationVentilation.setPmsTypeChambreId(rowObject.getInt("pmsTypeChambreId"));
-            reservationVentilation.setPmsTypeChambreId(rowObject.getInt("pmsChambreId"));
+            reservationVentilation.setPmsChambreId(rowObject.getInt("pmsChambreId"));
             // 1 par defaut
             reservationVentilation.setQteChb(1);
 
