@@ -27,9 +27,9 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -336,15 +336,16 @@ public class RoomDao {
     }
 
     public void putOutService(TPmsChambreHorsService pmsChambreHorsService)
-            throws ParseException, CustomConstraintViolationException {
-        Date dateLogicielle = null;
+            throws ParseException, CustomConstraintViolationException{
+        LocalDate dateLogicielle = null;
         TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
-        final java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd");
-        dateLogicielle = format.parse(parametrageDateLogicielle.getValeur());
-        if (pmsChambreHorsService.getDateFin().equals(dateLogicielle)
-                || pmsChambreHorsService.getDateDebut().equals(dateLogicielle)
-                || (pmsChambreHorsService.getDateDebut().before(dateLogicielle)
-                        && dateLogicielle.before(pmsChambreHorsService.getDateFin()))) {
+        //final java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        dateLogicielle = LocalDate.parse(parametrageDateLogicielle.getValeur(), formatter);
+        if (pmsChambreHorsService.getDateDebut().equals(dateLogicielle) 
+                || dateLogicielle.isBefore(pmsChambreHorsService.getDateDebut())
+                && pmsChambreHorsService.getDateFin().equals(dateLogicielle)
+                || dateLogicielle.isBefore(pmsChambreHorsService.getDateFin())) {
             TPmsChambre room = getRoomsById(pmsChambreHorsService.getPmsChambreId());
             room.setEtatChambre("OUT");
             try {
