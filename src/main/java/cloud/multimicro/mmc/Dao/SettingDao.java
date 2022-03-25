@@ -447,6 +447,21 @@ public class SettingDao {
             settingPosInvoiceFooter3.setValeur("N° Siret 210.890.764 00015 RCS Monpelier "+ "<br>" +"Code APE 947A-N°TVA intracom FR 77825696764000");
             entityManager.persist(settingPosInvoiceFooter3);
             
+            TMmcParametrage settingBookingMailHeder = new TMmcParametrage();
+            settingBookingMailHeder.setCle("BOOKING_MAIL_HEADER");
+            settingBookingMailHeder.setValeur("Hotel FNP Demo (Promenade des Anglais 35 - Nice - France)");
+            entityManager.persist(settingBookingMailHeder);
+            
+            TMmcParametrage settingBookingMailDetail = new TMmcParametrage();
+            settingBookingMailDetail.setCle("BOOKING_MAIL_DETAIL");
+            settingBookingMailDetail.setValeur("Details");
+            entityManager.persist(settingBookingMailDetail);
+            
+            TMmcParametrage settingBookingMailFooter = new TMmcParametrage();
+            settingBookingMailFooter.setCle("BOOKING_MAIL_FOOTER");
+            settingBookingMailFooter.setValeur("This message may contain confidential information. If you are not the addressee or authorized to receive this message, you must not use, copy, disclose or take any action based on any information herein");
+            entityManager.persist(settingBookingMailFooter);
+            
                  
         } catch (Exception e) {
             LOGGER.error("Setting initialization went wrong");

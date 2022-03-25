@@ -8,7 +8,9 @@
 package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.*;
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,11 +40,11 @@ public class TPmsChambreHorsService implements Serializable {
 
     @NotNull
     @Column(name = "date_debut")
-    private Date dateDebut;
+    private LocalDate dateDebut;
 
     @NotNull
     @Column(name = "date_fin")
-    private Date dateFin;
+    private LocalDate dateFin;
 
     @Column(name = "is_soustraire_dispo")
     private Boolean isSoustraireDispo;
@@ -52,15 +54,15 @@ public class TPmsChambreHorsService implements Serializable {
     private String motif;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
-    @Temporal(TemporalType.DATE)
-    private Date dateCreation;
+    @JsonbTransient
+    private LocalDate dateCreation;
 
     @Column(name = "DATE_MODIFICATION", insertable = false, updatable = false)
-    @Temporal(TemporalType.DATE)
-    private Date dateModification;
+    @JsonbTransient
+    private LocalDate dateModification;
 
     @Column(name = "DATE_DELETION")
-    @Temporal(TemporalType.DATE)
-    private Date dateDeletion;
+    @JsonbTransient
+    private LocalDate dateDeletion;
 
 }
