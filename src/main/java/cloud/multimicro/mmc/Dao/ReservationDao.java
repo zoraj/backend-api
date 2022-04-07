@@ -305,7 +305,11 @@ public class ReservationDao {
             JsonObject rowObject = jsonArray.getJsonObject(i);
             reservationVentilation.setPmsReservationId(pmsReservationId);
             reservationVentilation.setPmsTypeChambreId(rowObject.getInt("pmsTypeChambreId"));
-            reservationVentilation.setPmsChambreId(rowObject.getInt("pmsChambreId"));
+            if(!object.containsKey("pmsChambreId")){
+                reservationVentilation.setPmsChambreId(reservationVentilation.getPmsChambreId());
+            }else{
+                reservationVentilation.setPmsChambreId(rowObject.getInt("pmsChambreId"));
+            }
             // 1 par defaut
             reservationVentilation.setQteChb(1);
 

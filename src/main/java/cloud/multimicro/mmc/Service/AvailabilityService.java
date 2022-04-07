@@ -6,11 +6,12 @@
 package cloud.multimicro.mmc.Service;
 
 import cloud.multimicro.mmc.Dao.AvailabilityDao;
-import cloud.multimicro.mmc.Entity.RoomByType;
-import cloud.multimicro.mmc.Entity.TPmsChambreHorsService;
-import cloud.multimicro.mmc.Entity.TPmsReservationVentilation;
 import cloud.multimicro.mmc.Entity.TotalRoomByType;
+import cloud.multimicro.mmc.Entity.TotalRoomCountAvailable;
+import cloud.multimicro.mmc.Entity.TotalRoomCountUnavailable;
 import cloud.multimicro.mmc.Entity.TotalRoomOutOfOrderByType;
+import cloud.multimicro.mmc.Exception.DataException;
+import java.time.LocalDate;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -38,7 +39,7 @@ public class AvailabilityService {
     AvailabilityDao availabilityDao;
     
     @GET
-    @Path("/")  
+    @Path("/total-room")  
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRoomCountByType() {
         List<TotalRoomByType> roomList = availabilityDao.getRoomCountByType();
@@ -46,19 +47,66 @@ public class AvailabilityService {
             throw new NotFoundException();
         }
         return Response.ok(roomList, MediaType.APPLICATION_JSON).build();
-    }
+    }    
     
     @GET
     @Path("/out-of-order")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRoomCountByTypeOutOfOrder(@Context UriInfo info) {
-        String dateStart = info.getQueryParameters().getFirst("dateStart");
-        String dateEnd = info.getQueryParameters().getFirst("dateEnd");
-        List<TotalRoomOutOfOrderByType> outOrder = availabilityDao.getRoomCountByTypeOutOfOrder(dateStart, dateEnd);
-        if (outOrder.isEmpty()) {
-            throw new NotFoundException();
+        try {
+            LocalDate dateStart = LocalDate.parse(info.getQueryParameters().getFirst("dateStart"));
+            LocalDate dateEnd = LocalDate.parse(info.getQueryParameters().getFirst("dateEnd"));
+            if (dateStart.isAfter(dateEnd) ){
+                throw new DataException("Start date must be before end date");   
+            }
+            List<TotalRoomOutOfOrderByType> outOrder = availabilityDao.getRoomCountByTypeOutOfOrder(dateStart, dateEnd);
+            if (outOrder.isEmpty()) {
+                throw new NotFoundException();
+            }
+            return Response.ok(outOrder, MediaType.APPLICATION_JSON).build();
+        } catch (Exception ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
-        return Response.ok(outOrder, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
+    @Path("/room-unavailable")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRoomCountUnavailable(@Context UriInfo info) {
+        try {
+            LocalDate dateStart = LocalDate.parse(info.getQueryParameters().getFirst("dateStart"));
+            LocalDate dateEnd = LocalDate.parse(info.getQueryParameters().getFirst("dateEnd"));
+            if (dateStart.isAfter(dateEnd) ){
+                throw new DataException("Start date must be before end date");   
+            }
+            List<TotalRoomCountUnavailable> outOrder = availabilityDao.getRoomCountUnavailable(dateStart, dateEnd);
+            if (outOrder.isEmpty()) {
+                throw new NotFoundException();
+            }
+            return Response.ok(outOrder, MediaType.APPLICATION_JSON).build();
+        } catch (Exception ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+        }
+    }
+    
+    @GET
+    @Path("/total-rooms-available")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRoomCountAvailable(@Context UriInfo info) {
+        try {
+            LocalDate dateStart = LocalDate.parse(info.getQueryParameters().getFirst("dateStart"));
+            LocalDate dateEnd = LocalDate.parse(info.getQueryParameters().getFirst("dateEnd"));
+            if (dateStart.isAfter(dateEnd) ){
+                throw new DataException("Start date must be before end date");   
+            }
+            List<TotalRoomCountAvailable> outOrder = availabilityDao.getRoomCountAvailables(dateStart, dateEnd);
+            if (outOrder.isEmpty()) {
+                throw new NotFoundException();
+            }
+            return Response.ok(outOrder, MediaType.APPLICATION_JSON).build();
+        } catch (Exception ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+        }
     }
     
 }
