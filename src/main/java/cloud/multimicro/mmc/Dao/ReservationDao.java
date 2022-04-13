@@ -276,6 +276,10 @@ public class ReservationDao {
         entityManager.createNativeQuery("UPDATE t_pms_reservation SET date_deletion = CURRENT_TIMESTAMP WHERE id=:id")
                 .setParameter("id", id).executeUpdate();
     }
+    public void reopenReservation(int id) {
+        entityManager.createNativeQuery("UPDATE t_pms_reservation SET date_deletion = null WHERE id=:id")
+                .setParameter("id", id).executeUpdate();
+    }
 
     // CRUD RESERVATION VENTILATION
     public List<TPmsReservationVentilation> getAllReservationVentilation() {
@@ -413,6 +417,12 @@ public class ReservationDao {
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
+    }
+    
+     public List<TPmsReservation> getAllReservationCanceled() {
+        List<TPmsReservation> pmsReservationCanceled = entityManager
+                .createQuery("FROM TPmsReservation  WHERE dateDeletion IS not null").getResultList();
+        return pmsReservationCanceled;
     }
 
 }

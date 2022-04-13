@@ -289,4 +289,28 @@ public class ReservationService {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
+    
+    //reservation canceled
+    @GET
+    @Path("/canceled")  
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllReservationCanceled() {
+        List<TPmsReservation> reservation = reservationDao.getAllReservationCanceled();
+        if (reservation.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(reservation, MediaType.APPLICATION_JSON).build();       
+    }
+    
+    @Path("/{id}")
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response reopenReservation(@PathParam("id") int id) {
+        try {
+            reservationDao.reopenReservation(id);
+           return Response.ok(id, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }   
+    }
 }
