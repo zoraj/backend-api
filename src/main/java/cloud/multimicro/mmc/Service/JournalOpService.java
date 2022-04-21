@@ -16,6 +16,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -68,7 +69,7 @@ JournalOpDao JournalopDao;
             throw new NotFoundException();
         }
         return Response.ok(journal, MediaType.APPLICATION_JSON).build();       
-    }
+    }   
     @POST
     @Path("/brigade/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -89,4 +90,17 @@ JournalOpDao JournalopDao;
         }*/
         return Response.ok(journal, MediaType.APPLICATION_JSON).build();       
     }
+    
+    @GET
+    @Path("/booking/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getByBooking(@PathParam("id") Integer id) {
+        List<TMmcJournalOperation> journal = JournalopDao.getByBooking(id);
+       /* if (journal.isEmpty()) {
+            throw new NotFoundException();
+        }*/
+        return Response.ok(journal, MediaType.APPLICATION_JSON).build();       
+    }
+    
+
 }
