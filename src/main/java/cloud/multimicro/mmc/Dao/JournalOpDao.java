@@ -392,6 +392,7 @@ public class JournalOpDao {
         criteriaStr.append("FROM TMmcJournalOperation WHERE dateCreation  >= '" + dateDebut + "' AND dateCreation  <= '" + dateFin + "'");
 
         System.out.println("criteriaStr" + criteriaStr);
+        
         StringBuilder rglDetail = new StringBuilder();
         List<Map> rglList = (List) criteria.get("AJOUT_PRESTATION");
         if (rglList.size() > 0) {
@@ -477,5 +478,35 @@ public class JournalOpDao {
         return resultJournalOp;
 
     } 
+    
+    public List<TMmcJournalOperation> getByBooking(int id) {
+        System.out.print("test_query");
+        JsonObject object = Json.createObjectBuilder().add("id", id).build();       
+        String query;
+        StringBuilder criteriaStr = new StringBuilder();
+        StringBuilder detailCriteria = new StringBuilder();        
+        criteriaStr.append("FROM TMmcJournalOperation WHERE JSON_EXTRACT(detail,'$.id') =").append(object.get("id").toString());
+        StringBuilder brigadeDetail = new StringBuilder();        
+        brigadeDetail.append(" AND ( action='PMS-NEW-BOOKING' ");
+        
+        detailCriteria.append(brigadeDetail);        
+        if (detailCriteria.length() != 0) {
+            detailCriteria.insert(0, " OR (action='PMS-UPDATE-BOOKING') ");
+            detailCriteria.append(")");
+        }                     
+        if (!detailCriteria.toString().isEmpty()) {
+            query = criteriaStr.toString().concat(detailCriteria.toString());            
+        } else {
+            query = criteriaStr.toString();            
+        }
+        query = query.replaceAll("\"", "");
+        System.out.print("query"+query);
+        List<TMmcJournalOperation> journal = entityManager.createQuery(query).getResultList();
+        
+
+        return journal;
+    }
+    
+  
     
 }
