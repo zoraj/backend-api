@@ -6,14 +6,17 @@
 package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
+import java.sql.Blob;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -43,6 +46,10 @@ public class TPmsTypeChambrePhoto implements Serializable {
 
     @Column(name = "pms_type_chambre_id")
     private Integer pmsTypeChambreId;
+    
+    @Lob
+    @Basic(fetch=FetchType.LAZY)
+    private String data;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     @Temporal(TemporalType.DATE)
