@@ -23,6 +23,9 @@ import cloud.multimicro.mmc.Entity.TPmsTypeChambreTarifApplicable;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.sql.Blob;
+import java.sql.SQLException;
 
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -36,6 +39,7 @@ import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.sql.rowset.serial.SerialBlob;
 import javax.validation.ConstraintViolationException;
 
 /**
@@ -158,6 +162,14 @@ public class RoomDao {
             }
         }
     }
+    
+    public void setRoomTypesImages(TPmsTypeChambrePhoto typeChambrePhoto) throws CustomConstraintViolationException {
+        try {
+            entityManager.persist(typeChambrePhoto);
+        } catch (ConstraintViolationException ex) {
+            throw new CustomConstraintViolationException(ex);
+        }
+    }
 
     public List<TPmsTypeChambrePhoto> getRoomTypesImageByRoomType(Integer pmsTypeChambreId) {
         List<TPmsTypeChambrePhoto> result = entityManager
@@ -169,6 +181,12 @@ public class RoomDao {
     public void deleteRoomTypesImage(int id) {
         TPmsTypeChambrePhoto roomType = getRoomTypesImageById(id);
         entityManager.remove(roomType);
+    }
+    
+    public void deleteImageByRoomTypes(int id) {
+        entityManager
+                .createNativeQuery("DELETE FROM t_pms_type_chambre_photo WHERE pms_type_chambre_id=:pmsTypeChambreId")
+                .setParameter("pmsTypeChambreId", id).executeUpdate();
     }
 
     // ROOMS

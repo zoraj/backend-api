@@ -188,11 +188,25 @@ public class RoomService {
     @Path("/type/image")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addRoomTypesImage(JsonObject typeImage) {
+    public Response addRoomTypesImage(JsonObject typeImage) throws Exception{
         try {
             roomDao.setRoomTypesImage(typeImage);
             return Response.status(Response.Status.OK).entity(typeImage).build();
-        } catch (CustomConstraintViolationException ex) {
+        } catch (Exception ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+        }
+    }
+    
+    @Path("/type/images")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response setRoomTypesImages(List<TPmsTypeChambrePhoto> typeChambrePhoto) throws Exception {
+        try {
+            for (int i = 0; i < typeChambrePhoto.size(); i++) {
+                roomDao.setRoomTypesImages(typeChambrePhoto.get(i));
+            }
+            return Response.status(Response.Status.CREATED).entity(typeChambrePhoto).build();
+        } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }
@@ -215,6 +229,18 @@ public class RoomService {
     public Response deleteTypeImage(@PathParam("id") int id) {
         try {
             roomDao.deleteRoomTypesImage(id);
+            return Response.ok(id, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+    
+    @Path("/type/image/room-type/{id}")
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteImageByRoomTypes(@PathParam("id") int id) {
+        try {
+            roomDao.deleteImageByRoomTypes(id);
             return Response.ok(id, MediaType.APPLICATION_JSON).build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
