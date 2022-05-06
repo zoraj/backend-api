@@ -75,7 +75,7 @@ public class SubSeasonService {
         try {
             seasonDao.addSubSeason(sousSaison);
             return Response.status(Response.Status.CREATED).entity(sousSaison).build();
-        } catch (CustomConstraintViolationException ex) {
+        } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }

@@ -15,10 +15,12 @@ import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -149,6 +151,10 @@ public class TPosPrestation implements Serializable {
     @Size(max = 200)
     @Column(name = "description")
     private String description;
+    
+    @Lob
+    @Basic(fetch=FetchType.LAZY)
+    private String data;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     @JsonbTransient

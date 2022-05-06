@@ -198,7 +198,7 @@ public class ClientService {
         try {
             customerDao.setTypeClient(typeClient);
             return Response.status(Response.Status.CREATED).entity(typeClient).build();
-        } catch (CustomConstraintViolationException e) {
+        } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
@@ -257,7 +257,7 @@ public class ClientService {
         try {
             customerDao.setSegmentClient(segmentClient);
             return Response.status(Response.Status.CREATED).entity(segmentClient).build();
-        } catch (CustomConstraintViolationException e) {
+        } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
@@ -316,7 +316,7 @@ public class ClientService {
         try {
             customerDao.setPrescripteur(prescripteur);
             return Response.status(Response.Status.CREATED).entity(prescripteur).build();
-        } catch (CustomConstraintViolationException e) {
+        } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }

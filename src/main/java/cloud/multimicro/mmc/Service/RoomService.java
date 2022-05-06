@@ -142,7 +142,7 @@ public class RoomService {
         try {
             roomDao.setRoomTypes(type);
             return Response.status(Response.Status.OK).entity(type).build();
-        } catch (CustomConstraintViolationException ex) {
+        } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }
@@ -291,7 +291,7 @@ public class RoomService {
         try {
             roomDao.setRooms(rooms);
             return Response.status(Response.Status.CREATED).entity(rooms).build();
-        } catch (CustomConstraintViolationException ex) {
+        } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }
