@@ -153,8 +153,9 @@ public class TPosPrestation implements Serializable {
     private String description;
     
     @Lob
+    @Column(name = "photo_data")
     @Basic(fetch=FetchType.LAZY)
-    private String data;
+    private String photoData;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     @JsonbTransient
