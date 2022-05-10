@@ -317,7 +317,7 @@ public class ProductService {
         try {
             productDao.setProduct(prestation);
             return Response.status(Response.Status.CREATED).entity(prestation).build();
-        } catch (CustomConstraintViolationException ex) {
+        } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }
@@ -366,7 +366,7 @@ public class ProductService {
         try {
             productDao.setSiropParfum(sirupParfum);
             return Response.status(Response.Status.CREATED).entity(sirupParfum).build();
-        } catch (CustomConstraintViolationException ex) {
+        } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }
@@ -427,7 +427,7 @@ public class ProductService {
         try {
             productDao.setSpCategorie(categorie);
             return Response.status(Response.Status.CREATED).entity(categorie).build();
-        } catch (CustomConstraintViolationException ex) {
+        } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }
@@ -488,7 +488,7 @@ public class ProductService {
         try {
             productDao.setAccompagnement(accompagnement);
             return Response.status(Response.Status.CREATED).entity(accompagnement).build();
-        } catch (CustomConstraintViolationException ex) {
+        } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }

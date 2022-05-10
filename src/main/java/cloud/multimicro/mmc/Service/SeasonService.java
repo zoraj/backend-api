@@ -64,7 +64,7 @@ public class SeasonService {
             seasonDao.addSeason(saison);
             return Response.status(Response.Status.CREATED).entity(saison).build();
         }
-        catch (CustomConstraintViolationException ex) {
+        catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }

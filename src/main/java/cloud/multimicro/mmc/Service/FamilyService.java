@@ -71,7 +71,7 @@ public class FamilyService {
         try {
             familyDao.setFamily(family);
             return Response.status(Response.Status.CREATED).entity(family).build();
-        } catch (CustomConstraintViolationException e) {
+        } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
@@ -160,7 +160,7 @@ public class FamilyService {
         try {
             familyDao.setSubFamily(subFamily);
             return Response.status(Response.Status.CREATED).entity(subFamily).build();
-        } catch (CustomConstraintViolationException e) {
+        } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
