@@ -147,13 +147,15 @@ public class ReservationDao {
 
     public TPmsReservation add(JsonObject object) throws CustomConstraintViolationException {
 
-        try (Jsonb jsonb = JsonbBuilder.create()) { // Object mapping
+       
+            Jsonb jsonb = JsonbBuilder.create();// Object mapping
             TPmsReservation reservation = jsonb.fromJson(object.toString(), TPmsReservation.class);
             // Global setting - Get the actual date
             TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
             LocalDate dateLogicielle = LocalDate.parse(settingData.getValeur());
+            
+            if(dateLogicielle.isBefore(reservation.getDateArrivee()) && reservation.getDateArrivee().isBefore(reservation.getDateDepart()) || dateLogicielle.equals(reservation.getDateArrivee())){
 
-            if(dateLogicielle.isBefore(reservation.getDateArrivee()) && reservation.getDateArrivee().isBefore(reservation.getDateDepart())) {
                 // Get the next reservation number
                 String numeroReservation = getNextReservationNumber();
                 reservation.setNumeroReservation(numeroReservation);
@@ -188,12 +190,16 @@ public class ReservationDao {
                 int value = Integer.parseInt(parametrage.getValeur()) + 1;
                 parametrage.setValeur(Integer.toString(value));
                 entityManager.merge(parametrage);
-            }
+                
+            } 
+            
+            else  {
+            throw new CustomConstraintViolationException("");
+        }
+            
             return reservation;
-        }
-        catch(Exception ex){
-            throw new CustomConstraintViolationException(ex.getMessage());
-        }
+
+        
 
         /*
         final SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
