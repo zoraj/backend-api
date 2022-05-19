@@ -153,7 +153,7 @@ public class ReservationDao {
             TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
             LocalDate dateLogicielle = LocalDate.parse(settingData.getValeur());
 
-            if(dateLogicielle.isBefore(reservation.getDateArrivee()) && reservation.getDateArrivee().isBefore(reservation.getDateDepart())) {
+            if(dateLogicielle.isBefore(reservation.getDateArrivee()) && reservation.getDateArrivee().isBefore(reservation.getDateDepart()) || dateLogicielle.equals(reservation.getDateArrivee())) {
                 // Get the next reservation number
                 String numeroReservation = getNextReservationNumber();
                 reservation.setNumeroReservation(numeroReservation);
@@ -188,6 +188,9 @@ public class ReservationDao {
                 int value = Integer.parseInt(parametrage.getValeur()) + 1;
                 parametrage.setValeur(Integer.toString(value));
                 entityManager.merge(parametrage);
+            }
+            else{
+                throw new CustomConstraintViolationException("arrival date must be before departure");
             }
             return reservation;
         }
