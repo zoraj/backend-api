@@ -13,5 +13,5 @@ public class RoomByType {
     private int persMax;
     private String typeChambre;
     private List<TarifApplicable> tarif;
-    
+    private List<TPmsTypeChambrePhoto> roomPhoto;
 }

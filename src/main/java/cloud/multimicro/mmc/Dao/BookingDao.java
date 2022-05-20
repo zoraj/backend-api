@@ -11,6 +11,7 @@ import cloud.multimicro.mmc.Entity.RoomByType;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Entity.TPmsReservation;
 import cloud.multimicro.mmc.Entity.TPmsSejour;
+import cloud.multimicro.mmc.Entity.TPmsTypeChambrePhoto;
 import cloud.multimicro.mmc.Entity.TarifApplicable;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
@@ -93,6 +94,13 @@ public class BookingDao {
         }
         return result;
     }
+    
+    public List<TPmsTypeChambrePhoto> getRoomTypesImageByRoomType(Integer pmsTypeChambreId) {
+        List<TPmsTypeChambrePhoto> result = entityManager
+                .createQuery("FROM TPmsTypeChambrePhoto where pmsTypeChambreId=:pmsTypeChambreId")
+                .setParameter("pmsTypeChambreId", pmsTypeChambreId).getResultList();
+        return result;
+    }
 
     // liste des chambres disponibles
     public List<RoomByType> getAvailableRoomsByType(Date dateArrivee, Date dateDepart, JsonArray requests)
@@ -101,6 +109,7 @@ public class BookingDao {
         List<RoomByType> occupiedRoomList = getOccupiedRoomByType(dateArrivee, dateDepart);
         List<RoomByType> availableRoom = new ArrayList<RoomByType>();
         List<TarifApplicable> tarifApplicables = new ArrayList<TarifApplicable>();
+        List<TPmsTypeChambrePhoto> roomPhotoType = new ArrayList<TPmsTypeChambrePhoto>();
         int pmsTypeChambreId = 0;
         int qte = 0;
         int nbPersMax = 0;
@@ -139,6 +148,8 @@ public class BookingDao {
                 room.setTypeChambre(roomList.get(i).getTypeChambre());
                 tarifApplicables = getApplicableRateRoomType(pmsTypeChambreId, dateArrivee);
                 room.setTarif(tarifApplicables);
+                roomPhotoType = getRoomTypesImageByRoomType(pmsTypeChambreId);
+                room.setRoomPhoto(roomPhotoType);
 
                 for (int j = 0; j < requests.size(); j++) {
                     JsonObject request = requests.getJsonObject(j);
