@@ -41,6 +41,10 @@ public class TPmsTarifOption implements Serializable {
     @NotNull @NotBlank @Column(name = "libelle")
     private String libelle;
     
+    @Size(min = 1, max = 45)
+    @NotNull @NotBlank @Column(name = "icone_img")
+    private String iconeImg;
+    
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     @Temporal(TemporalType.DATE)
     private Date dateCreation;
