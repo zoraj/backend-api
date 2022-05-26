@@ -112,14 +112,13 @@ public class ReservationService {
         }
     }
     
-    
     @Path("/")
     @PATCH
     @Produces(MediaType.APPLICATION_JSON)
     public Response update(TPmsReservation reservation) {
         try {
-            reservationDao.update(reservation);
-            return Response.status(Response.Status.OK).entity(reservation).build();
+            TPmsReservation result = reservationDao.update(reservation);
+            return Response.status(Response.Status.OK).entity(result).build();
         } catch (CustomConstraintViolationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
