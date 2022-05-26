@@ -21,6 +21,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.validation.ConstraintViolationException;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.jboss.logging.Logger;
 
 import cloud.multimicro.mmc.Entity.TMmcClient;
@@ -31,6 +33,8 @@ import cloud.multimicro.mmc.Entity.TPmsReservationTarifPrestation;
 import cloud.multimicro.mmc.Entity.TPmsReservationVentilation;
 import cloud.multimicro.mmc.Entity.TPmsTarifGrilleDetail;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
+import cloud.multimicro.mmc.Util.NullAwareBeanUtilsBean;
+
 
 /**
  *
@@ -267,11 +271,19 @@ public class ReservationDao {
         */
     }
 
-    public TPmsReservation update(TPmsReservation pmsReservation) throws CustomConstraintViolationException {
+    public TPmsReservation update(TPmsReservation newReservationData) throws CustomConstraintViolationException {
         try {
-            return entityManager.merge(pmsReservation);
-        } catch (ConstraintViolationException ex) {
+            TPmsReservation oldReservation = entityManager.find(TPmsReservation.class, newReservationData.getId());
+            BeanUtilsBean reservation = new NullAwareBeanUtilsBean();
+            reservation.copyProperties(oldReservation, newReservationData);
+            return entityManager.merge(oldReservation);
+        }
+        catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
         }
     }
 

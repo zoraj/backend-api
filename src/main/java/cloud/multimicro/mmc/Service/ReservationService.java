@@ -31,6 +31,7 @@ import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -113,12 +114,12 @@ public class ReservationService {
     
     
     @Path("/")
-    @PUT
+    @PATCH
     @Produces(MediaType.APPLICATION_JSON)
-    public Response update(TPmsReservation pmsReservation) {
+    public Response update(TPmsReservation reservation) {
         try {
-            reservationDao.update(pmsReservation);
-            return Response.status(Response.Status.OK).entity(pmsReservation).build();
+            reservationDao.update(reservation);
+            return Response.status(Response.Status.OK).entity(reservation).build();
         } catch (CustomConstraintViolationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
