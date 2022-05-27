@@ -722,9 +722,12 @@ public class ReportingService {
     @GET
     @Path("/pos/report-visualisation-mode-encaissement")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllVisualisationModeEncaissement() {
-        List<VPosEditionVisualisationModeEncaissement> visualisationModeEncaissement = reportingDao
-                .getAllVisualisationModeEncaissement();
+    public Response getAllVisualisationModeEncaissement(@Context UriInfo info) {
+        String dateEncaissement = info.getQueryParameters().getFirst("dateEncaissement");
+        String activityStr = info.getQueryParameters().getFirst("activity");
+        Integer activity = (!Objects.isNull(activityStr)) ? Integer.parseInt(activityStr) : 0;
+        JsonObject visualisationModeEncaissement = reportingDao
+                .getAllVisualisationModeEncaissement(dateEncaissement, activity);
         if (visualisationModeEncaissement.isEmpty()) {
             throw new NotFoundException();
         }

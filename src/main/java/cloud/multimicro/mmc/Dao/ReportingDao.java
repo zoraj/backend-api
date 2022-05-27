@@ -2116,10 +2116,101 @@ public class ReportingDao {
         return consolidationJsonObject;
     }
 
-    public List<VPosEditionVisualisationModeEncaissement> getAllVisualisationModeEncaissement() {
+    public JsonObject getAllVisualisationModeEncaissement(String dateEncaissement, Integer activity) {
+        Boolean isExist = false;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("FROM VPosEditionVisualisationModeEncaissement  ");
+        TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        
+        if (!Objects.isNull(dateEncaissement)) {
+            stringBuilder.append(" WHERE Date(dateEncaissement) = '" + dateEncaissement + "'");
+        } else {
+            stringBuilder.append(" WHERE Date(dateEncaissement) = '" + settingData.getValeur() + "'");
+        }
+        
+        if (activity != 0) {
+            if (isExist == true) {
+                stringBuilder.append(" AND activiteId = " + activity + "");
+            } else {
+                stringBuilder.append(" AND activiteId = " + activity + "");
+            }
+        }
+        
         List<VPosEditionVisualisationModeEncaissement> visualisationModeEncaissement = entityManager
-                .createQuery("FROM VPosEditionVisualisationModeEncaissement").getResultList();
-        return visualisationModeEncaissement;
+                .createQuery(stringBuilder.toString()).getResultList();
+        
+        var visualisationResults    = Json.createArrayBuilder();
+        var totalGeneralDebitJour   = new BigDecimal("0");
+        var totalGeneralCreditJour  = new BigDecimal("0");
+        var totalGeneralSoldeJour   = new BigDecimal("0");
+        
+        if (visualisationModeEncaissement.size() > 0) {
+            VPosEditionVisualisationModeEncaissement valueListeVisualisationModeEnc = visualisationModeEncaissement.get(0);
+            String libModeEncInitial = valueListeVisualisationModeEnc.getLibelleModeEncaissement();
+            var libelleModeEnc  = "";
+            var debitJour       = new BigDecimal("0");
+            var creditJour      = new BigDecimal("0");
+            var soldeJour       = new BigDecimal("0");
+            var totalDebitJour  = new BigDecimal("0");
+            var totalCreditJour = new BigDecimal("0");
+            var totalSoldeJour  = new BigDecimal("0");
+            
+            for(VPosEditionVisualisationModeEncaissement visualModeEnc : visualisationModeEncaissement){
+                if(libModeEncInitial.equals(visualModeEnc.getLibelleModeEncaissement())){
+                    libelleModeEnc  = visualModeEnc.getLibelleModeEncaissement();
+                    debitJour       = visualModeEnc.getDebitJour();
+                    creditJour      = visualModeEnc.getCreditJour();
+                    soldeJour       = visualModeEnc.getSoldeJour();
+                    totalDebitJour  = totalDebitJour.add(visualModeEnc.getDebitJour());
+                    totalCreditJour = totalCreditJour.add(visualModeEnc.getCreditJour());
+                    totalSoldeJour  = totalDebitJour.add(totalCreditJour);
+                }else{
+                    var object = Json.createObjectBuilder()
+                            .add("libelleModeEncaissement", libelleModeEnc)
+                            .add("totalDebitJour", totalDebitJour)
+                            .add("totalCreditJour", totalCreditJour)
+                            .add("totalSoldeJour", totalSoldeJour).build();
+                    
+                    totalGeneralDebitJour   = totalGeneralDebitJour.add(totalDebitJour);
+                    totalGeneralCreditJour  = totalGeneralCreditJour.add(totalCreditJour);
+                    totalGeneralSoldeJour   = totalGeneralSoldeJour.add(totalSoldeJour);
+                    visualisationResults.add(object);
+                    
+                    totalDebitJour  = new BigDecimal("0");
+                    totalCreditJour = new BigDecimal("0");
+                    totalSoldeJour  = new BigDecimal("0");
+                    
+                    libelleModeEnc  = visualModeEnc.getLibelleModeEncaissement();
+                    debitJour       = visualModeEnc.getDebitJour();
+                    creditJour      = visualModeEnc.getCreditJour();
+                    soldeJour       = visualModeEnc.getSoldeJour();
+                    totalDebitJour  = totalDebitJour.add(visualModeEnc.getDebitJour());
+                    totalCreditJour = totalCreditJour.add(visualModeEnc.getCreditJour());
+                    totalSoldeJour  = totalDebitJour.add(totalCreditJour);
+                    
+                    libModeEncInitial = libelleModeEnc;
+                }
+            }
+            
+            var object = Json.createObjectBuilder()
+                            .add("libelleModeEncaissement", libelleModeEnc)
+                            .add("totalDebitJour", totalDebitJour)
+                            .add("totalCreditJour", totalCreditJour)
+                            .add("totalSoldeJour", totalSoldeJour).build();
+            
+                    totalGeneralDebitJour   = totalGeneralDebitJour.add(totalDebitJour);
+                    totalGeneralCreditJour  = totalGeneralCreditJour.add(totalCreditJour);
+                    totalGeneralSoldeJour   = totalGeneralSoldeJour.add(totalSoldeJour);
+                    
+                    visualisationResults.add(object);
+        }
+        var resultsVisualisationModeEnc = Json.createObjectBuilder()
+                .add("visualisation", visualisationResults.build())
+                .add("totalGeneralDebitJour", totalGeneralDebitJour)
+                .add("totalGeneralCreditJour", totalGeneralCreditJour)
+                .add("totalGeneralSoldeJour", totalGeneralSoldeJour).build();
+
+        return resultsVisualisationModeEnc;
     }
 
     public List<VPosEditionCaActivite> getAllCaActivite() {
