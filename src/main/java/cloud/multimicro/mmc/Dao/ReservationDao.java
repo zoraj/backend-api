@@ -287,10 +287,12 @@ public class ReservationDao {
         }
     }
 
-    public void delete(int id) {
-        entityManager.createNativeQuery("UPDATE t_pms_reservation SET date_deletion = CURRENT_TIMESTAMP WHERE id=:id")
-                .setParameter("id", id).executeUpdate();
+    public void delete(int id,String motifAnnulation) {
+        entityManager.createNativeQuery("UPDATE t_pms_reservation SET motif_annulation =:motifAnnulation, date_deletion = CURRENT_TIMESTAMP WHERE id=:id")
+                .setParameter("id", id)
+                .setParameter("motifAnnulation", motifAnnulation).executeUpdate();
     }
+    
     public void reopenReservation(int id) {
         entityManager.createNativeQuery("UPDATE t_pms_reservation SET date_deletion = null WHERE id=:id")
                 .setParameter("id", id).executeUpdate();
