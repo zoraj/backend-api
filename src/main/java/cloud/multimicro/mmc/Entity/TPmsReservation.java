@@ -154,6 +154,9 @@ public class TPmsReservation implements Serializable {
     @Column(name = "cb_cvv")
     private String cbCvv;
 
+    @Column(name = "motif_annulation")
+    private String motifAnnulation;
+    
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     private LocalDate dateCreation;
 

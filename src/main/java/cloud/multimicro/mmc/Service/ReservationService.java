@@ -127,9 +127,11 @@ public class ReservationService {
     @Path("/{id}")
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
-    public Response delete(@PathParam("id") int id) {
+    public Response delete(@PathParam("id") int id,JsonObject request) {
+        String arrival = request.getString("motifAnnulation");
+        
         try {
-            reservationDao.delete(id);
+            reservationDao.delete(id,arrival);
            return Response.ok(id, MediaType.APPLICATION_JSON).build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
