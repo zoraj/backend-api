@@ -737,8 +737,12 @@ public class ReportingService {
     @GET
     @Path("/pos/report-ca-activite")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllCaActivite() {
-        List<VPosEditionCaActivite> caActivite = reportingDao.getAllCaActivite();
+    public Response getAllCaActivite(@Context UriInfo info) {
+        String dateStart = info.getQueryParameters().getFirst("startDate");
+        String dateEnd = info.getQueryParameters().getFirst("endDate");
+        String activityStr = info.getQueryParameters().getFirst("activity");
+        Integer activity = (!Objects.isNull(activityStr)) ? Integer.parseInt(activityStr) : 0;
+        JsonObject caActivite = reportingDao.getAllCaByActivity(dateStart, dateEnd, activity);
         if (caActivite.isEmpty()) {
             throw new NotFoundException();
         }
