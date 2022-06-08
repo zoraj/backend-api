@@ -52,6 +52,7 @@ import cloud.multimicro.mmc.Entity.VPmsEditionListePrestationArrivee;
 import cloud.multimicro.mmc.Entity.VPmsEditionListeVerifArrivee;
 import cloud.multimicro.mmc.Entity.VPmsEditionPlanningMensuelChambre;
 import cloud.multimicro.mmc.Entity.VPmsEditionSoldeNoteOuverte;
+import cloud.multimicro.mmc.Entity.VPosCa;
 import cloud.multimicro.mmc.Entity.VPosEditionCaActivite;
 import cloud.multimicro.mmc.Entity.VPosEditionConsolidation;
 import cloud.multimicro.mmc.Entity.VPosEditionConsolidationResto;
@@ -2211,6 +2212,81 @@ public class ReportingDao {
                 .add("totalGeneralSoldeJour", totalGeneralSoldeJour).build();
 
         return resultsVisualisationModeEnc;
+    }
+    
+    public JsonObject getAllCaByActivity(String dateStart, String dateEnd, Integer activity) {
+        Boolean isExist = false;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("FROM VPosCa  ");
+        
+        if (!Objects.isNull(dateStart)) { 
+            stringBuilder.append(" WHERE dateCa >= '"+ dateStart + "'"); 
+            isExist = true; 
+        }
+        if (!Objects.isNull(dateEnd)) { 
+            if (isExist == true) {
+                stringBuilder.append(" AND dateCa <= '" + dateEnd + "'"); 
+            }else {
+                stringBuilder.append(" WHERE dateCa <= '" + dateEnd + "'"); 
+            } 
+        }
+        
+        if (activity != 0) {
+            if (isExist == true) {
+                stringBuilder.append(" AND posActiviteId = " + activity + "");
+            } else {
+                stringBuilder.append(" AND posActiviteId = " + activity + "");
+            }
+        }
+        
+        List<VPosCa> caActivity = entityManager.createQuery(stringBuilder.toString()).getResultList();
+        
+        var caActivityResults    = Json.createArrayBuilder();
+        var totalGeneralMontantCa   = new BigDecimal("0");
+        
+        if (caActivity.size() > 0) {
+            VPosCa valueCaActivity = caActivity.get(0);
+            String libActivityInit = valueCaActivity.getLibelleActivite();
+            var libelleAcitivite  = "";
+            var montantCa       = new BigDecimal("0");
+            var totalMontantCa  = new BigDecimal("0");
+            
+            for(VPosCa activiteCa : caActivity){
+                if(libActivityInit.equals(activiteCa.getLibelleActivite())){
+                    libelleAcitivite  = activiteCa.getLibelleActivite();
+                    montantCa       = activiteCa.getMontantCa();
+                    totalMontantCa  = totalMontantCa.add(montantCa);
+                }else{
+                    var object = Json.createObjectBuilder()
+                            .add("libelleActivite", libelleAcitivite)
+                            .add("totalMontantCa", totalMontantCa).build();
+                    
+                    totalGeneralMontantCa   = totalGeneralMontantCa.add(totalMontantCa);
+                    caActivityResults.add(object);
+                    
+                    totalMontantCa  = new BigDecimal("0");
+                    
+                    libelleAcitivite    = activiteCa.getLibelleActivite();
+                    montantCa           = activiteCa.getMontantCa();
+                    totalMontantCa  = totalMontantCa.add(montantCa);
+                    
+                    libActivityInit = libelleAcitivite;
+                }
+            }
+            
+            var object = Json.createObjectBuilder()
+                            .add("libelleActivite", libelleAcitivite)
+                            .add("totalMontantCa", totalMontantCa).build();
+            
+                    totalGeneralMontantCa   = totalGeneralMontantCa.add(totalMontantCa);
+                    
+                    caActivityResults.add(object);
+        }
+        var resultsCaActivity = Json.createObjectBuilder()
+                .add("caActivity", caActivityResults.build())
+                .add("totalGeneralMontantCa", totalGeneralMontantCa).build();
+
+        return resultsCaActivity;
     }
 
     public List<VPosEditionCaActivite> getAllCaActivite() {
