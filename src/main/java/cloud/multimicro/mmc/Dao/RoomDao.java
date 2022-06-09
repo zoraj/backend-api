@@ -266,6 +266,13 @@ public class RoomDao {
                 .setParameter("pmsTypeChambreId", pmsTypeChambreId).getResultList();
         return rateModelList;
     }
+    
+    public List<Integer> getRoomTypeByTariffApplicable(Integer pmsModelTarifId) {
+        List<Integer> rateModelList = entityManager.createQuery(
+                "SELECT pmsTypeChambreId FROM TPmsTypeChambreTarifApplicable  WHERE pmsModelTarifId =:pmsModelTarifId")
+                .setParameter("pmsModelTarifId", pmsModelTarifId).getResultList();
+        return rateModelList;
+    }
 
     public List<TPmsModelTarif> getPmsFareModel() {
         List<TPmsModelTarif> rateModelList = entityManager

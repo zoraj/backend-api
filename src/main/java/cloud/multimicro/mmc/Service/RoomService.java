@@ -25,6 +25,7 @@ import cloud.multimicro.mmc.Entity.TPmsChambreHorsService;
 import cloud.multimicro.mmc.Entity.TPmsModelTarif;
 import cloud.multimicro.mmc.Entity.TPmsTypeChambre;
 import cloud.multimicro.mmc.Entity.TPmsTypeChambrePhoto;
+import cloud.multimicro.mmc.Entity.TPmsTypeChambreTarifApplicable;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import javax.json.JsonObject;
 import javax.ws.rs.DELETE;
@@ -402,6 +403,17 @@ public class RoomService {
             throw new NotFoundException();
         }
         return Response.ok(remplissageAnnuel, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @Path("/applicable-room-by-rate-type/{pmsModelTarifId}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRoomTypeByTariffApplicable(@PathParam("pmsModelTarifId") int pmsModelTarifId) {
+        List<Integer> roomTypesByRateModel = roomDao.getRoomTypeByTariffApplicable(pmsModelTarifId);
+        if (roomTypesByRateModel.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(roomTypesByRateModel, MediaType.APPLICATION_JSON).build();
     }
 
 }

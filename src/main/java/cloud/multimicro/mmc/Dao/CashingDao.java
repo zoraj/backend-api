@@ -117,12 +117,12 @@ public class CashingDao {
         String action = "PMS-ADD-CASHING";
         LocalTime currentTime = LocalTime.now();      
         TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
-        TMmcParametrage invoiceHeader1 = entityManager.find(TMmcParametrage.class, "INVOICE_HEADER_1");
-        TMmcParametrage invoiceHeader2 = entityManager.find(TMmcParametrage.class, "INVOICE_HEADER_2");
-        TMmcParametrage invoiceHeader3 = entityManager.find(TMmcParametrage.class, "INVOICE_HEADER_3");
-        TMmcParametrage invoiceFooter1 = entityManager.find(TMmcParametrage.class, "INVOICE_FOOTER_1");
-        TMmcParametrage invoiceFooter2 = entityManager.find(TMmcParametrage.class, "INVOICE_FOOTER_2");
-        TMmcParametrage invoiceFooter3 = entityManager.find(TMmcParametrage.class, "INVOICE_FOOTER_3");
+        TMmcParametrage invoiceHeader1 = entityManager.find(TMmcParametrage.class, "PMS_INVOICE_HEADER_1");
+        TMmcParametrage invoiceHeader2 = entityManager.find(TMmcParametrage.class, "PMS_INVOICE_HEADER_2");
+        TMmcParametrage invoiceHeader3 = entityManager.find(TMmcParametrage.class, "PMS_INVOICE_HEADER_3");
+        TMmcParametrage invoiceFooter1 = entityManager.find(TMmcParametrage.class, "PMS_INVOICE_FOOTER_1");
+        TMmcParametrage invoiceFooter2 = entityManager.find(TMmcParametrage.class, "PMS_INVOICE_FOOTER_2");
+        TMmcParametrage invoiceFooter3 = entityManager.find(TMmcParametrage.class, "PMS_INVOICE_FOOTER_3");
         LocalDate dateLogiciel = LocalDate.parse(parametrageDateLogicielle.getValeur());
         LocalDateTime dateEtatSolde = currentTime.atDate(dateLogiciel);       
         BigDecimal amountCashed = encaissement.getMontant();
@@ -132,7 +132,7 @@ public class CashingDao {
         List<TPmsNoteDetail> noteDetail = entityManager.createQuery("FROM TPmsNoteDetail WHERE dateDeletion = null ").getResultList();
         List<TPmsPrestation> Prestation = entityManager.createQuery("FROM TPmsPrestation WHERE dateDeletion = null ").getResultList();
         
-        List<TMmcUser> User = entityManager.createQuery("FROM TPmsPrestation WHERE dateDeletion = null ").getResultList();
+        List<TMmcUser> User = entityManager.createQuery("FROM TMmcUser WHERE dateDeletion = null ").getResultList();
         List<TMmcDeviceCloture> mmcDeviceClotureList = entityManager
                 .createQuery("SELECT deviceUuid FROM TMmcDeviceCloture WHERE dateStatus=:parameter")
                 .setParameter("parameter", dateLogiciel).getResultList();      
@@ -182,7 +182,9 @@ public class CashingDao {
             facture.setNumero(numFact);
             facture.setDateFacture(dateLogiciel);
             facture.setDateEcheance(dateLogiciel);
-            facture.setEntete1(invoiceHeader1.getValeur());         
+            facture.setEntete1(invoiceHeader1.getValeur()); 
+            
+            
             facture.setEntete2(invoiceHeader2.getValeur());
             facture.setEntete3(invoiceHeader3.getValeur());
             facture.setBas1(invoiceFooter1.getValeur());
@@ -339,10 +341,12 @@ public class CashingDao {
     }
 
     public void setPosEncaissement(TPosEncaissement encaissement) throws CustomConstraintViolationException {
+
         TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
         LocalDate daten = LocalDate.parse(parametrageDateLogicielle.getValeur());
         
         //
+        List<TMmcUser> User = entityManager.createQuery("FROM TMmcUser WHERE dateDeletion = null ").getResultList();
         List<TPosNoteDetail> noteDetail = entityManager.createQuery("FROM TPosNoteDetail WHERE dateDeletion = null ").getResultList();
         List<TPosPrestation> Prestation = entityManager.createQuery("FROM TPosPrestation WHERE dateDeletion = null ").getResultList();
         List<TMmcDeviceCloture> mmcDeviceClotureList = entityManager
@@ -386,7 +390,12 @@ public class CashingDao {
             facturePos.setBas3("N° Siret 210.890.764 00015 RCS Monpelier "+ "<br>" +"Code APE 947A-N°TVA intracom FR 77825696764000     ");                     
             facturePos.setMontantRemise(new BigDecimal(0));
             facturePos.setDeviceUuid(DeviceUuid);
-            facturePos.setUtilisateur("herizo");
+            
+            for (TMmcUser userList : User) {
+                if(userList.getId().equals(encaissement.getMmcUserId())){
+                    facturePos.setUtilisateur(userList.getFirstname());
+                }
+            }
              //
             factureDetailPos.setPosFactureNumero(numFact);
                     
