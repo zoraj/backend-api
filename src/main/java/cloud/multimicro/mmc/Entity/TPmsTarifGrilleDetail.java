@@ -47,6 +47,10 @@ public class TPmsTarifGrilleDetail implements Serializable {
     @NotNull
     @Column(name = "pms_model_tarif_id")
     private Integer pmsModelTarifId;
+    
+    @NotNull
+    @Column(name = "pms_type_chambre_id")
+    private Integer pmsTypeChambreId;
 
     @NotNull
     @Column(name = "base")
