@@ -66,7 +66,7 @@ public class RateGridDetailService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getById(@PathParam("dateStart") String dateStart, @PathParam("dateEnd") String dateEnd,
             @PathParam("id") Integer id) {
-        List<VPmsTarifGrilleDetail> valueList = rateGridDetailDao.getDetailByRateGrid(dateStart, dateEnd, id);
+        List<VPmsTarifGrilleDetail> valueList = rateGridDetailDao.getDetailByRateGrid(dateStart, dateEnd, id);        
         if (valueList.isEmpty()) {
             throw new NotFoundException();
         }

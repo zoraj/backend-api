@@ -44,6 +44,9 @@ public class VPmsTarifGrilleDetail implements Serializable {
 
     @Column(name = "pms_model_tarif_id")
     private Integer pmsModelTarifId;
+    
+    @Column(name = "pms_type_chambre_id")
+    private Integer pmsTypeChambreId;
 
     @Column(name = "base")
     private Integer base;
