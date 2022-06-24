@@ -47,6 +47,9 @@ public class VPmsTarifGrilleDetail implements Serializable {
     
     @Column(name = "pms_type_chambre_id")
     private Integer pmsTypeChambreId;
+    
+    @Column(name = "libelle")
+    private String libelle;
 
     @Column(name = "base")
     private Integer base;
