@@ -10,7 +10,7 @@
   <packaging>war</packaging>
 
   <name>RestAPI</name>
-  <url>https://bymmc.com/api</url>
+  <url>https://mat.cloud/api</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <webXmlPath>src/main/webapp/WEB-INF/web.develop.xml</webXmlPath>
