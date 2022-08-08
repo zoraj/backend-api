@@ -319,12 +319,12 @@ public class ReservationDao {
     }
 
     public void addReservationVentilation(JsonObject object) throws CustomConstraintViolationException {
-        Integer pmsReservationId = object.getInt("pmsReservationId");
+        //Integer pmsReservationId = object.getInt("pmsReservationId");
         JsonArray jsonArray = object.getJsonArray("ventilation");
         for (int i = 0; i < jsonArray.size(); i++) {
             var reservationVentilation = new TPmsReservationVentilation();
             JsonObject rowObject = jsonArray.getJsonObject(i);
-            reservationVentilation.setPmsReservationId(pmsReservationId);
+            reservationVentilation.setPmsReservationId(getLastIdReservation());
             reservationVentilation.setPmsTypeChambreId(rowObject.getInt("pmsTypeChambreId"));
             if(!object.containsKey("pmsChambreId")){
                 reservationVentilation.setPmsChambreId(reservationVentilation.getPmsChambreId());
@@ -340,6 +340,11 @@ public class ReservationDao {
                 throw new CustomConstraintViolationException(ex);
             }
         }
+    }
+    
+    public Integer getLastIdReservation() {
+        return (Integer) entityManager.createNativeQuery("select max(id) from t_pms_reservation")
+                .getSingleResult();
     }
 
     public TPmsReservationVentilation updateReservationVentilation(
