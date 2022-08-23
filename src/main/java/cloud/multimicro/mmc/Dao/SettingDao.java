@@ -462,6 +462,15 @@ public class SettingDao {
             settingBookingMailFooter.setValeur("This message may contain confidential information. If you are not the addressee or authorized to receive this message, you must not use, copy, disclose or take any action based on any information herein");
             entityManager.persist(settingBookingMailFooter);
             
+            TMmcParametrage settingStripePrivateKey = new TMmcParametrage();
+            settingStripePrivateKey.setCle("STRIPE_PRIVATE_KEY");
+            settingStripePrivateKey.setValeur("");
+            entityManager.persist(settingStripePrivateKey);
+            
+            TMmcParametrage settingStripePublicKey = new TMmcParametrage();
+            settingStripePublicKey.setCle("STRIPE_PUBLIC_KEY");
+            settingStripePublicKey.setValeur("");
+            entityManager.persist(settingStripePublicKey);
                  
         } catch (Exception e) {
             LOGGER.error("Setting initialization went wrong");
