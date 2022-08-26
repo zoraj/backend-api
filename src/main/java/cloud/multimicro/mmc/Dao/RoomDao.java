@@ -114,27 +114,16 @@ public class RoomDao {
     }
 
     public TPmsTypeChambre updateRoomTypes(TPmsTypeChambre pmsTypeChambre) throws CustomConstraintViolationException {
-        try {  
-                        if(pmsTypeChambre.getIsParDefaut().equals(true)){
-                entityManager.createNativeQuery(
-                "UPDATE t_pms_type_chambre SET is_par_defaut =null where id != '"+pmsTypeChambre.getId()+"' " )
-                .executeUpdate();              
-            }    
+        try {
             return entityManager.merge(pmsTypeChambre);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
     }
-    
-    public void setRoomTypes(TPmsTypeChambre typeChambre) throws CustomConstraintViolationException {
 
+    public void setRoomTypes(TPmsTypeChambre type) throws CustomConstraintViolationException {
         try {
-            entityManager.persist(typeChambre);
-            if(typeChambre.getIsParDefaut().equals(true)){
-                entityManager.createNativeQuery(
-                "UPDATE t_pms_type_chambre SET is_par_defaut =null where id <> " + typeChambre.getId())
-                .executeUpdate();              
-            }                                                        
+            entityManager.persist(type);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }

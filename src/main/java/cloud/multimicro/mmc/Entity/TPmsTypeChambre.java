@@ -49,9 +49,6 @@ public class TPmsTypeChambre implements Serializable {
     
     @Column(name = "salon")
     private Boolean salon;
-    
-    @Column(name = "is_par_defaut")
-    private Boolean isParDefaut;
 
     @NotNull @Column(name = "pms_categorie_chambre_id")
     private Integer pmsCategorieChambreId;
