@@ -11,4 +11,8 @@ nb-configuration.xml
 *.bak
 /target/
 src/main/webapp/WEB-INF/web.develop.xml
-src/main/webapp/WEB-INF/web.prod.xml
+src/main/webapp/WEB-INF/web.prod.a.template.xml
+src/main/webapp/WEB-INF/web.prod.a.node.a.xml
+src/main/webapp/WEB-INF/web.prod.a.node.b.xml
+src/main/webapp/WEB-INF/web.prod.b.node.a.xml
+src/main/webapp/WEB-INF/web.prod.b.node.b.xml

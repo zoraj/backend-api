@@ -7,10 +7,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Persistence;
 import cloud.multimicro.mmc.Dao.SiteDao;
 import cloud.multimicro.mmc.Entity.TSite;
 import org.jboss.logging.Logger;
@@ -23,10 +28,32 @@ import java.io.IOException;
  */
 @Stateless
 public class Helper {
-    @Inject
-    SiteDao siteDao;
     private static Map<String, String> apiKeyHash = new HashMap<String, String>();
     private static final Logger LOGGER = Logger.getLogger(StartupListener.class);
+
+    private List<TSite> getSites() {
+        var result = new ArrayList<TSite>();
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("cloud.multimicro_Establishement_PU");
+        EntityManager em = emf.createEntityManager();
+
+        //List<TSite> apiList = em.createQuery("FROM TSite", TSite.class).getResultList();
+        List<Object[]> sites = em.createNativeQuery("SELECT name, api_key FROM t_site").getResultList();
+        LOGGER.info("Did we find it ? ");
+        LOGGER.info(sites.size());
+
+        if (sites.size() > 0) {
+            for (Object[] s : sites) {
+                if (s.length > 1) {
+                    TSite site = new TSite();
+                    site.setName(s[0].toString());
+                    site.setApiKey(s[1].toString());
+                    result.add(site);
+                }
+            }
+        }   
+        em.close();
+        return result;
+    }
 
     // The same function can be found in Establishment Management Project 
     private String transformENameToDBName(String establishmentName) {
@@ -41,7 +68,9 @@ public class Helper {
     }
 
     public void init() {
-        var apiList = siteDao.getAll();
+        //var apiList = siteDao.getAll();
+        //apiKeyHash = (HashMap<String, String>) apiList.stream().collect(Collectors.toMap(TSite::getApiKey, Site -> Site.getName()));
+        var apiList = getSites();
         apiKeyHash = (HashMap<String, String>) apiList.stream().collect(Collectors.toMap(TSite::getApiKey, Site -> Site.getName()));
     }
 
@@ -52,42 +81,14 @@ public class Helper {
             return transformENameToDBName(establishmentName); 
         }
         else { 
-            try {
-                // The following codes are a Hack !. Can do better
-                // This occurs when a new establishment was created bu the apiKey lists is not up to date
-                // for optimisation's sake, we won't refresh unless we didn't find at first attempt 
-                LOGGER.info("The API KEY provided " + apiKey + " can't be found. Let's retry the list");
-                // Let's look inside temporary folder if any
-                String appServerTempDir = System.getProperty("jboss.server.temp.dir");             
-                final String apiKeyFileFullPath = appServerTempDir + "/" + apiKey + ".properties";
-
-                final Properties properties = new Properties();
-                InputStream input = new FileInputStream(apiKeyFileFullPath); ; 
-                properties.load(input);
-                establishmentName = properties.getProperty(apiKey);
-                input.close();
-                if (establishmentName != null) {
-                    apiKeyHash.put(apiKey, establishmentName);
-                    // I had tried the following code to retrieve the current APIKEY list with success. EJB Transaction fuckery
-                    //var apiList = siteDao.getAll();
-                    //apiKeyHash = (HashMap<String, String>) apiList.stream().collect(Collectors.toMap(TSite::getApiKey, Site -> Site.getName()));
-                    LOGGER.info("API KEY lists now up to date");
-
-                    // Delete the API KEY properties file
-                    File apiKeyFile = new File(apiKeyFileFullPath);
-                    if (!apiKeyFile.delete()) {
-                        LOGGER.error("Error deleting properties file " + apiKeyFileFullPath);
-                    }
-
-                    if (apiKeyHash.containsKey(apiKey)) {
-                        establishmentName = apiKeyHash.get(apiKey);  
-                        return transformENameToDBName(establishmentName); 
-                    }
-                }
-                     
-                } catch(IOException e){
-                    e.printStackTrace();
-                }
+            var apiList = getSites();
+            LOGGER.info("API list refreshed:");
+            LOGGER.info(apiList);
+            apiKeyHash = (HashMap<String, String>) apiList.stream().collect(Collectors.toMap(TSite::getApiKey, Site -> Site.getName()));
+            if (apiKeyHash.containsKey(apiKey)) {
+                establishmentName = apiKeyHash.get(apiKey);  
+                return transformENameToDBName(establishmentName); 
+            }
        }
        LOGGER.info("APY KEY definitely not exists");
        return null; // TODO - Should raise an exception

@@ -23,17 +23,23 @@
          </properties>
      </profile>
      <profile>
-         <id>prod-a</id>
-         <properties>
-           <webXmlPath>src/main/webapp/WEB-INF/web.prod.xml</webXmlPath>
-         </properties>
-     </profile>
-     <profile>
-         <id>prod-b</id>
-         <properties>
-           <webXmlPath>src/main/webapp/WEB-INF/web.prod.xml</webXmlPath>
-         </properties>
-     </profile>
+        <id>prod-a-template</id>
+        <properties>
+        <webXmlPath>src/main/webapp/WEB-INF/web.prod.a.template.xml</webXmlPath>
+        </properties>
+      </profile>
+      <profile>
+          <id>prod-a-node-a</id>
+          <properties>
+            <webXmlPath>src/main/webapp/WEB-INF/web.prod.a.node.a.xml</webXmlPath>
+          </properties>
+      </profile>
+      <profile>
+          <id>prod-a-node-b</id>
+          <properties>
+            <webXmlPath>src/main/webapp/WEB-INF/web.prod.a.node.b.xml</webXmlPath>
+          </properties>
+      </profile>      
    </profiles>  
   <dependencies>
     <dependency>
@@ -188,6 +194,7 @@
           <artifactId>wildfly-maven-plugin</artifactId>
           <version>2.0.2.Final</version>
           <configuration>
+              <protocol>${wildfly-protocol}</protocol>
               <hostname>${wildfly-hostname}</hostname>
               <username>${wildfly-username}</username>
               <password>${wildfly-password}</password>
