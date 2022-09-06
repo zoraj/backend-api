@@ -71,6 +71,9 @@ public class TPmsTypeChambre implements Serializable {
 
     @Column(name = "nb_enfant")
     private Integer nbEnfant;
+    
+    @Column(name = "ref_externe")
+    private String refExterne;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     @JsonbTransient
