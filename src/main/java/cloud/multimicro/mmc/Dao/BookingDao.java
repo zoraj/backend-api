@@ -197,6 +197,7 @@ public class BookingDao {
                     tarifApplicable.setTypeTarifLibelle(n[1].toString());
                     tarifApplicable.setAmount(new BigDecimal(n[2].toString()));
                     tarifApplicable.setPmsTarifGrilleDetailId(Integer.parseInt(n[3].toString()));
+                    tarifApplicable.setBase(Integer.parseInt(n[4].toString()));
                     result.add(tarifApplicable);
                 }
             }

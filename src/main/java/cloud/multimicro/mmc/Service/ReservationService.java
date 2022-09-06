@@ -221,6 +221,18 @@ public class ReservationService {
         return Response.ok(reservation, MediaType.APPLICATION_JSON).build();   
     }
     
+    @POST
+    @Path("/rate")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addRateReservation(JsonObject object) {
+        try {
+            reservationDao.addRateReservation(object);
+            return Response.status(Response.Status.CREATED).entity(object).build();
+        } catch (CustomConstraintViolationException ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+        }
+    }
+    
     @Path("/rate")
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
