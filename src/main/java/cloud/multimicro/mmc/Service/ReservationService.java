@@ -12,6 +12,7 @@ import cloud.multimicro.mmc.Entity.TPmsReservation;
 import cloud.multimicro.mmc.Entity.TPmsReservationVentilation;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarif;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarifPrestation;
+import cloud.multimicro.mmc.Entity.VPmsReservationVentilation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
 import cloud.multimicro.mmc.Util.Payload;
@@ -155,6 +156,17 @@ public class ReservationService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getReservationVentilationByReservation(@PathParam("id") Integer id) {
         List<TPmsReservationVentilation> reservation = reservationDao.getReservationVentilationByReservation(id);        
+        if (reservation.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(reservation, MediaType.APPLICATION_JSON).build();   
+    }
+    
+    @GET
+    @Path("/ventilation-detail/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getVentilationByReservation(@PathParam("id") Integer id) {
+        List<VPmsReservationVentilation> reservation = reservationDao.getVentilationByReservation(id);        
         if (reservation.isEmpty()) {
             throw new NotFoundException();
         }

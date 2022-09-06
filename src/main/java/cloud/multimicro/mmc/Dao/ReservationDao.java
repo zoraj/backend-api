@@ -32,6 +32,7 @@ import cloud.multimicro.mmc.Entity.TPmsReservationTarif;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarifPrestation;
 import cloud.multimicro.mmc.Entity.TPmsReservationVentilation;
 import cloud.multimicro.mmc.Entity.TPmsTarifGrilleDetail;
+import cloud.multimicro.mmc.Entity.VPmsReservationVentilation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Util.NullAwareBeanUtilsBean;
 
@@ -311,6 +312,13 @@ public class ReservationDao {
                 .setParameter("pmsReservationId", pmsReservationId).getResultList();
         return reservationVentilation;
     }
+    
+    public List<VPmsReservationVentilation> getVentilationByReservation(Integer pmsReservationId) {
+        List<VPmsReservationVentilation> reservationVentilation = entityManager
+                .createQuery("FROM VPmsReservationVentilation  WHERE idReservation=:pmsReservationId")
+                .setParameter("pmsReservationId", pmsReservationId).getResultList();
+        return reservationVentilation;
+    }
 
     public TPmsReservationVentilation getReservationVentilationById(int id) {
         TPmsReservationVentilation reservationVentilation = entityManager.find(TPmsReservationVentilation.class,
@@ -326,13 +334,11 @@ public class ReservationDao {
             JsonObject rowObject = jsonArray.getJsonObject(i);
             reservationVentilation.setPmsReservationId(getLastIdReservation());
             reservationVentilation.setPmsTypeChambreId(rowObject.getInt("pmsTypeChambreId"));
-            if(!object.containsKey("pmsChambreId")){
+            if(!rowObject.containsKey("pmsChambreId")){
                 reservationVentilation.setPmsChambreId(reservationVentilation.getPmsChambreId());
             }else{
                 reservationVentilation.setPmsChambreId(rowObject.getInt("pmsChambreId"));
             }
-            // 1 par defaut
-            reservationVentilation.setQteChb(1);
 
             try {
                 entityManager.persist(reservationVentilation);
