@@ -10,5 +10,5 @@ public class TarifApplicable {
     String typeTarifLibelle;
     BigDecimal amount;
     Integer pmsTarifGrilleDetailId;
-    
+    Integer base;
 }

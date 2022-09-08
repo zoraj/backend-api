@@ -6,6 +6,7 @@
 package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -57,11 +58,11 @@ public class TPmsReservationTarif implements Serializable {
 
     @NotNull
     @Column(name = "date_debut")
-    private Date dateDebut;
+    private LocalDate dateDebut;
     
     @NotNull
     @Column(name = "date_fin")
-    private Date dateFin;    
+    private LocalDate dateFin;    
 
     
     @Column(name = "base")

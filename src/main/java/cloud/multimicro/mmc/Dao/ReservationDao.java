@@ -32,6 +32,7 @@ import cloud.multimicro.mmc.Entity.TPmsReservationTarif;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarifPrestation;
 import cloud.multimicro.mmc.Entity.TPmsReservationVentilation;
 import cloud.multimicro.mmc.Entity.TPmsTarifGrilleDetail;
+import cloud.multimicro.mmc.Entity.VPmsReservationVentilation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Util.NullAwareBeanUtilsBean;
 
@@ -311,6 +312,13 @@ public class ReservationDao {
                 .setParameter("pmsReservationId", pmsReservationId).getResultList();
         return reservationVentilation;
     }
+    
+    public List<VPmsReservationVentilation> getVentilationByReservation(Integer pmsReservationId) {
+        List<VPmsReservationVentilation> reservationVentilation = entityManager
+                .createQuery("FROM VPmsReservationVentilation  WHERE idReservation=:pmsReservationId")
+                .setParameter("pmsReservationId", pmsReservationId).getResultList();
+        return reservationVentilation;
+    }
 
     public TPmsReservationVentilation getReservationVentilationById(int id) {
         TPmsReservationVentilation reservationVentilation = entityManager.find(TPmsReservationVentilation.class,
@@ -326,13 +334,11 @@ public class ReservationDao {
             JsonObject rowObject = jsonArray.getJsonObject(i);
             reservationVentilation.setPmsReservationId(getLastIdReservation());
             reservationVentilation.setPmsTypeChambreId(rowObject.getInt("pmsTypeChambreId"));
-            if(!object.containsKey("pmsChambreId")){
+            if(!rowObject.containsKey("pmsChambreId")){
                 reservationVentilation.setPmsChambreId(reservationVentilation.getPmsChambreId());
             }else{
                 reservationVentilation.setPmsChambreId(rowObject.getInt("pmsChambreId"));
             }
-            // 1 par defaut
-            reservationVentilation.setQteChb(1);
 
             try {
                 entityManager.persist(reservationVentilation);
@@ -375,7 +381,7 @@ public class ReservationDao {
         return reservationTarif;
     }
 
-    public void addReservationRate(List<Map> pmsReservationTarifList ,String nom, Date dateStart, Date dateEnd, Integer pmsReservationId) throws CustomConstraintViolationException {
+    /*public void addReservationRate(List<Map> pmsReservationTarifList ,String nom, Date dateStart, Date dateEnd, Integer pmsReservationId) throws CustomConstraintViolationException {
         final SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
         for (Map room : pmsReservationTarifList) {
             TPmsReservationTarif object = new TPmsReservationTarif();
@@ -392,6 +398,40 @@ public class ReservationDao {
             object.setPmsModelTarifId(pmsGrilleTarifDetail.getPmsModelTarifId());
             try {
                 entityManager.persist(object);
+            } catch (ConstraintViolationException ex) {
+                throw new CustomConstraintViolationException(ex);
+            }
+        }
+    }*/
+    
+    public void addRateReservation(JsonObject object) throws CustomConstraintViolationException {
+        JsonArray jsonArray = object.getJsonArray("reservationTarif");
+        for (int i = 0; i < jsonArray.size(); i++) {
+            var reservationRate = new TPmsReservationTarif();
+            JsonObject rowObject = jsonArray.getJsonObject(i);
+            reservationRate.setPmsReservationId(getLastIdReservation());
+            reservationRate.setPmsTypeChambreId(rowObject.getInt("pmsTypeChambreId"));
+            reservationRate.setNbAdult(rowObject.getInt("nbAdult"));
+            reservationRate.setNbEnf(rowObject.getInt("nbEnf"));
+            LocalDate dateDebut = LocalDate.parse(rowObject.getString("dateDebut"));
+            LocalDate dateFin = LocalDate.parse(rowObject.getString("dateFin"));
+            reservationRate.setDateDebut(dateDebut);
+            reservationRate.setDateFin(dateFin);
+            reservationRate.setBase(rowObject.getInt("base"));
+            reservationRate.setPmsModelTarifId(rowObject.getInt("pmsModelTarifId"));
+            if(!rowObject.containsKey("pmsChambreId")){
+                reservationRate.setPmsChambreId(reservationRate.getPmsChambreId());
+            }else{
+                reservationRate.setPmsChambreId(rowObject.getInt("pmsChambreId"));
+            }
+            if(!rowObject.containsKey("nom")){
+                reservationRate.setNom(reservationRate.getNom());
+            }else{
+                reservationRate.setNom(rowObject.getString("nom"));
+            }
+
+            try {
+                entityManager.persist(reservationRate);
             } catch (ConstraintViolationException ex) {
                 throw new CustomConstraintViolationException(ex);
             }

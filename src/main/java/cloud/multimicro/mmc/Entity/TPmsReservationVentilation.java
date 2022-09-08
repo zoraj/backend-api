@@ -26,7 +26,7 @@ import lombok.Data;
  */
 @Entity
 @Table(name = "t_pms_reservation_ventilation",uniqueConstraints={
-    @UniqueConstraint(columnNames = {"pms_reservation_id", "qte_chb", "pms_type_chambre_id"})
+    @UniqueConstraint(columnNames = {"pms_reservation_id", "pms_type_chambre_id"})
 })
 @Data
 public class TPmsReservationVentilation implements Serializable {
@@ -39,10 +39,6 @@ public class TPmsReservationVentilation implements Serializable {
     @NotNull
     @Column(name = "pms_reservation_id")
     private Integer pmsReservationId;
-
-    @NotNull
-    @Column(name = "qte_chb")
-    private Integer qteChb;
 
     @NotNull
     @Column(name = "pms_type_chambre_id")
