@@ -51,6 +51,18 @@ public class DepositService {
         }
     }
     
+    @Path("/booking")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addDepositBooking(JsonObject request) {
+        try {
+            depositDao.setDepositBooking(request);
+            return Response.ok(request, MediaType.APPLICATION_JSON).build();
+        } catch (CustomConstraintViolationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+    
     @Path("/")
     @PUT
     @Produces(MediaType.APPLICATION_JSON)

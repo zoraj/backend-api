@@ -348,6 +348,11 @@ public class SettingDao {
             settingRateGrid.setCle("BOOKING_GRILLE_TARIF");
             settingRateGrid.setValeur("1");
             entityManager.persist(settingRateGrid);
+            
+            TMmcParametrage settingCashingMode = new TMmcParametrage();
+            settingCashingMode.setCle("BOOKING_CASHING_MODE");
+            settingCashingMode.setValeur("1");
+            entityManager.persist(settingCashingMode);
 
             TMmcParametrage settingIntegrationJournalVente = new TMmcParametrage();
             settingIntegrationJournalVente.setCle("INTEGRATION_JOURNAL_VENTE");

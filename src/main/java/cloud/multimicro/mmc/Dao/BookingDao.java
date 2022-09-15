@@ -120,7 +120,9 @@ public class BookingDao {
         Date dateLogicielle = null;
         final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
-
+        TMmcParametrage cashingMode = entityManager.find(TMmcParametrage.class, "BOOKING_CASHING_MODE");
+        TMmcParametrage clientId = entityManager.find(TMmcParametrage.class, "BOOKING_CLIENT_ID");
+        
         try {
             dateLogicielle = format.parse(parametrageDateLogicielle.getValeur());
         } catch (ParseException ex) {
@@ -150,6 +152,8 @@ public class BookingDao {
                 room.setTarif(tarifApplicables);
                 roomPhotoType = getRoomTypesImageByRoomType(pmsTypeChambreId);
                 room.setRoomPhoto(roomPhotoType);
+                room.setMmcModeEncaissementId(Integer.valueOf(cashingMode.getValeur()));
+                room.setMmcClientId(Integer.valueOf(clientId.getValeur()));
 
                 for (int j = 0; j < requests.size(); j++) {
                     JsonObject request = requests.getJsonObject(j);
