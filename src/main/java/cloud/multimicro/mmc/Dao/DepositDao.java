@@ -41,6 +41,30 @@ public class DepositDao {
             throw new CustomConstraintViolationException(ex);
         }
     }
+    
+    public void setDepositBooking(JsonObject request) throws CustomConstraintViolationException{
+       try {
+           TPmsArrhe addDeposit = new TPmsArrhe();
+           addDeposit.setMmcModeEncaissementId(request.getInt("mmcModeEncaissementId"));
+           addDeposit.setMmcClientId(request.getInt("mmcClientId"));
+           addDeposit.setMontant(new BigDecimal(request.get("montant").toString()));
+           LocalDate dateReglement = LocalDate.parse(request.getString("dateReglement"));
+           addDeposit.setDateReglement(dateReglement);
+           if(!request.containsKey("pmsReservationId")){
+                addDeposit.setPmsReservationId(getLastIdReservation());
+            }else{
+                addDeposit.setPmsReservationId(request.getInt("pmsReservationId"));
+            }
+            entityManager.persist(addDeposit);
+         } catch (ConstraintViolationException ex) {
+            throw new CustomConstraintViolationException(ex);
+        }
+    }
+    
+    public Integer getLastIdReservation() {
+        return (Integer) entityManager.createNativeQuery("select max(id) from t_pms_reservation")
+                .getSingleResult();
+    }
 
     public TPmsArrhe putDeposit(JsonObject request) throws CustomConstraintViolationException{
         final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");

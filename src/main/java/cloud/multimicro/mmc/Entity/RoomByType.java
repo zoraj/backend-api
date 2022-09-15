@@ -14,4 +14,6 @@ public class RoomByType {
     private String typeChambre;
     private List<TarifApplicable> tarif;
     private List<TPmsTypeChambrePhoto> roomPhoto;
+    private int mmcModeEncaissementId;
+    private int mmcClientId;
 }
