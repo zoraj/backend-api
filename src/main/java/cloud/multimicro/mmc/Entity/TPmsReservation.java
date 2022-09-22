@@ -7,14 +7,20 @@ package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.json.bind.annotation.JsonbDateFormat;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -156,6 +162,10 @@ public class TPmsReservation implements Serializable {
 
     @Column(name = "motif_annulation")
     private String motifAnnulation;
+    
+    @JoinColumn(name = "pms_reservation_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<TPmsReservationVentilation> ventilations = new ArrayList<>();
     
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     private LocalDate dateCreation;
