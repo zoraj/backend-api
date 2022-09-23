@@ -99,12 +99,12 @@ public class SettingDao {
 
             TMmcParametrage settingLinkToRESAPREAFF = new TMmcParametrage();
             settingLinkToRESAPREAFF.setCle("COLOR_RESA_PREAFF");
-            settingLinkToRESAPREAFF.setValeur("c75050");
+            settingLinkToRESAPREAFF.setValeur("1965A7");
             entityManager.persist(settingLinkToRESAPREAFF);
 
             TMmcParametrage settingLinkToRESAARRIVEE = new TMmcParametrage();
             settingLinkToRESAARRIVEE.setCle("COLOR_RESA_ARRIVEE");
-            settingLinkToRESAARRIVEE.setValeur("c75050");
+            settingLinkToRESAARRIVEE.setValeur("F79E1B");
             entityManager.persist(settingLinkToRESAARRIVEE);
 
             TMmcParametrage settingLinkToINDIVNOTE = new TMmcParametrage();
@@ -119,7 +119,7 @@ public class SettingDao {
 
             TMmcParametrage settingLinkToRECEPSOLDEE = new TMmcParametrage();
             settingLinkToRECEPSOLDEE.setCle("COLOR_RECEP_SOLDEE");
-            settingLinkToRECEPSOLDEE.setValeur("c75050");
+            settingLinkToRECEPSOLDEE.setValeur("E92467");
             entityManager.persist(settingLinkToRECEPSOLDEE);
 
             TMmcParametrage settingLinkToGRPARRIVEE = new TMmcParametrage();
