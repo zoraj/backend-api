@@ -25,6 +25,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import lombok.Data;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 /**
  *
@@ -166,6 +168,11 @@ public class TPmsReservation implements Serializable {
     @JoinColumn(name = "pms_reservation_id", referencedColumnName = "id", insertable = false, updatable = false)
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<TPmsReservationVentilation> ventilations = new ArrayList<>();
+    
+    @JoinColumn(name = "pms_reservation_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @OneToMany(cascade = CascadeType.ALL)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<TPmsSejour> sejours = new ArrayList<>();
     
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     private LocalDate dateCreation;
