@@ -8,6 +8,8 @@ package cloud.multimicro.mmc.Service;
 import cloud.multimicro.mmc.Dao.ClosureDao;
 import cloud.multimicro.mmc.Entity.TMmcDeviceCloture;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
+import cloud.multimicro.mmc.Entity.TPmsClotureDefinitive;
+import cloud.multimicro.mmc.Entity.TPmsClotureProvisoire;
 import cloud.multimicro.mmc.Entity.VPosCa;
 import cloud.multimicro.mmc.Entity.VPosEncaissement;
 
@@ -25,6 +27,7 @@ import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
 
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,6 +37,8 @@ import javax.json.JsonObject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
 
 /**
  *
@@ -58,6 +63,18 @@ public class ClosureService {
             return Response.ok(dateLogicielle, MediaType.APPLICATION_JSON).build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+    }
+    
+    @Path("/pms")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDateLogicielleIncrementPms() {
+        try{
+            TMmcParametrage dateLogicielle = closureDao.getDateLogicielleIncrementPms();
+            return Response.ok(dateLogicielle, MediaType.APPLICATION_JSON).build();
+        } catch (Exception ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
     }
 
@@ -186,6 +203,54 @@ public class ClosureService {
             throw new NotFoundException();
         }
         return Response.ok(caList, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @Path("/pms/provisional")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response setPmsClotureProvisoire(JsonObject request) throws ParseException {
+        try {
+            closureDao.setPmsClotureProvisoire(request);
+            return Response.ok(request, MediaType.APPLICATION_JSON).build();
+        } catch (CustomConstraintViolationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+    
+    @GET
+    @Path("/pms/provisional")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPmsClotureProvisoire(@Context UriInfo info) {
+        String dateReference = info.getQueryParameters().getFirst("dateReference");
+        List<TPmsClotureProvisoire> closure = closureDao.getPmsClotureProvisoire(dateReference);
+        if (closure.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(closure, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @Path("/pms/definitive")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response setPmsClotureDefinitive(JsonObject request) throws ParseException {
+        try {
+            closureDao.setPmsClotureDefinitive(request);
+            return Response.ok(request, MediaType.APPLICATION_JSON).build();
+        } catch (CustomConstraintViolationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+    
+    @GET
+    @Path("/pms/definitive")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPmsClotureDefinitive(@Context UriInfo info) {
+        String dateReference = info.getQueryParameters().getFirst("dateReference");
+        List<TPmsClotureDefinitive> closure = closureDao.getPmsClotureDefinitive(dateReference);
+        if (closure.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(closure, MediaType.APPLICATION_JSON).build();
     }
 
 }
