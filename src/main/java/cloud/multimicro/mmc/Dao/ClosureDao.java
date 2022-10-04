@@ -814,6 +814,11 @@ public class ClosureDao {
                     } else {                    
                         try {
                             subFamily.setDateCloture(dateRef);
+                            subFamily.setLibelle(libelleSousFamille);
+                            subFamily.setMontantJour(montantCaJour);
+                            subFamily.setMontantPeriode(montantCaJour);
+                            subFamily.setMontantMois(montantCaMois);
+                            subFamily.setMontantAnnee(montantCaAnnee);
                             entityManager.persist(subFamily);
                         } catch (ConstraintViolationException ex) {
                             throw new CustomConstraintViolationException(ex);
@@ -1069,6 +1074,11 @@ public class ClosureDao {
                     } else {                    
                         try {
                             subFamily.setDateCloture(dateRef);
+                            subFamily.setLibelle(libelleSousFamille);
+                            subFamily.setMontantJour(montantCaJour);
+                            subFamily.setMontantPeriode(montantCaJour);
+                            subFamily.setMontantMois(montantCaMois);
+                            subFamily.setMontantAnnee(montantCaAnnee);
                             entityManager.persist(subFamily);
                         } catch (ConstraintViolationException ex) {
                             throw new CustomConstraintViolationException(ex);
