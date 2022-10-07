@@ -16,4 +16,5 @@ public class RoomByType {
     private List<TPmsTypeChambrePhoto> roomPhoto;
     private int mmcModeEncaissementId;
     private int mmcClientId;
+    private int pmsTarifGrilleId;
 }

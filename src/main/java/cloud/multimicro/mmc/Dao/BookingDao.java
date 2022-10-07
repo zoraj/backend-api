@@ -122,6 +122,7 @@ public class BookingDao {
         TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
         TMmcParametrage cashingMode = entityManager.find(TMmcParametrage.class, "BOOKING_CASHING_MODE");
         TMmcParametrage clientId = entityManager.find(TMmcParametrage.class, "BOOKING_CLIENT_ID");
+        TMmcParametrage rateGridId = entityManager.find(TMmcParametrage.class, "BOOKING_GRILLE_TARIF");
         
         try {
             dateLogicielle = format.parse(parametrageDateLogicielle.getValeur());
@@ -154,6 +155,7 @@ public class BookingDao {
                 room.setRoomPhoto(roomPhotoType);
                 room.setMmcModeEncaissementId(Integer.valueOf(cashingMode.getValeur()));
                 room.setMmcClientId(Integer.valueOf(clientId.getValeur()));
+                room.setPmsTarifGrilleId(Integer.valueOf(rateGridId.getValeur()));
 
                 for (int j = 0; j < requests.size(); j++) {
                     JsonObject request = requests.getJsonObject(j);
