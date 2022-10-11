@@ -69,8 +69,8 @@ public class TPmsReservationTarif implements Serializable {
     private Integer base;
 
     @NotNull
-    @Column(name = "pms_model_tarif_id")
-    private Integer pmsModelTarifId;
+    @Column(name = "pms_tarif_grille_detail_id")
+    private Integer pmsTarifGrilleDetailId;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     @Temporal(TemporalType.DATE)

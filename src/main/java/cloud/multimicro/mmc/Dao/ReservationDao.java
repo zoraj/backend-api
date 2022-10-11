@@ -418,7 +418,7 @@ public class ReservationDao {
             reservationRate.setDateDebut(dateDebut);
             reservationRate.setDateFin(dateFin);
             reservationRate.setBase(rowObject.getInt("base"));
-            reservationRate.setPmsModelTarifId(rowObject.getInt("pmsModelTarifId"));
+            reservationRate.setPmsTarifGrilleDetailId(rowObject.getInt("pmsTarifGrilleDetailId"));
             if(!rowObject.containsKey("pmsChambreId")){
                 reservationRate.setPmsChambreId(reservationRate.getPmsChambreId());
             }else{
