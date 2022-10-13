@@ -5,7 +5,6 @@
  */
 package cloud.multimicro.mmc.Service;
 import cloud.multimicro.mmc.Dao.JournalOpDao;
-import cloud.multimicro.mmc.Entity.TMmcJournalOperation;
 import cloud.multimicro.mmc.Entity.TPosJournalOperation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import java.util.List;
@@ -35,7 +34,7 @@ public class JournalOpService {
 JournalOpDao JournalopDao;
 
 
-    @POST
+    /*@POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getByCriteria(JsonObject criteria) {
@@ -44,7 +43,7 @@ JournalOpDao JournalopDao;
             throw new NotFoundException();
         }
         return Response.ok(journal, MediaType.APPLICATION_JSON).build();       
-    }
+    }*/
 
 //   @GET
 //    @Path("")
@@ -60,7 +59,7 @@ JournalOpDao JournalopDao;
 //    }
     
   
-    @GET
+    /*@GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll() {
@@ -88,10 +87,10 @@ JournalOpDao JournalopDao;
        /* if (journal.isEmpty()) {
             throw new NotFoundException();
         }*/
-        return Response.ok(journal, MediaType.APPLICATION_JSON).build();       
-    }
+        //return Response.ok(journal, MediaType.APPLICATION_JSON).build();       
+    //}
     
-    @GET
+    /*@GET
     @Path("/booking/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getByBooking(@PathParam("id") Integer id) {
@@ -99,8 +98,8 @@ JournalOpDao JournalopDao;
        /* if (journal.isEmpty()) {
             throw new NotFoundException();
         }*/
-        return Response.ok(journal, MediaType.APPLICATION_JSON).build();       
-    }
+        //return Response.ok(journal, MediaType.APPLICATION_JSON).build();       
+    //}
     
 
 }

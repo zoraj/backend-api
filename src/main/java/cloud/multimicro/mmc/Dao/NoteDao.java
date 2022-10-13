@@ -32,7 +32,6 @@ import javax.json.bind.JsonbBuilder;
 import cloud.multimicro.mmc.Entity.MonthlyTurnover;
 import cloud.multimicro.mmc.Entity.PassageHistory;
 import cloud.multimicro.mmc.Entity.TMmcClient;
-import cloud.multimicro.mmc.Entity.TMmcJournalOperation;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Entity.TPmsNoteDetail;
 import cloud.multimicro.mmc.Entity.TPmsNoteEntete;
@@ -370,19 +369,6 @@ public class NoteDao {
     public TPosNoteDetail getPosNoteDetailById(int id) {
         TPosNoteDetail details = entityManager.find(TPosNoteDetail.class, id);
         return details;
-    }
-
-    public void setJournalOperation(String action, JsonObject detail) throws CustomConstraintViolationException {
-        TMmcJournalOperation mmcJournalOperation = new TMmcJournalOperation();
-        mmcJournalOperation.setAction(action);
-        mmcJournalOperation.setDetail(detail.toString());
-
-        try {
-            entityManager.persist(mmcJournalOperation);
-        } catch (ConstraintViolationException ex) {
-            throw new CustomConstraintViolationException(ex);
-        }
-
     }
 
     public List<Integer> stringToList(String value) {

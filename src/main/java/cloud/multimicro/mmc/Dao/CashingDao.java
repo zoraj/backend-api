@@ -8,7 +8,6 @@ package cloud.multimicro.mmc.Dao;
 import cloud.multimicro.mmc.Entity.RemittanceInBank;
 import cloud.multimicro.mmc.Entity.RemittanceInBankDetail;
 import cloud.multimicro.mmc.Entity.TMmcDeviceCloture;
-import cloud.multimicro.mmc.Entity.TMmcJournalOperation;
 import cloud.multimicro.mmc.Entity.TMmcModeEncaissement;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Entity.TMmcUser;
@@ -460,17 +459,6 @@ public class CashingDao {
         return (BigDecimal) entityManager.createNativeQuery("SELECT IFNULL(SUM(montant), 0) FROM t_pms_encaissement "
                 + "WHERE pms_note_entete_id =:pmsNoteEnteteId  ")
                 .setParameter("pmsNoteEnteteId", pmsNoteEnteteId).getSingleResult();       
-    }
-
-    public void setJournalOperation(String action, JsonObject detail) throws CustomConstraintViolationException {
-        TMmcJournalOperation mmcJournalOperation = new TMmcJournalOperation();
-        mmcJournalOperation.setAction(action);
-        mmcJournalOperation.setDetail(detail.toString());
-        try {
-            entityManager.persist(mmcJournalOperation);
-        } catch (ConstraintViolationException ex) {
-            throw new CustomConstraintViolationException(ex);
-        }
     }
 
     public void refundArrhe(JsonObject object)
