@@ -2301,12 +2301,6 @@ public class ReportingDao {
         return prestaVendue;
     }
 
-    public List<VPosEditionJournalOperation> getAllJournalOperation() {
-        List<VPosEditionJournalOperation> journalOperation = entityManager
-                .createQuery("FROM VPosEditionJournalOperation").getResultList();
-        return journalOperation;
-    }
-
     //EDITION COLLECTIVITE
     public JsonArray getEditionFamilyReading(String dateStart, String dateEnd) {
         Boolean isExist = false;

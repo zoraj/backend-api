@@ -54,7 +54,6 @@ import cloud.multimicro.mmc.Entity.VPosEditionCaActivite;
 import cloud.multimicro.mmc.Entity.VPosEditionConsolidation;
 import cloud.multimicro.mmc.Entity.VPosEditionConsolidationResto;
 import cloud.multimicro.mmc.Entity.VPosEditionJournalOffert;
-import cloud.multimicro.mmc.Entity.VPosEditionJournalOperation;
 import cloud.multimicro.mmc.Entity.VPosEditionNoteSoldeJour;
 import cloud.multimicro.mmc.Entity.VPosEditionPrestationVendue;
 import cloud.multimicro.mmc.Entity.VPosEditionVisualisationModeEncaissement;
@@ -758,17 +757,6 @@ public class ReportingService {
             throw new NotFoundException();
         }
         return Response.ok(prestaVendue, MediaType.APPLICATION_JSON).build();
-    }
-
-    @GET
-    @Path("/pos/report-journal-operation")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllJournalOperation() {
-        List<VPosEditionJournalOperation> journalOperation = reportingDao.getAllJournalOperation();
-        if (journalOperation.isEmpty()) {
-            throw new NotFoundException();
-        }
-        return Response.ok(journalOperation, MediaType.APPLICATION_JSON).build();
     }
 
     //EDITION COLLECTIVITE
