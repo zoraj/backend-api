@@ -5,7 +5,6 @@
  */
 package cloud.multimicro.mmc.Dao;
 
-import cloud.multimicro.mmc.Entity.TMmcJournalOperation;
 import cloud.multimicro.mmc.Entity.TPosJournalOperation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import java.io.StringReader;
@@ -46,7 +45,7 @@ public class JournalOpDao {
         return array;
     }
 
-    public List<TMmcJournalOperation> getByCriteria(JsonObject criteria) {
+    /*public List<TMmcJournalOperation> getByCriteria(JsonObject criteria) {
         String query;
         StringBuilder criteriaStr = new StringBuilder();
         String dateDebut = criteria.getString("dateDebut");
@@ -443,7 +442,7 @@ public class JournalOpDao {
         return journal;
     }
 
-    public List<TMmcJournalOperation> getAll() {
+    /*public List<TMmcJournalOperation> getAll() {
         List<TMmcJournalOperation> journal = entityManager.createQuery("FROM TMmcJournalOperation  ").getResultList();
         return journal;
 
@@ -505,7 +504,7 @@ public class JournalOpDao {
         
 
         return journal;
-    }
+    }*/
     
   
     
