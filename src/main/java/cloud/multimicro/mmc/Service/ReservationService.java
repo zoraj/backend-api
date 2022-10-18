@@ -68,13 +68,23 @@ public class ReservationService {
         String arrival = parameters.getFirst("dateArrivee");
         String departure = parameters.getFirst("dateDepart");
         String name = parameters.getFirst("name");
-        String statut = parameters.getFirst("statut");
-        String client = parameters.getFirst("client");
-        String origin = parameters.getFirst("origin");
         String numbooking = parameters.getFirst("numeroReservation");
-        String reservationType = parameters.getFirst("reservationType");
 
-        List<TPmsReservation> reservation = reservationDao.getAll(arrival, departure, name, statut, client, origin, numbooking, reservationType);
+        List<TPmsReservation> reservation = reservationDao.getAll(arrival, departure, name, numbooking);
+        if (reservation.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(reservation, MediaType.APPLICATION_JSON).build();       
+    }
+    
+    @GET
+    @Path("/planning")  
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getReservationPlanning(@Context UriInfo info) {
+        MultivaluedMap<String, String> parameters = info.getQueryParameters();
+        String arrival = parameters.getFirst("dateArrivee");
+
+        List<TPmsReservation> reservation = reservationDao.getReservationPlanning(arrival);
         if (reservation.isEmpty()) {
             throw new NotFoundException();
         }

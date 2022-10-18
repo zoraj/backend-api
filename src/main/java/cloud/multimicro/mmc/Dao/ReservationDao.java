@@ -61,58 +61,30 @@ public class ReservationDao {
     }
 
     // RESERVATION
-    public List<TPmsReservation> getAll(String arrival, String departure, String name, String statut, String client,
-            String origin, String numbooking, String reservationType) {
+    public List<TPmsReservation> getAll(String arrival, String departure, String name, String numbooking) {
         List<TPmsReservation> reservationList = new ArrayList<>();
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FROM TPmsReservation WHERE ");
         if (!Objects.isNull(name)) {
-            stringBuilder.append(" nomNote LIKE '" + name.charAt(0) + "%'");
+            stringBuilder.append(" nomReservation LIKE '%" + name + "%'");
             isExist = true;
         }
 
         if (!Objects.isNull(arrival)) {
             if (isExist == true) {
-                stringBuilder.append(" AND dateArrivee >= '" + arrival + "'");
+                stringBuilder.append(" AND dateArrivee = '" + arrival + "'");
             } else {
-                stringBuilder.append(" dateArrivee >= '" + arrival + "'");
+                stringBuilder.append(" dateArrivee = '" + arrival + "'");
                 isExist = true;
             }
         }
 
         if (!Objects.isNull(departure)) {
             if (isExist == true) {
-                stringBuilder.append(" AND dateDepart >= '" + departure + "'");
+                stringBuilder.append(" AND dateDepart = '" + departure + "'");
             } else {
-                stringBuilder.append(" AND dateDepart >= '" + departure + "'");
-                isExist = true;
-            }
-        }
-
-        if (!Objects.isNull(statut)) {
-            if (isExist == true) {
-                stringBuilder.append(" AND statut = '" + statut + "'");
-            } else {
-                stringBuilder.append(" statut ='" + statut + "'");
-                isExist = true;
-            }
-        }
-
-        if (!Objects.isNull(client)) {
-            if (isExist == true) {
-                stringBuilder.append(" AND mmcClientId =" + client);
-            } else {
-                stringBuilder.append(" mmcClientId =" + client);
-                isExist = true;
-            }
-        }
-
-        if (!Objects.isNull(origin)) {
-            if (isExist == true) {
-                stringBuilder.append(" AND origine = '" + origin + "'");
-            } else {
-                stringBuilder.append(" origine = '" + origin + "'");
+                stringBuilder.append(" dateDepart = '" + departure + "'");
                 isExist = true;
             }
         }
@@ -126,15 +98,6 @@ public class ReservationDao {
             }
         }
 
-        if (!Objects.isNull(reservationType)) {
-            if (isExist == true) {
-                stringBuilder.append(" AND reservationType = '" + reservationType + "'");
-            } else {
-                stringBuilder.append(" reservationType = '" + reservationType + "'");
-                isExist = true;
-            }
-        }
-
         if (isExist == true) {
             stringBuilder.append(" AND dateDeletion IS null ");
         } else {
@@ -143,6 +106,11 @@ public class ReservationDao {
 
         reservationList = entityManager.createQuery(stringBuilder.toString()).getResultList();
         return reservationList;
+    }
+    
+    public List<TPmsReservation> getReservationPlanning(String arrival) {
+        List<TPmsReservation> result = entityManager.createQuery("FROM TPmsReservation WHERE dateArrivee >= '" + arrival + "' AND dateDeletion IS null ").getResultList();
+        return result;
     }
 
     public TPmsReservation getResaById(int id) {
