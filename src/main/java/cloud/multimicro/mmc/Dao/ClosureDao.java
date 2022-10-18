@@ -10,6 +10,8 @@ import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Entity.TPmsClotureDefinitive;
 import cloud.multimicro.mmc.Entity.TPmsClotureProvisoire;
 import cloud.multimicro.mmc.Entity.TPmsEncaissement;
+import cloud.multimicro.mmc.Entity.TPosClotureDefinitive;
+import cloud.multimicro.mmc.Entity.TPosClotureProvisoire;
 import cloud.multimicro.mmc.Entity.TPosNoteEntete;
 import cloud.multimicro.mmc.Entity.VPmsCa;
 import cloud.multimicro.mmc.Entity.VPmsEncaissement;
@@ -61,6 +63,18 @@ public class ClosureDao {
     }
     
     public TMmcParametrage getDateLogicielleIncrementPms() {
+        TMmcParametrage valueDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate dateLogicielle = LocalDate.parse(valueDateLogicielle.getValeur());
+        LocalDate futureDateLogicielle = dateLogicielle.plusDays(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        valueDateLogicielle.setValeur(futureDateLogicielle.format(formatter));
+        entityManager.merge(valueDateLogicielle);
+        this.saveNewDeviceCloture(dateLogicielle, futureDateLogicielle);
+
+        return valueDateLogicielle;
+    }
+    
+    public TMmcParametrage getDateLogicielleIncrementPmsHotel() {
         TMmcParametrage valueDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
         LocalDate dateLogicielle = LocalDate.parse(valueDateLogicielle.getValeur());
         LocalDate futureDateLogicielle = dateLogicielle.plusDays(1);
@@ -135,6 +149,20 @@ public class ClosureDao {
         return (BigInteger) entityManager
                 .createNativeQuery("SELECT COUNT(*) FROM t_mmc_device_cloture WHERE status = 'ENCOURS' ")
                 .getSingleResult();
+    }
+    
+    public BigInteger countNoteInProgress() {
+        return (BigInteger) entityManager
+                .createNativeQuery("SELECT COUNT(*) FROM t_pms_note_entete WHERE etat = 'ENCOURS' ")
+                .getSingleResult();
+    }
+    
+    public BigInteger countNoteInClosureDefinitive() {
+        TMmcParametrage valueDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate dateLogicielle = LocalDate.parse(valueDateLogicielle.getValeur());
+        return (BigInteger) entityManager
+                .createNativeQuery("SELECT COUNT(*) FROM t_pos_cloture_definitive WHERE date_cloture =:dateLogicielle")
+                .setParameter("dateLogicielle", dateLogicielle).getSingleResult();
     }
         
     public JsonArray getAllListCaByActivity() {      
@@ -864,6 +892,12 @@ public class ClosureDao {
                     montantCaMois           = sumCaMonthBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry, dateMonthEntry);
                     montantCaAnnee          = sumCaYearBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry, dateYearEntry);
                     
+                    subFamily.setLibelle(libelleSousFamille);
+                    subFamily.setMontantJour(montantCaJour);
+                    subFamily.setMontantPeriode(montantCaJour);
+                    subFamily.setMontantMois(montantCaMois);
+                    subFamily.setMontantAnnee(montantCaAnnee);
+                            
                     totalMontantCaJour      = BigDecimal.ZERO;
                     totalMontantCaMois      = BigDecimal.ZERO;
                     totalMontantCaAnnee     = BigDecimal.ZERO;
@@ -871,6 +905,12 @@ public class ClosureDao {
                     totalMontantCaJour  = totalSumCaDayByFamily(caList.getIdFamille(), dateEntry);
                     totalMontantCaMois  = totalSumCaMonthByFamily(caList.getIdFamille(), dateEntry, dateMonthEntry);
                     totalMontantCaAnnee = totalSumCaYearByFamily(caList.getIdFamille(), dateEntry, dateYearEntry);
+                    
+                    family.setLibelle("TOTAL "+libelleFamille);
+                    family.setMontantJour(totalMontantCaJour);
+                    family.setMontantPeriode(totalMontantCaJour);
+                    family.setMontantMois(totalMontantCaMois);
+                    family.setMontantAnnee(totalMontantCaAnnee);
                 }
             }
             try {
@@ -1124,6 +1164,12 @@ public class ClosureDao {
                     montantCaMois           = sumCaMonthBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry, dateMonthEntry);
                     montantCaAnnee          = sumCaYearBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry, dateYearEntry);
                     
+                    subFamily.setLibelle(libelleSousFamille);
+                    subFamily.setMontantJour(montantCaJour);
+                    subFamily.setMontantPeriode(montantCaJour);
+                    subFamily.setMontantMois(montantCaMois);
+                    subFamily.setMontantAnnee(montantCaAnnee);
+                    
                     totalMontantCaJour      = BigDecimal.ZERO;
                     totalMontantCaMois      = BigDecimal.ZERO;
                     totalMontantCaAnnee     = BigDecimal.ZERO;
@@ -1131,6 +1177,12 @@ public class ClosureDao {
                     totalMontantCaJour  = totalSumCaDayByFamily(caList.getIdFamille(), dateEntry);
                     totalMontantCaMois  = totalSumCaMonthByFamily(caList.getIdFamille(), dateEntry, dateMonthEntry);
                     totalMontantCaAnnee = totalSumCaYearByFamily(caList.getIdFamille(), dateEntry, dateYearEntry);
+                    
+                    family.setLibelle("TOTAL "+libelleFamille);
+                    family.setMontantJour(totalMontantCaJour);
+                    family.setMontantPeriode(totalMontantCaJour);
+                    family.setMontantMois(totalMontantCaMois);
+                    family.setMontantAnnee(totalMontantCaAnnee);                    
                 }
             }
             try {
@@ -1249,5 +1301,488 @@ public class ClosureDao {
 
         List<TPmsClotureDefinitive> result = entityManager.createQuery(stringBuilder.toString()).getResultList();
         return result;
+    }
+    
+    //CLOSURE PROVISOIRE POS
+    public void deletePosClotureProvisoire(String dateReference) {
+        entityManager.createNativeQuery(" DELETE FROM `t_pos_cloture_provisoire` WHERE date_cloture=:dateReference").setParameter("dateReference", dateReference)
+                .executeUpdate();
+    }
+    
+    public List<TPosClotureProvisoire> getPosClotureProvisoire(String dateReference) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("FROM TPosClotureProvisoire  ");
+        if (!Objects.isNull(dateReference)) {
+            stringBuilder.append(" WHERE dateCloture  = '" + dateReference + "'");
+        }
+
+        List<TPosClotureProvisoire> result = entityManager.createQuery(stringBuilder.toString()).getResultList();
+        return result;
+    }
+    
+    public BigDecimal totalMontantCa(String dateReference) {
+        return (BigDecimal) entityManager.createNativeQuery("SELECT IFNULL(SUM(montant_ca), 0) FROM v_pos_ca "
+                + "WHERE Date(date_ca) =:dateReference  ")
+                .setParameter("dateReference", dateReference).getSingleResult();       
+    }
+    
+    public BigDecimal totalTva(String dateReference) {
+        return (BigDecimal) entityManager.createNativeQuery("SELECT IFNULL(SUM(tva), 0) FROM v_pos_ca "
+                + "WHERE Date(date_ca) =:dateReference  ")
+                .setParameter("dateReference", dateReference).getSingleResult();       
+    }
+    
+    public BigDecimal totalCaHt(String dateReference) {
+        return (BigDecimal) entityManager.createNativeQuery("SELECT IFNULL(SUM(ca_ht), 0) FROM v_pos_ca "
+                + "WHERE Date(date_ca) =:dateReference  ")
+                .setParameter("dateReference", dateReference).getSingleResult();     
+    }
+    
+    public BigDecimal totalRemise(String dateReference) {
+        return (BigDecimal) entityManager.createNativeQuery("SELECT IFNULL(SUM(remise), 0) FROM v_pos_ca "
+                + "WHERE Date(date_ca) =:dateReference  ")
+                .setParameter("dateReference", dateReference).getSingleResult();     
+    }
+    
+    public BigDecimal totalOffert(String dateReference) {
+        return (BigDecimal) entityManager.createNativeQuery("SELECT IFNULL(SUM(offert), 0) FROM v_pos_ca "
+                + "WHERE Date(date_ca) =:dateReference  ")
+                .setParameter("dateReference", dateReference).getSingleResult();     
+    }
+    
+    public BigDecimal totalNbCouvert(String dateReference) {
+        return (BigDecimal) entityManager.createNativeQuery("SELECT IFNULL(SUM(nb_couvert), 0) FROM v_pos_ca "
+                + "WHERE Date(date_ca) =:dateReference  ")
+                .setParameter("dateReference", dateReference).getSingleResult();
+    }
+    
+    public BigDecimal totalMontantEncaissement(String dateReference) {
+        return (BigDecimal) entityManager.createNativeQuery("SELECT IFNULL(SUM(montant_ttc), 0) FROM v_pos_encaissement "
+                + "WHERE Date(date_encaissement) =:dateReference  ")
+                .setParameter("dateReference", dateReference).getSingleResult();     
+    }
+            
+    public void setPosClotureProvisoire(JsonObject request)
+            throws CustomConstraintViolationException, ParseException {
+        String dateCloture = request.getString("dateReference");
+        deletePosClotureProvisoire(dateCloture);
+        
+        //LIST  CA
+        StringBuilder stringBuilderCa = new StringBuilder();
+        stringBuilderCa.append("FROM VPosCa  ");
+        TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        String dateLog = settingData.getValeur();
+        var dateEntry = "";
+        
+        if (!Objects.isNull(dateCloture)) {
+            stringBuilderCa.append(" WHERE Date(dateCa) = '" + dateCloture + "' ORDER BY idSousFamille ");
+            dateEntry = dateCloture;
+        } else {
+            stringBuilderCa.append(" WHERE Date(dateCa) = '" + dateLog + "' ORDER BY idSousFamille ");
+            dateEntry = dateLog;
+        }       
+        List<VPosCa> listCa = entityManager.createQuery(stringBuilderCa.toString()).getResultList();
+        
+        if (listCa.size() > 0) {
+            VPosCa valueListCa = listCa.get(0);
+            Integer idSousFamilleInit = valueListCa.getIdSousFamille();
+            var libelleSousFamille = "";
+            var txTva = BigDecimal.ZERO;
+            var service = "";
+            
+            libelleSousFamille = valueListCa.getLibelleSousFamille();
+            
+            var montantCa = BigDecimal.ZERO;
+            var caHt = BigDecimal.ZERO;
+            var tva = BigDecimal.ZERO;
+            var remise = BigDecimal.ZERO;
+            var offert = BigDecimal.ZERO;
+            var nbCouvert = BigDecimal.ZERO;
+            
+            var totalMontantCa = BigDecimal.ZERO;
+            var totalCaHt = BigDecimal.ZERO;
+            var totalTva = BigDecimal.ZERO;
+            var totalRemise = BigDecimal.ZERO;
+            var totalOffert = BigDecimal.ZERO;
+            var totalNbCouvert = 0;
+            
+            LocalDate dateRef = LocalDate.parse(dateCloture);
+            TPosClotureProvisoire caSubFamily = new TPosClotureProvisoire();
+            TPosClotureProvisoire totalCaSubFamily = new TPosClotureProvisoire();
+            for(VPosCa caList : listCa){
+                if(idSousFamilleInit.equals(caList.getIdSousFamille())){
+                    libelleSousFamille = caList.getLibelleSousFamille();
+                    service = caList.getService();
+                    txTva = caList.getTxTva();
+                    montantCa = montantCa.add(caList.getMontantCa());
+                    caHt = caHt.add(caList.getCaHt());
+                    tva = tva.add(caList.getTva());
+                    remise = remise.add(caList.getRemise());
+                    offert = offert.add(caList.getOffert());
+                    nbCouvert = caList.getNbCouvert();
+                    
+                    caSubFamily.setLibelle(libelleSousFamille);
+                    caSubFamily.setTauxTva(txTva);
+                    caSubFamily.setMontantHt(caHt);
+                    caSubFamily.setMontantTva(tva);
+                    caSubFamily.setMontantTtc(montantCa);
+                    caSubFamily.setMontantRemise(remise);
+                    caSubFamily.setMontantOffert(offert);
+                    caSubFamily.setNbCouvert(nbCouvert.intValue());
+                    caSubFamily.setService(service);
+                }else{
+                    try {
+                        caSubFamily.setDateCloture(dateRef);
+                        entityManager.persist(caSubFamily);
+                    } catch (ConstraintViolationException ex) {
+                        throw new CustomConstraintViolationException(ex);
+                    }
+                    caSubFamily = new TPosClotureProvisoire();
+                    caSubFamily.setLibelle(caList.getLibelleSousFamille());
+                    caSubFamily.setTauxTva(caList.getTxTva());
+                    caSubFamily.setMontantHt(caList.getCaHt());
+                    caSubFamily.setMontantTva(caList.getTva());
+                    caSubFamily.setMontantTtc(caList.getMontantCa());
+                    caSubFamily.setMontantRemise(caList.getRemise());
+                    caSubFamily.setMontantOffert(caList.getOffert());
+                    caSubFamily.setNbCouvert(caList.getNbCouvert().intValue());
+                    caSubFamily.setService(caList.getService());
+                    
+                    montantCa = BigDecimal.ZERO;
+                    caHt = BigDecimal.ZERO;
+                    tva = BigDecimal.ZERO;
+                    remise = BigDecimal.ZERO;
+                    offert = BigDecimal.ZERO;
+                    
+                    libelleSousFamille = caList.getLibelleSousFamille();
+                    service = caList.getService();
+                    txTva = caList.getTxTva();
+                    montantCa = montantCa.add(caList.getMontantCa());
+                    caHt = caHt.add(caList.getCaHt());
+                    tva = tva.add(caList.getTva());
+                    remise = remise.add(caList.getRemise());
+                    offert = offert.add(caList.getOffert());
+                    
+                    idSousFamilleInit = caList.getIdSousFamille();
+                }
+            }   
+            totalMontantCa = totalMontantCa(dateEntry);
+            totalCaHt = totalCaHt(dateEntry);
+            totalTva = totalTva(dateEntry);
+            totalRemise = totalRemise(dateEntry);
+            totalOffert = totalOffert(dateEntry);
+            totalNbCouvert = totalNbCouvert(dateEntry).intValue();
+            
+            totalCaSubFamily.setLibelle("TOTAL");
+            totalCaSubFamily.setTauxTva(new BigDecimal("0"));
+            totalCaSubFamily.setMontantHt(totalCaHt);
+            totalCaSubFamily.setMontantTva(totalTva);
+            totalCaSubFamily.setMontantTtc(totalMontantCa);
+            totalCaSubFamily.setMontantRemise(totalRemise);
+            totalCaSubFamily.setMontantOffert(totalOffert);
+            totalCaSubFamily.setNbCouvert(totalNbCouvert);
+            totalCaSubFamily.setService("0");
+            
+            try {
+                caSubFamily.setDateCloture(dateRef);
+                entityManager.persist(caSubFamily);
+                totalCaSubFamily.setDateCloture(dateRef);
+                entityManager.persist(totalCaSubFamily);
+            } catch (ConstraintViolationException ex) {
+                throw new CustomConstraintViolationException(ex);
+            }
+        }
+        
+        //LIST  CASHING    
+        List<VPosEncaissement> listCashing = entityManager.createQuery("FROM VPosEncaissement WHERE Date(dateEncaissement) = '" + dateCloture + "' ORDER BY mmcModeEncaissementId  ").getResultList();
+        if (listCashing.size() > 0) {
+            VPosEncaissement valueListCashing = listCashing.get(0);
+            Integer idModeCashingInit = valueListCashing.getMmcModeEncaissementId();
+            var libelleModeCashing = "";
+            var service = "";
+           
+            libelleModeCashing = valueListCashing.getLibelleModeEncaissement();
+            
+            var montantCashingMidi = BigDecimal.ZERO;
+            var montantCashingSoir = BigDecimal.ZERO;
+            var totalMontantCashing = BigDecimal.ZERO;
+            var totalMontantEncaissement = BigDecimal.ZERO;
+            
+            LocalDate dateRef = LocalDate.parse(dateCloture);
+            TPosClotureProvisoire cashing = new TPosClotureProvisoire();
+            TPosClotureProvisoire totalCashing = new TPosClotureProvisoire();
+            
+            for(VPosEncaissement cashingList : listCashing){
+                if(idModeCashingInit.equals(cashingList.getMmcModeEncaissementId())){
+                    service = cashingList.getService();
+                    if(service.equals("M")){
+                        montantCashingMidi = montantCashingMidi.add(cashingList.getMontantTtc());                           
+                    }else if(service.equals("S")){                           
+                        montantCashingSoir = montantCashingSoir.add(cashingList.getMontantTtc());
+                    }
+                    totalMontantCashing = montantCashingMidi.add(montantCashingSoir);
+                    
+                    cashing.setLibelle(cashingList.getLibelleModeEncaissement());
+                    cashing.setMontantEncaissement(totalMontantCashing);
+                }else{
+                    try {
+                        cashing.setDateCloture(dateRef);
+                        entityManager.persist(cashing);
+                    } catch (ConstraintViolationException ex) {
+                        throw new CustomConstraintViolationException(ex);
+                    }
+                    cashing = new TPosClotureProvisoire(); 
+                    cashing.setLibelle(cashingList.getLibelleModeEncaissement());
+                    
+                    montantCashingMidi = new BigDecimal("0");
+                    montantCashingSoir = new BigDecimal("0");
+                    totalMontantCashing = new BigDecimal("0");
+                    if(cashingList.getService().equals("M")){
+                        montantCashingMidi = montantCashingMidi.add(cashingList.getMontantTtc());
+                        montantCashingSoir = new BigDecimal("0");
+                    }else if(cashingList.getService().equals("S")){
+                        montantCashingMidi = new BigDecimal("0");
+                        montantCashingSoir = montantCashingSoir.add(cashingList.getMontantTtc());
+                    }
+                    totalMontantCashing = montantCashingMidi.add(montantCashingSoir);
+                    cashing.setMontantEncaissement(totalMontantCashing);
+                    idModeCashingInit = cashingList.getMmcModeEncaissementId();
+                    libelleModeCashing = cashingList.getLibelleModeEncaissement();
+                }
+            }
+            totalMontantEncaissement = totalMontantEncaissement(dateCloture);
+            
+            totalCashing.setLibelle("TOTAL ENCAISSEMENT");
+            totalCashing.setMontantEncaissement(totalMontantEncaissement);
+            
+            try {
+                cashing.setDateCloture(dateRef);
+                entityManager.persist(cashing);
+                totalCashing.setDateCloture(dateRef);
+                entityManager.persist(totalCashing);
+            } catch (ConstraintViolationException ex) {
+                throw new CustomConstraintViolationException(ex);
+            }
+        }
+    }
+    
+    
+    //CLOSURE DEFINITIVE POS
+    public void deletePosClotureDefinitive(String dateReference) {
+        entityManager.createNativeQuery(" DELETE FROM `t_pos_cloture_definitive` WHERE date_cloture=:dateReference").setParameter("dateReference", dateReference)
+                .executeUpdate();
+    } 
+    
+    public List<TPosClotureDefinitive> getPosClotureDefinitive(String dateReference) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("FROM TPosClotureDefinitive  ");
+        if (!Objects.isNull(dateReference)) {
+            stringBuilder.append(" WHERE dateCloture  = '" + dateReference + "'");
+        }
+
+        List<TPosClotureDefinitive> result = entityManager.createQuery(stringBuilder.toString()).getResultList();
+        return result;
+    }
+    
+    public void setPosClotureDefinitive(JsonObject request)
+            throws CustomConstraintViolationException, ParseException {
+        String dateCloture = request.getString("dateReference");
+        deletePosClotureDefinitive(dateCloture);
+        
+        //LIST  CA
+        StringBuilder stringBuilderCa = new StringBuilder();
+        stringBuilderCa.append("FROM VPosCa  ");
+        TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        String dateLog = settingData.getValeur();
+        var dateEntry = "";
+        
+        if (!Objects.isNull(dateCloture)) {
+            stringBuilderCa.append(" WHERE Date(dateCa) = '" + dateCloture + "' ORDER BY idSousFamille ");
+            dateEntry = dateCloture;
+        }       
+        List<VPosCa> listCa = entityManager.createQuery(stringBuilderCa.toString()).getResultList();
+        
+        if (listCa.size() > 0) {
+            VPosCa valueListCa = listCa.get(0);
+            Integer idSousFamilleInit = valueListCa.getIdSousFamille();
+            var libelleSousFamille = "";
+            var txTva = BigDecimal.ZERO;
+            var service = "";
+            
+            libelleSousFamille = valueListCa.getLibelleSousFamille();
+            
+            var montantCa = BigDecimal.ZERO;
+            var caHt = BigDecimal.ZERO;
+            var tva = BigDecimal.ZERO;
+            var remise = BigDecimal.ZERO;
+            var offert = BigDecimal.ZERO;
+            var nbCouvert = BigDecimal.ZERO;
+            
+            var totalMontantCa = BigDecimal.ZERO;
+            var totalCaHt = BigDecimal.ZERO;
+            var totalTva = BigDecimal.ZERO;
+            var totalRemise = BigDecimal.ZERO;
+            var totalOffert = BigDecimal.ZERO;
+            var totalNbCouvert = 0;
+            
+            LocalDate dateRef = LocalDate.parse(dateCloture);
+            TPosClotureDefinitive caSubFamily = new TPosClotureDefinitive();
+            TPosClotureDefinitive totalCaSubFamily = new TPosClotureDefinitive();
+            for(VPosCa caList : listCa){
+                if(idSousFamilleInit.equals(caList.getIdSousFamille())){
+                    libelleSousFamille = caList.getLibelleSousFamille();
+                    service = caList.getService();
+                    txTva = caList.getTxTva();
+                    montantCa = montantCa.add(caList.getMontantCa());
+                    caHt = caHt.add(caList.getCaHt());
+                    tva = tva.add(caList.getTva());
+                    remise = remise.add(caList.getRemise());
+                    offert = offert.add(caList.getOffert());
+                    nbCouvert = caList.getNbCouvert();
+                    
+                    caSubFamily.setLibelle(libelleSousFamille);
+                    caSubFamily.setTauxTva(txTva);
+                    caSubFamily.setMontantHt(caHt);
+                    caSubFamily.setMontantTva(tva);
+                    caSubFamily.setMontantTtc(montantCa);
+                    caSubFamily.setMontantRemise(remise);
+                    caSubFamily.setMontantOffert(offert);
+                    caSubFamily.setNbCouvert(nbCouvert.intValue());
+                    caSubFamily.setService(service);
+                }else{
+                    try {
+                        caSubFamily.setDateCloture(dateRef);
+                        entityManager.persist(caSubFamily);
+                    } catch (ConstraintViolationException ex) {
+                        throw new CustomConstraintViolationException(ex);
+                    }
+                    caSubFamily = new TPosClotureDefinitive();
+                    caSubFamily.setLibelle(caList.getLibelleSousFamille());
+                    caSubFamily.setTauxTva(caList.getTxTva());
+                    caSubFamily.setMontantHt(caList.getCaHt());
+                    caSubFamily.setMontantTva(caList.getTva());
+                    caSubFamily.setMontantTtc(caList.getMontantCa());
+                    caSubFamily.setMontantRemise(caList.getRemise());
+                    caSubFamily.setMontantOffert(caList.getOffert());
+                    caSubFamily.setNbCouvert(caList.getNbCouvert().intValue());
+                    caSubFamily.setService(caList.getService());
+                    
+                    montantCa = BigDecimal.ZERO;
+                    caHt = BigDecimal.ZERO;
+                    tva = BigDecimal.ZERO;
+                    remise = BigDecimal.ZERO;
+                    offert = BigDecimal.ZERO;
+                    
+                    libelleSousFamille = caList.getLibelleSousFamille();
+                    service = caList.getService();
+                    txTva = caList.getTxTva();
+                    montantCa = montantCa.add(caList.getMontantCa());
+                    caHt = caHt.add(caList.getCaHt());
+                    tva = tva.add(caList.getTva());
+                    remise = remise.add(caList.getRemise());
+                    offert = offert.add(caList.getOffert());
+                    
+                    idSousFamilleInit = caList.getIdSousFamille();
+                }
+            }   
+            totalMontantCa = totalMontantCa(dateEntry);
+            totalCaHt = totalCaHt(dateEntry);
+            totalTva = totalTva(dateEntry);
+            totalRemise = totalRemise(dateEntry);
+            totalOffert = totalOffert(dateEntry);
+            totalNbCouvert = totalNbCouvert(dateEntry).intValue();
+            
+            totalCaSubFamily.setLibelle("TOTAL");
+            totalCaSubFamily.setTauxTva(new BigDecimal("0"));
+            totalCaSubFamily.setMontantHt(totalCaHt);
+            totalCaSubFamily.setMontantTva(totalTva);
+            totalCaSubFamily.setMontantTtc(totalMontantCa);
+            totalCaSubFamily.setMontantRemise(totalRemise);
+            totalCaSubFamily.setMontantOffert(totalOffert);
+            totalCaSubFamily.setNbCouvert(totalNbCouvert);
+            totalCaSubFamily.setService("0");
+            
+            try {
+                caSubFamily.setDateCloture(dateRef);
+                entityManager.persist(caSubFamily);
+                totalCaSubFamily.setDateCloture(dateRef);
+                entityManager.persist(totalCaSubFamily);
+            } catch (ConstraintViolationException ex) {
+                throw new CustomConstraintViolationException(ex);
+            }
+        }
+        
+        //LIST  CASHING       
+        List<VPosEncaissement> listCashing = entityManager.createQuery("FROM VPosEncaissement WHERE Date(dateEncaissement) = '" + dateCloture + "' ORDER BY mmcModeEncaissementId  ").getResultList();
+
+        if (listCashing.size() > 0) {
+            VPosEncaissement valueListCashing = listCashing.get(0);
+            Integer idModeCashingInit = valueListCashing.getMmcModeEncaissementId();
+            var libelleModeCashing = "";
+            var service = "";
+           
+            libelleModeCashing = valueListCashing.getLibelleModeEncaissement();
+            
+            var montantCashingMidi = BigDecimal.ZERO;
+            var montantCashingSoir = BigDecimal.ZERO;
+            var totalMontantCashing = BigDecimal.ZERO;
+            var totalMontantEncaissement = BigDecimal.ZERO;
+            
+            LocalDate dateRef = LocalDate.parse(dateCloture);
+            TPosClotureDefinitive cashing = new TPosClotureDefinitive();
+            TPosClotureDefinitive totalCashing = new TPosClotureDefinitive();
+            
+            for(VPosEncaissement cashingList : listCashing){
+                if(idModeCashingInit.equals(cashingList.getMmcModeEncaissementId())){
+                    service = cashingList.getService();
+                    if(service.equals("M")){
+                        montantCashingMidi = montantCashingMidi.add(cashingList.getMontantTtc());                           
+                    }else if(service.equals("S")){                           
+                        montantCashingSoir = montantCashingSoir.add(cashingList.getMontantTtc());
+                    }
+                    totalMontantCashing = montantCashingMidi.add(montantCashingSoir);
+                    
+                    cashing.setLibelle(cashingList.getLibelleModeEncaissement());
+                    cashing.setMontantEncaissement(totalMontantCashing);
+                }else{
+                    try {
+                        cashing.setDateCloture(dateRef);
+                        entityManager.persist(cashing);
+                    } catch (ConstraintViolationException ex) {
+                        throw new CustomConstraintViolationException(ex);
+                    }
+                    cashing = new TPosClotureDefinitive(); 
+                    cashing.setLibelle(cashingList.getLibelleModeEncaissement());
+                    
+                    montantCashingMidi = new BigDecimal("0");
+                    montantCashingSoir = new BigDecimal("0");
+                    totalMontantCashing = new BigDecimal("0");
+                    if(cashingList.getService().equals("M")){
+                        montantCashingMidi = montantCashingMidi.add(cashingList.getMontantTtc());
+                        montantCashingSoir = new BigDecimal("0");
+                    }else if(cashingList.getService().equals("S")){
+                        montantCashingMidi = new BigDecimal("0");
+                        montantCashingSoir = montantCashingSoir.add(cashingList.getMontantTtc());
+                    }
+                    totalMontantCashing = montantCashingMidi.add(montantCashingSoir);
+                    cashing.setMontantEncaissement(totalMontantCashing);
+                    idModeCashingInit = cashingList.getMmcModeEncaissementId();
+                    libelleModeCashing = cashingList.getLibelleModeEncaissement();
+                }
+            }
+            totalMontantEncaissement = totalMontantEncaissement(dateCloture);
+            
+            totalCashing.setLibelle("TOTAL ENCAISSEMENT");
+            totalCashing.setMontantEncaissement(totalMontantEncaissement);
+            
+            try {
+                cashing.setDateCloture(dateRef);
+                entityManager.persist(cashing);
+                totalCashing.setDateCloture(dateRef);
+                entityManager.persist(totalCashing);
+            } catch (ConstraintViolationException ex) {
+                throw new CustomConstraintViolationException(ex);
+            }
+        }
     }
 }

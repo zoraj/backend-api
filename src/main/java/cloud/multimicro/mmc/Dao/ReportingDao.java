@@ -57,7 +57,6 @@ import cloud.multimicro.mmc.Entity.VPosEditionCaActivite;
 import cloud.multimicro.mmc.Entity.VPosEditionConsolidation;
 import cloud.multimicro.mmc.Entity.VPosEditionConsolidationResto;
 import cloud.multimicro.mmc.Entity.VPosEditionJournalOffert;
-import cloud.multimicro.mmc.Entity.VPosEditionJournalOperation;
 import cloud.multimicro.mmc.Entity.VPosEditionNoteSoldeJour;
 import cloud.multimicro.mmc.Entity.VPosEditionPrestationVendue;
 import cloud.multimicro.mmc.Entity.VPosEditionVisualisationModeEncaissement;

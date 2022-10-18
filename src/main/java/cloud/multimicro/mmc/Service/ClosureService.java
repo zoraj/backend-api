@@ -10,6 +10,8 @@ import cloud.multimicro.mmc.Entity.TMmcDeviceCloture;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Entity.TPmsClotureDefinitive;
 import cloud.multimicro.mmc.Entity.TPmsClotureProvisoire;
+import cloud.multimicro.mmc.Entity.TPosClotureDefinitive;
+import cloud.multimicro.mmc.Entity.TPosClotureProvisoire;
 import cloud.multimicro.mmc.Entity.VPosCa;
 import cloud.multimicro.mmc.Entity.VPosEncaissement;
 
@@ -66,15 +68,44 @@ public class ClosureService {
         }
     }
     
+    @GET
+    @Path("/pos/post-closed")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response countPostNotClosed() {
+        BigInteger postNotClosed = closureDao.countPostNotClosed();
+        if (postNotClosed.equals(new BigInteger("0"))) {
+            return Response.ok(postNotClosed, MediaType.APPLICATION_JSON).build();
+        }else{
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }     
+    }
+    
     @Path("/pms")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDateLogicielleIncrementPms() {
-        try{
+        BigInteger noteInProgress = closureDao.countNoteInProgress();
+        BigInteger noteInClosureDefinitive = closureDao.countNoteInClosureDefinitive();
+        
+        if(noteInProgress.equals(new BigInteger("0")) && noteInClosureDefinitive.compareTo(new BigInteger("0")) == 1){
             TMmcParametrage dateLogicielle = closureDao.getDateLogicielleIncrementPms();
             return Response.ok(dateLogicielle, MediaType.APPLICATION_JSON).build();
-        } catch (Exception ex) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+        } else{
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+    }
+    
+    @Path("/pms-hotel")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDateLogicielleIncrementPmsHotel() {
+        BigInteger noteInProgress = closureDao.countNoteInProgress();
+        
+        if(noteInProgress.equals(new BigInteger("0"))){
+            TMmcParametrage dateLogicielle = closureDao.getDateLogicielleIncrementPmsHotel();
+            return Response.ok(dateLogicielle, MediaType.APPLICATION_JSON).build();
+        } else{
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
     }
 
@@ -247,6 +278,55 @@ public class ClosureService {
     public Response getPmsClotureDefinitive(@Context UriInfo info) {
         String dateReference = info.getQueryParameters().getFirst("dateReference");
         List<TPmsClotureDefinitive> closure = closureDao.getPmsClotureDefinitive(dateReference);
+        if (closure.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(closure, MediaType.APPLICATION_JSON).build();
+    }
+    
+    //CLOTURE POS
+    @Path("/pos/provisional")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response setPosClotureProvisoire(JsonObject request) throws ParseException {
+        try {
+            closureDao.setPosClotureProvisoire(request);
+            return Response.ok(request, MediaType.APPLICATION_JSON).build();
+        } catch (CustomConstraintViolationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+    
+    @GET
+    @Path("/pos/provisional")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPosClotureProvisoire(@Context UriInfo info) {
+        String dateReference = info.getQueryParameters().getFirst("dateReference");
+        List<TPosClotureProvisoire> closure = closureDao.getPosClotureProvisoire(dateReference);
+        if (closure.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(closure, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @Path("/pos/definitive")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response setPosClotureDefinitive(JsonObject request) throws ParseException {
+        try {
+            closureDao.setPosClotureDefinitive(request);
+            return Response.ok(request, MediaType.APPLICATION_JSON).build();
+        } catch (CustomConstraintViolationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+    
+    @GET
+    @Path("/pos/definitive")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPosClotureDefinitive(@Context UriInfo info) {
+        String dateReference = info.getQueryParameters().getFirst("dateReference");
+        List<TPosClotureDefinitive> closure = closureDao.getPosClotureDefinitive(dateReference);
         if (closure.isEmpty()) {
             throw new NotFoundException();
         }
