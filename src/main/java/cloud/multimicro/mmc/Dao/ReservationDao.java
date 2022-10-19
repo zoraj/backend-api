@@ -109,7 +109,7 @@ public class ReservationDao {
     }
     
     public List<TPmsReservation> getReservationPlanning(String arrival) {
-        List<TPmsReservation> result = entityManager.createQuery("FROM TPmsReservation WHERE dateArrivee >= '" + arrival + "' AND dateDeletion IS null ").getResultList();
+        List<TPmsReservation> result = entityManager.createQuery("FROM TPmsReservation WHERE (dateArrivee >= '" + arrival + "' OR dateArrivee < '" + arrival + "') AND dateDepart >= '" + arrival + "' AND dateDeletion IS null ").getResultList();
         return result;
     }
 
