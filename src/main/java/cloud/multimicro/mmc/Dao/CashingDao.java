@@ -354,6 +354,10 @@ public class CashingDao {
         String DeviceUuid = "";
         DeviceUuid = mmcDeviceClotureList.toString().replace("[","");
         DeviceUuid = DeviceUuid.replace("]","");
+        BigDecimal amountCashed = encaissement.getMontant();
+        BigDecimal totalNote = totalMontantByNoteHeaderIdPos(encaissement.getPosNoteEnteteId());
+        BigDecimal amountAlreadyCashed = totalMontantExistingCashedPos(encaissement.getPosNoteEnteteId());
+        BigDecimal totalAmount = amountCashed.add(amountAlreadyCashed);       
         TPosFacture facturePos = new TPosFacture();
         TPosFactureDetail factureDetailPos = new TPosFactureDetail();
         if (encaissement.getPosNoteEnteteId() != null) {
@@ -400,6 +404,11 @@ public class CashingDao {
                     
             
             factureDetailPos.setMontantTtc(new BigDecimal(0));
+            if(amountCashed.equals(totalNote) || amountCashed.compareTo(totalNote) == 1 || totalAmount.equals(totalNote) || totalAmount.compareTo(totalNote) == 1){
+                noteHeader.setEtat("SOLDE");
+            }else{
+                noteHeader.setEtat("ENCOURS");
+            }
             try {
                 entityManager.merge(noteHeader);
                 entityManager.persist(facturePos);
@@ -459,6 +468,18 @@ public class CashingDao {
         return (BigDecimal) entityManager.createNativeQuery("SELECT IFNULL(SUM(montant), 0) FROM t_pms_encaissement "
                 + "WHERE pms_note_entete_id =:pmsNoteEnteteId  ")
                 .setParameter("pmsNoteEnteteId", pmsNoteEnteteId).getSingleResult();       
+    }
+    
+    private BigDecimal totalMontantByNoteHeaderIdPos(Integer posNoteEnteteId) {
+        return (BigDecimal) entityManager.createNativeQuery("SELECT SUM(pos_prestation_prix*qte) FROM t_pos_note_detail "
+                + "WHERE pos_note_entete_id =:posNoteEnteteId  ")
+                .setParameter("posNoteEnteteId", posNoteEnteteId).getSingleResult();       
+    }
+    
+    private BigDecimal totalMontantExistingCashedPos(Integer posNoteEnteteId) {
+        return (BigDecimal) entityManager.createNativeQuery("SELECT IFNULL(SUM(montant_ttc), 0) FROM t_pos_encaissement "
+                + "WHERE pos_note_entete_id =:posNoteEnteteId  ")
+                .setParameter("posNoteEnteteId", posNoteEnteteId).getSingleResult();       
     }
 
     public void refundArrhe(JsonObject object)
