@@ -1,15 +1,16 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package cloud.multimicro.mmc.Entity;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Data;
@@ -17,13 +18,13 @@ import org.hibernate.annotations.Immutable;
 
 /**
  *
- * @author Naly
+ * @author HERIZO-PC
  */
 @Entity
 @Immutable
-@Table(name = "v_collectivite_lecture_sous_famille")
+@Table(name = "v_collectivite_edition_passage")
 @Data
-public class VCollectiviteLectureSousFamille implements Serializable {    
+public class VCollectiviteEditionPassage implements Serializable {    
     @Id
     @Column(name = "id")
     private Integer id;
@@ -42,6 +43,9 @@ public class VCollectiviteLectureSousFamille implements Serializable {
     
     @Column(name = "quantite")
     private Integer qte;
+    
+    @Column(name = "idSf")
+    private Integer idSf;
     
     @Column(name = "montant_ttc")
     private BigDecimal montantTtc;

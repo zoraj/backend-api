@@ -72,4 +72,10 @@ public class VPosEncaissement implements Serializable {
         this.montantTtc = montantTtcValue;
         this.posteUuid = posteUuidValue;
     }
+    
+    @Column(name = "code")
+    private String code;
+    
+    @Column(name = "qte")
+    private BigDecimal qte;
 }

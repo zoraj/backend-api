@@ -476,6 +476,41 @@ public class SettingDao {
             settingStripePublicKey.setCle("STRIPE_PUBLIC_KEY");
             settingStripePublicKey.setValeur("");
             entityManager.persist(settingStripePublicKey);
+            
+            TMmcParametrage settingPremierNumeroBadge = new TMmcParametrage();
+            settingPremierNumeroBadge.setCle("PREMIER_NUMERO_BADGE");
+            settingPremierNumeroBadge.setValeur("0");
+            entityManager.persist(settingPremierNumeroBadge);
+            
+            TMmcParametrage settingDernierNumeroBadge = new TMmcParametrage();
+            settingDernierNumeroBadge.setCle("DERNIER_NUMERO_BADGE");
+            settingDernierNumeroBadge.setValeur("0");
+            entityManager.persist(settingDernierNumeroBadge);
+            
+            TMmcParametrage settingAdmissionBadgeDebut = new TMmcParametrage();
+            settingAdmissionBadgeDebut.setCle("ADMISSION_BADGE_DEBUT");
+            settingAdmissionBadgeDebut.setValeur("0");
+            entityManager.persist(settingAdmissionBadgeDebut);
+            
+            TMmcParametrage settingAdmissionBadgefin = new TMmcParametrage();
+            settingAdmissionBadgefin.setCle("ADMISSION_BADGE_FIN");
+            settingAdmissionBadgefin.setValeur("0");
+            entityManager.persist(settingAdmissionBadgefin);
+            
+            TMmcParametrage settingPassageObligatoireBadge = new TMmcParametrage();
+            settingPassageObligatoireBadge.setCle("PASSAGE_OBLIGATOIRE_BADGE");
+            settingPassageObligatoireBadge.setValeur("0");
+            entityManager.persist(settingPassageObligatoireBadge);
+            
+            TMmcParametrage settingGestionDateValiditeBadge = new TMmcParametrage();
+            settingGestionDateValiditeBadge.setCle("GESTION_DATE_VALIDITE_BADGE");
+            settingGestionDateValiditeBadge.setValeur("0");
+            entityManager.persist(settingGestionDateValiditeBadge);
+            
+            TMmcParametrage settingImpressionMessageTicket = new TMmcParametrage();
+            settingImpressionMessageTicket.setCle("IMPRESSION_MESSAGE_TICKET");
+            settingImpressionMessageTicket.setValeur("0");
+            entityManager.persist(settingImpressionMessageTicket);
                  
         } catch (Exception e) {
             LOGGER.error("Setting initialization went wrong");

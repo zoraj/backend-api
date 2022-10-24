@@ -13,6 +13,9 @@ import cloud.multimicro.mmc.Entity.TPmsEncaissement;
 import cloud.multimicro.mmc.Entity.TPosClotureDefinitive;
 import cloud.multimicro.mmc.Entity.TPosClotureProvisoire;
 import cloud.multimicro.mmc.Entity.TPosNoteEntete;
+import cloud.multimicro.mmc.Entity.VCollectiviteLectureFamille;
+import cloud.multimicro.mmc.Entity.VCollectiviteLecturePrestation;
+import cloud.multimicro.mmc.Entity.VCollectiviteLectureSousFamille;
 import cloud.multimicro.mmc.Entity.VPmsCa;
 import cloud.multimicro.mmc.Entity.VPmsEncaissement;
 import cloud.multimicro.mmc.Entity.VPosCa;
@@ -1785,4 +1788,334 @@ public class ClosureDao {
             }
         }
     }
+    
+        public JsonObject getAllEditionClosureCollectivite() {
+        var closureClient = getAllNbNature();
+        var closurePrestationCollectivite = getAllListPrestationCollectivite();
+        var closureFamilleCollectivite = getAllListFamilleCollectivite();
+        var closureSubFamilyCollectivite = getAllListCaCollectiviteSub();
+        var closureJsonObject = Json.createObjectBuilder()
+                .add("closureClient", closureClient)
+                .add("closurePrestationCollectivite", closurePrestationCollectivite)
+                .add("closureFamilleCollectivite", closureFamilleCollectivite)
+                .add("closureSubFamilyCollectivite", closureSubFamilyCollectivite)
+                .build();
+        return closureJsonObject;
+    }
+	
+	/*public JsonArray getAllListCashing() {
+        TMmcParametrage valueDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate dateLogicielle = LocalDate.parse(valueDateLogicielle.getValeur());
+        List<VPosEncaissement> listCashing = entityManager
+                .createQuery("FROM VPosEncaissement WHERE dateEncaissement =:dateLogicielle ORDER BY mmcModeEncaissementId")
+                .setParameter("dateLogicielle", dateLogicielle).getResultList();
+        
+        var cashingResults = Json.createArrayBuilder();
+        
+        if (listCashing.size() > 0) {
+            VPosEncaissement valueListCashing = listCashing.get(0);
+            Integer idModeCashingInit = valueListCashing.getMmcModeEncaissementId();
+            var libelleModeCashing = "";
+            var service = "";
+            var code = "";
+           
+            libelleModeCashing = valueListCashing.getLibelleModeEncaissement();
+            code = valueListCashing.getCode();
+            var montantCashingMidi = BigDecimal.ZERO;
+            var montantCashingSoir = BigDecimal.ZERO;
+            var totalMontantCashing = BigDecimal.ZERO;
+            var qte = BigDecimal.ZERO;
+            
+            for(VPosEncaissement cashingList : listCashing){
+                if(idModeCashingInit.equals(cashingList.getMmcModeEncaissementId())){
+                    service = cashingList.getService();
+                    if(service.equals("M")){
+                        montantCashingMidi = montantCashingMidi.add(cashingList.getMontantTtc());                           
+                    }else if(service.equals("S")){                           
+                        montantCashingSoir = montantCashingSoir.add(cashingList.getMontantTtc());
+                    }
+                    qte = qte.add(cashingList.getQte());
+                    totalMontantCashing = montantCashingMidi.add(montantCashingSoir);
+                }else{
+                    var cashingJson = Json.createObjectBuilder()
+                            .add("code", code)
+                            .add("libelleModeEncaissement", libelleModeCashing)                           
+                            .add("montantCashingMidi", montantCashingMidi)
+                            .add("montantCashingSoir", montantCashingSoir)
+                            .add("total", totalMontantCashing)
+                            .add("qte", qte).build();
+                            
+                           cashingResults.add(cashingJson);
+                           
+                    montantCashingMidi = new BigDecimal("0");
+                    montantCashingSoir = new BigDecimal("0");
+                    totalMontantCashing = new BigDecimal("0");
+                    qte = new BigDecimal("0");
+                    if(cashingList.getService().equals("M")){
+                        montantCashingMidi = montantCashingMidi.add(cashingList.getMontantTtc());
+                        montantCashingSoir = new BigDecimal("0");
+                    }else if(cashingList.getService().equals("S")){
+                        montantCashingMidi = new BigDecimal("0");
+                        montantCashingSoir = montantCashingSoir.add(cashingList.getMontantTtc());
+                    }
+                    totalMontantCashing = montantCashingMidi.add(montantCashingSoir);
+                    idModeCashingInit = cashingList.getMmcModeEncaissementId();
+                    libelleModeCashing = cashingList.getLibelleModeEncaissement();
+                    code = cashingList.getCode();
+                    qte = qte.add(cashingList.getQte());
+                }
+            }
+            var cashingJson = Json.createObjectBuilder()
+                            .add("code", code)
+                            .add("libelleModeEncaissement", libelleModeCashing)                           
+                            .add("montantCashingMidi", montantCashingMidi)
+                            .add("montantCashingSoir", montantCashingSoir)
+                            .add("total", totalMontantCashing)
+                            .add("qte", qte).build();
+                           cashingResults.add(cashingJson);
+        }
+        return cashingResults.build();
+    }*/
+	
+	     public JsonArray getAllListPrestationCollectivite() {
+        TMmcParametrage valueDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate dateLogicielle = LocalDate.parse(valueDateLogicielle.getValeur());
+        List<VCollectiviteLecturePrestation> listCa = entityManager
+                .createQuery("FROM VCollectiviteLecturePrestation WHERE date_note =:dateLogicielle ORDER BY id ")
+                .setParameter("dateLogicielle", dateLogicielle).getResultList();
+
+        var caResults = Json.createArrayBuilder();
+        
+        if (listCa.size() > 0) {
+           
+            VCollectiviteLecturePrestation valueListCa = listCa.get(0);
+            
+            Integer idInit = valueListCa.getId();
+            var libelle = valueListCa.getLibellePrestation();
+            var code = valueListCa.getCode();
+            var montantTtc = new BigDecimal("0");
+            var montantHt = new BigDecimal("0");
+            var quantite = valueListCa.getQte();
+            var txTva = new BigDecimal("0");
+            var tva = new BigDecimal("0");
+            for(VCollectiviteLecturePrestation caList : listCa){
+                if(idInit.equals(caList.getId())){
+                    libelle = caList.getLibellePrestation();
+                    code = caList.getCode();
+                    montantTtc = montantTtc.add(caList.getMontantTtc());
+                    montantHt = montantHt.add(caList.getMontantHt());
+                    quantite = caList.getQte();
+                    txTva = caList.getTxTva();
+                    tva = tva.add(caList.getTva());
+                }else{
+                    var caJson = Json.createObjectBuilder()
+                        .add("libelle", libelle)
+                        .add("code", code)   
+                        .add("montantTtc", montantTtc)
+                        .add("montantHt", montantHt)    
+                        .add("quantite", quantite)
+                        .add("txTva", txTva)
+                        .add("tva", tva)
+                        .build();
+                    caResults.add(caJson);                    
+                    montantTtc = new BigDecimal("0");
+                    montantHt = new BigDecimal("0");
+                    quantite = caList.getQte();                   
+                    libelle = caList.getLibellePrestation();                   
+                    idInit = caList.getId();
+                    txTva = caList.getTxTva();
+                    tva = tva.add(caList.getTva());
+                }
+            }
+             var caJson = Json.createObjectBuilder()
+                        .add("libelle", libelle)
+                        .add("code", code)   
+                        .add("montantTtc", montantTtc)
+                        .add("montantHt", montantHt)    
+                        .add("quantite", quantite)
+                        .add("txTva", txTva)
+                        .add("tva", tva).build();
+                    caResults.add(caJson);
+            
+        }
+        return caResults.build();
+    }
+    
+    public JsonArray getAllListFamilleCollectivite() {
+        TMmcParametrage valueDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate dateLogicielle = LocalDate.parse(valueDateLogicielle.getValeur());
+        List<VCollectiviteLectureFamille> listCa = entityManager
+                .createQuery("FROM VCollectiviteLectureFamille WHERE date_note =:dateLogicielle ORDER BY id_famille ")
+                .setParameter("dateLogicielle", dateLogicielle).getResultList();
+
+        var caResults = Json.createArrayBuilder();
+        
+        if (listCa.size() > 0) {
+           
+            VCollectiviteLectureFamille valueListCa = listCa.get(0);
+             System.out.println("valueListCa_valueListCa"+valueListCa);
+            Integer idFamilleInit = valueListCa.getIdFamille();
+            var libelle = valueListCa.getLibelle();
+            var code = valueListCa.getCode();
+            var montantTtc = new BigDecimal("0");
+            var montantHt = new BigDecimal("0");
+            var quantite = valueListCa.getQte();
+            var txTva = new BigDecimal("0");
+            var tva = new BigDecimal("0");
+            for(VCollectiviteLectureFamille caList : listCa){
+                if(idFamilleInit.equals(caList.getIdFamille())){
+                    libelle = caList.getLibelle();
+                    code = caList.getCode();
+                    montantTtc = montantTtc.add(caList.getMontantTtc());
+                    montantHt = montantHt.add(caList.getMontantHt());
+                    quantite = caList.getQte();
+                    txTva = caList.getTxTva();
+                    tva = tva.add(caList.getTva());
+                }else{
+                    var caJson = Json.createObjectBuilder()
+                        .add("libelle", libelle)
+                        .add("code", code)   
+                        .add("montantTtc", montantTtc)
+                        .add("montantHt", montantHt)    
+                        .add("quantite", quantite)
+                        .add("txTva", txTva)
+                        .add("tva", tva)
+                        .build();
+                    caResults.add(caJson);                    
+                    montantTtc = new BigDecimal("0");
+                    montantHt = new BigDecimal("0");
+                    quantite = caList.getQte();                   
+                    libelle = caList.getLibelle();                   
+                    idFamilleInit = caList.getIdFamille();
+                    txTva = caList.getTxTva();
+                    tva = tva.add(caList.getTva());
+                }
+            }
+             var caJson = Json.createObjectBuilder()
+                        .add("libelle", libelle)
+                        .add("code", code)   
+                        .add("montantTtc", montantTtc)
+                        .add("montantHt", montantHt)    
+                        .add("quantite", quantite)
+                        .add("txTva", txTva)
+                        .add("tva", tva).build();
+                    caResults.add(caJson);
+            
+        }
+        return caResults.build();
+    }
+    
+    public JsonArray getAllListCaCollectiviteSub() {
+        TMmcParametrage valueDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate dateLogicielle = LocalDate.parse(valueDateLogicielle.getValeur());
+        List<VCollectiviteLectureSousFamille> listCa = entityManager
+                .createQuery("FROM VCollectiviteLectureSousFamille WHERE date_note =:dateLogicielle ORDER BY id")
+                .setParameter("dateLogicielle", dateLogicielle).getResultList();
+
+        var caResults = Json.createArrayBuilder();
+        
+        if (listCa.size() > 0) {
+           
+            VCollectiviteLectureSousFamille valueListCa = listCa.get(0);
+             System.out.println("valueListCa_valueListCa"+valueListCa);
+            Integer idInit = valueListCa.getId();
+            var libelle = valueListCa.getLibelle();
+            var code = valueListCa.getCode();
+            var montantTtc = new BigDecimal("0");
+            var montantHt = new BigDecimal("0");
+            var quantite = valueListCa.getQte();
+            var txTva = new BigDecimal("0");
+            var tva = new BigDecimal("0");
+            var nature = valueListCa.getNature();
+            var nom = valueListCa.getNom();
+            var prenom = valueListCa.getPrenom();
+            var reference = valueListCa.getCodeClient();
+          
+            for(VCollectiviteLectureSousFamille caList : listCa){
+                if(idInit.equals(caList.getId())){
+                    libelle = caList.getLibelle();
+                    nature = caList.getNature();
+                    code = caList.getCode();
+                    montantTtc = montantTtc.add(caList.getMontantTtc());
+                    montantHt = montantHt.add(caList.getMontantHt());
+                    quantite = caList.getQte();
+                    txTva = caList.getTxTva();
+                    tva = tva.add(caList.getTva());
+                    nom = caList.getNom();
+                    prenom = caList.getPrenom();
+                    reference = caList.getCodeClient();
+                }else{
+                    var caJson = Json.createObjectBuilder()
+                        .add("libelle", libelle)
+                        .add("code", code)   
+                        .add("montantTtc", montantTtc)
+                        .add("montantHt", montantHt)    
+                        .add("quantite", quantite)
+                        .add("txTva", txTva)
+                        .add("tva", tva)
+                        .add("nature", nature)
+                        .add("nom", nom)
+                        .add("prenom", prenom)
+                        .add("reference", reference)
+                        .build();
+                    caResults.add(caJson);                    
+                    montantTtc = new BigDecimal("0");
+                    montantHt = new BigDecimal("0");
+                    quantite = caList.getQte();                   
+                    libelle = caList.getLibelle();   
+                    nature = caList.getNature();
+                    idInit = caList.getId();
+                    txTva = caList.getTxTva();
+                    tva = tva.add(caList.getTva());
+                    nom = caList.getNom();
+                    prenom = caList.getPrenom();
+                    reference = caList.getCodeClient();
+                }
+            }
+             var caJson = Json.createObjectBuilder()
+                        .add("libelle", libelle)
+                        .add("code", code)   
+                        .add("montantTtc", montantTtc)
+                        .add("montantHt", montantHt)    
+                        .add("quantite", quantite)
+                        .add("txTva", txTva)
+                        .add("tva", tva)
+                        .add("nature", nature)
+                        .add("nom", nom)
+                        .add("prenom", prenom)
+                        .add("reference", reference).build();
+                    caResults.add(caJson);
+            
+        }
+        return caResults.build();
+    }
+    
+    public JsonArray getAllNbNature() {
+        var jsonArray = Json.createArrayBuilder();
+        TMmcParametrage valueDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate dateLogicielle = LocalDate.parse(valueDateLogicielle.getValeur());
+        List<Object[]> nbNature = entityManager.createNativeQuery("CALL p_nb_nature(:dateLogicielle) ")
+                .setParameter("dateLogicielle", dateLogicielle).getResultList();
+        for (Object[] n : nbNature) {
+            
+                if (n.length > 1) {
+                    //DebitLiquide nature = new DebitLiquide();
+                    var rowJson = Json.createObjectBuilder()
+                            .add("id", Integer.parseInt(n[0].toString()))
+                            .add("code", n[1].toString())
+                            .add("nom", n[2].toString())
+                            .add("prenom", n[3].toString())
+                            .add("debitLiquide", new BigDecimal(n[4].toString()))
+                            .add("subvention", new BigDecimal(n[5].toString()))
+                            .add("admission", new BigDecimal(n[6].toString()))
+                            .add("cotisation", new BigDecimal(n[7].toString()))
+                            .add("debitSolide", new BigDecimal(n[8].toString()))
+                            .add("nbrClient", new BigDecimal(n[9].toString()))
+                            .build();
+                    jsonArray.add(rowJson);
+                }  
+        }
+        return jsonArray.build();
+    }
+    
 }
