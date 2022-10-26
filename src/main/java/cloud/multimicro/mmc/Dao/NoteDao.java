@@ -219,7 +219,12 @@ public class NoteDao {
                 .setParameter("noteHeaderId", noteHeaderId).getResultList();
     }
     
-    public JsonArray getPosNoteDetailVaeByNoteHeaderId(Integer noteHeaderId) {
+    public List<VPosNoteDetailVenteEmportee> getPosNoteDetailVaeByNoteHeaderId(Integer noteHeaderId) {
+        return entityManager.createQuery("FROM VPosNoteDetailVenteEmportee WHERE noteEnteteId=:noteHeaderId")
+                .setParameter("noteHeaderId", noteHeaderId).getResultList();
+    }
+    
+    /*public JsonArray getPosNoteDetailVaeByNoteHeaderId(Integer noteHeaderId) {
         List<VPosNoteDetailVenteEmportee> listeNoteDetailVae = entityManager.createQuery("FROM VPosNoteDetailVenteEmportee WHERE noteEnteteId=:noteHeaderId")
                 .setParameter("noteHeaderId", noteHeaderId).getResultList();
         
@@ -267,7 +272,7 @@ public class NoteDao {
                         noteDetailVaeResults.add(object);
         }
         return noteDetailVaeResults.build();
-    }
+    }*/
     
     public Long getPosNoteHeaderNbCouvert(String dateNote) {
         final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
