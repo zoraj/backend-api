@@ -130,24 +130,27 @@ public class TakeAwayDao {
         
         for (int i = 0; i < jsonArrayNotedetail.size(); i++) {
             try (Jsonb jsonb = JsonbBuilder.create()) { 
+                TPosNoteDetailCommande detailcommandes = jsonb.fromJson(jsonArray.getJsonObject(i).toString(), TPosNoteDetailCommande.class);
                 noteDetail = jsonb.fromJson(jsonArrayNotedetail.getJsonObject(i).toString(), TPosNoteDetail.class);
                 noteDetail.setPosNoteEnteteId(noteEntete.getId());
                 entityManager.persist(noteDetail);  
+                detailcommandes.setPosNoteDetailId(noteDetail.getId());
+                entityManager.persist(detailcommandes);
             }catch(Exception ex){
                 throw new CustomConstraintViolationException(ex.getMessage());
             }  
         }
         
-        for (int i = 0; i < jsonArray.size(); i++) {
+        /*for (int i = 0; i < jsonArray.size(); i++) {
             try (Jsonb jsonb = JsonbBuilder.create()) { 
-            TPosNoteDetailCommande detailcommandes = jsonb.fromJson(jsonArray.getJsonObject(i).toString(), TPosNoteDetailCommande.class);
-            detailcommandes.setPosNoteDetailId(noteDetail.getId());
-            entityManager.persist(detailcommandes);
-        }catch(Exception ex){
-            throw new CustomConstraintViolationException(ex.getMessage());
-        }  
+                TPosNoteDetailCommande detailcommandes = jsonb.fromJson(jsonArray.getJsonObject(i).toString(), TPosNoteDetailCommande.class);
+                detailcommandes.setPosNoteDetailId(noteDetail.getId());
+                entityManager.persist(detailcommandes);
+            }catch(Exception ex){
+                throw new CustomConstraintViolationException(ex.getMessage());
+            }  
     
-        }   
+        }*/   
     }
     
     public String getInvoiceNumberVAE(String posteUuid){

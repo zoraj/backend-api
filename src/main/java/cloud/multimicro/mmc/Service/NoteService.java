@@ -36,6 +36,7 @@ import cloud.multimicro.mmc.Entity.TPosNoteApprovision;
 import cloud.multimicro.mmc.Entity.TPosNoteDetail;
 import cloud.multimicro.mmc.Entity.TPosNoteDetailCommande;
 import cloud.multimicro.mmc.Entity.TPosNoteEntete;
+import cloud.multimicro.mmc.Entity.VPosNoteDetailVenteEmportee;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
 
@@ -205,7 +206,7 @@ public class NoteService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPosNoteDetailVaeByNoteHeaderId(@PathParam("header") int id) {
-        JsonArray details = noteDao.getPosNoteDetailVaeByNoteHeaderId(id);
+        List<VPosNoteDetailVenteEmportee> details = noteDao.getPosNoteDetailVaeByNoteHeaderId(id);
         if (details.isEmpty()) {
             throw new NotFoundException();
         }
