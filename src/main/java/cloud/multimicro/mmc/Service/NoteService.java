@@ -68,7 +68,19 @@ public class NoteService {
         } catch (CustomConstraintViolationException ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
-    }    
+    } 
+    
+    @Path("/pos/header")
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updatePosNoteHeader(TPosNoteEntete note) {
+        try {
+            noteDao.updatePosNoteHeader(note);
+            return Response.status(Response.Status.OK).entity(note).build();
+        } catch (CustomConstraintViolationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
     
     @Path("/pos/header/{id}")
     @PUT
