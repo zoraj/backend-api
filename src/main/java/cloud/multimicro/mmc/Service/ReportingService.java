@@ -751,8 +751,12 @@ public class ReportingService {
     @GET
     @Path("/pos/report-prestation-vendue")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllPrestationVendue() {
-        List<VPosEditionPrestationVendue> prestaVendue = reportingDao.getAllPrestationVendue();
+    public Response getAllPrestationVendue(@Context UriInfo info) {
+        String dateStart = info.getQueryParameters().getFirst("startDate");
+        String dateEnd = info.getQueryParameters().getFirst("endDate");
+        String activityStr = info.getQueryParameters().getFirst("activity");
+        Integer activity = (!Objects.isNull(activityStr)) ? Integer.parseInt(activityStr) : 0;
+        JsonArray prestaVendue = reportingDao.getAllPrestationVendue(dateStart, dateEnd, activity);
         if (prestaVendue.isEmpty()) {
             throw new NotFoundException();
         }
