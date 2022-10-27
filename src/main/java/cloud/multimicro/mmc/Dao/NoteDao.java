@@ -915,6 +915,15 @@ public class NoteDao {
         TPosNoteEntete product = entityManager.find(TPosNoteEntete.class, id);
         return product;
     }
+    
+    public TPosNoteEntete updatePosNoteHeader(TPosNoteEntete note) throws CustomConstraintViolationException {
+        try {
+            return entityManager.merge(note);
+        } catch (ConstraintViolationException ex) {
+            throw new CustomConstraintViolationException(ex);
+        }
+    }
+    
     public TPosNoteEntete updatePosNoteVaeStatutDelivre(Integer id) throws CustomConstraintViolationException {
         TPosNoteEntete prestationStop = getPosNoteHeaderId(id);
         prestationStop.setStatutVae("DELIVRE");
