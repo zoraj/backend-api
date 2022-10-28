@@ -61,6 +61,12 @@ public class VPosEncaissement implements Serializable {
     @Column(name = "libelle_mode_encaissement")
     private String libelleModeEncaissement;
     
+    @Column(name = "code")
+    private String code;
+    
+    @Column(name = "qte")
+    private BigDecimal qte;
+    
     @Column(name = "service")
     private String service;
 

@@ -26,27 +26,31 @@ import org.hibernate.annotations.Immutable;
 public class VCollectiviteLectureFamille implements Serializable {    
     
     @Id
+    @Column(name = "id_famille")
+    private Integer idFamille;
+    
     @Column(name = "date_note")
     private LocalDate dateNote;
 
-    @Id
     @Column(name = "code")
     private String code;
     
-    @Id
     @Column(name = "libelle")
     private String libelle;
     
-    @Id
     @Column(name = "quantite")
     private Integer qte;
     
-    @Id
     @Column(name = "montant_ttc")
     private BigDecimal montantTtc;
 
-    @Id
     @Column(name = "montant_ht")
     private BigDecimal montantHt;
+    
+    @Column(name = "tx_tva")
+    private BigDecimal txTva;
+        
+    @Column(name = "tva")
+    private BigDecimal tva;
 
 }

@@ -332,5 +332,82 @@ public class ClosureService {
         }
         return Response.ok(closure, MediaType.APPLICATION_JSON).build();
     }
+     @GET
+    @Path("/list-famille-collectivite")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllListFamilleCollectivite() {
+        JsonArray caList = closureDao.getAllListFamilleCollectivite();
+        if (caList.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(caList, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
+    @Path("/list-subFamille-collectivite")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllListCaCollectiviteSub() {
+        JsonArray caList = closureDao.getAllListCaCollectiviteSub();
+        if (caList.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(caList, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
+    @Path("/list-prestation-collectivite")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllListPrestationCollectivite() {
+        JsonArray caList = closureDao.getAllListPrestationCollectivite();
+        if (caList.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(caList, MediaType.APPLICATION_JSON).build();
+    }
+    
+    
+    @GET
+    @Path("/list-client-collectivite")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllListCaCollectiviteClient() {
+        JsonArray array = closureDao.getAllNbNature();
+        if (array.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(array, MediaType.APPLICATION_JSON).build();
+    }
+	
+	@GET
+    @Path("/list-edition-collectivite")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllEditionClosureCollectivite() {
+        JsonObject caList = closureDao.getAllEditionClosureCollectivite();
+        if (caList.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(caList, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
+    @Path("/list-val_bac_mois")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllValBacMois() {
+        JsonArray array = closureDao.getAllValBacMois();
+        if (array.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(array, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
+    @Path("/list-val_bac_annee")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllValBacAnnees() {
+        JsonArray array = closureDao.getAllValBacAnnees();
+        if (array.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(array, MediaType.APPLICATION_JSON).build();
+    }
 
 }
