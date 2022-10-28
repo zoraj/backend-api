@@ -2294,10 +2294,104 @@ public class ReportingDao {
         return caActivite;
     }
 
-    public List<VPosEditionPrestationVendue> getAllPrestationVendue() {
-        List<VPosEditionPrestationVendue> prestaVendue = entityManager.createQuery("FROM VPosEditionPrestationVendue")
-                .getResultList();
-        return prestaVendue;
+    public JsonArray getAllPrestationVendue(String dateStart, String dateEnd, Integer activity) {      
+        Boolean isExist = false;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("FROM VPosEditionPrestationVendue  ");
+        
+        if (!Objects.isNull(dateStart)) { 
+            stringBuilder.append(" WHERE datePresta >= '"+ dateStart + "'"); 
+            isExist = true; 
+        }
+        if (!Objects.isNull(dateEnd)) { 
+            if (isExist == true) {
+                stringBuilder.append(" AND datePresta <= '" + dateEnd + "'"); 
+            }else {
+                stringBuilder.append(" WHERE datePresta <= '" + dateEnd + "'"); 
+            } 
+        }
+        
+        if (activity != 0) {
+            if (isExist == true) {
+                stringBuilder.append(" AND idActivite = " + activity + "");
+            } else {
+                stringBuilder.append(" AND idActivite = " + activity + "");
+            }
+        }
+        
+        stringBuilder.append(" ORDER BY idPrestation ");
+        
+        List<VPosEditionPrestationVendue> prestaVendue = entityManager.createQuery(stringBuilder.toString()).getResultList();
+        
+        var prestaVendueResults    = Json.createArrayBuilder();
+        
+        if (prestaVendue.size() > 0) {
+            VPosEditionPrestationVendue valueListePrestaVendue = prestaVendue.get(0);
+            Integer idProductInit   = valueListePrestaVendue.getIdPrestation();
+            LocalDate datePresta    = null;
+            var libelleProduct      = "";
+            var libelleFamille      = "";
+            var libelleSousFamille  = "";
+            var totalQte            = 0;
+            var totalMontantBrut    = new BigDecimal("0");
+            var remise              = new BigDecimal("0");
+            var qteOffert           = 0;
+            
+            for(VPosEditionPrestationVendue productSolde : prestaVendue){
+                if(idProductInit.equals(productSolde.getIdPrestation())){
+                    datePresta          = productSolde.getDatePresta();
+                    libelleProduct      = productSolde.getLibelle();
+                    libelleFamille      = productSolde.getFamille();
+                    libelleSousFamille  = productSolde.getSousFamille();
+                    totalQte            += productSolde.getQte();
+                    totalMontantBrut    = totalMontantBrut.add(productSolde.getCaTtcBrut());
+                    remise              = productSolde.getRemise();
+                    qteOffert           = productSolde.getQteOffert();
+                }else{
+                    var object = Json.createObjectBuilder()
+                            .add("datePresta", datePresta.toString())
+                            .add("famille", libelleFamille)
+                            .add("sousFamille", libelleSousFamille)
+                            .add("libelle", libelleProduct)
+                            .add("qte", totalQte)
+                            .add("caTtcBrut", totalMontantBrut)
+                            .add("remise", remise)
+                            .add("qteOffert", qteOffert).build();
+                    
+                    prestaVendueResults.add(object);
+                    
+                    totalQte            = 0;
+                    totalMontantBrut    = new BigDecimal("0");
+                    remise              = new BigDecimal("0");
+                    qteOffert           = 0;
+                    
+                    datePresta          = productSolde.getDatePresta();
+                    libelleProduct      = productSolde.getLibelle();
+                    libelleFamille      = productSolde.getFamille();
+                    libelleSousFamille  = productSolde.getSousFamille();
+                    totalQte            += productSolde.getQte();
+                    totalMontantBrut    = totalMontantBrut.add(productSolde.getCaTtcBrut());
+                    remise              = productSolde.getRemise();
+                    qteOffert           = productSolde.getQteOffert();
+                    
+                    idProductInit  = productSolde.getIdPrestation();
+                }
+            }
+            
+            var object = Json.createObjectBuilder()
+                            .add("datePresta", datePresta.toString())
+                            .add("famille", libelleFamille)
+                            .add("sousFamille", libelleSousFamille)
+                            .add("libelle", libelleProduct)
+                            .add("qte", totalQte)
+                            .add("caTtcBrut", totalMontantBrut)
+                            .add("remise", remise)
+                            .add("qteOffert", qteOffert).build();
+                    
+                    prestaVendueResults.add(object);
+        }
+
+        return prestaVendueResults.build();
     }
 
     //EDITION COLLECTIVITE
