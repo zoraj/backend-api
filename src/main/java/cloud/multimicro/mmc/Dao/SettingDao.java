@@ -476,6 +476,21 @@ public class SettingDao {
             settingStripePublicKey.setCle("STRIPE_PUBLIC_KEY");
             settingStripePublicKey.setValeur("");
             entityManager.persist(settingStripePublicKey);
+            
+            TMmcParametrage settingUser = new TMmcParametrage();
+            settingUser.setCle("VAE_USER_ID");
+            settingUser.setValeur("1000");
+            entityManager.persist(settingUser);
+
+            TMmcParametrage settingActivityId = new TMmcParametrage();
+            settingActivityId.setCle("VAE_ACTIVITY_ID");
+            settingActivityId.setValeur("1");
+            entityManager.persist(settingActivityId);
+            
+            TMmcParametrage settingCashingModeVae = new TMmcParametrage();
+            settingCashingModeVae.setCle("VAE_CASHING_MODE_ID");
+            settingCashingModeVae.setValeur("1");
+            entityManager.persist(settingCashingModeVae);
                  
         } catch (Exception e) {
             LOGGER.error("Setting initialization went wrong");
