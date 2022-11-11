@@ -21,7 +21,7 @@ public class DebtorClientDao {
     EntityManager entityManager;
 
     public List<VPmsClientDebiteur> getAll() {
-        List<VPmsClientDebiteur> result = entityManager.createQuery("FROM VPmsClientDebiteur").getResultList();
+        List<VPmsClientDebiteur> result = entityManager.createQuery("FROM VPmsClientDebiteur ORDER BY compteDebiteur").getResultList();
         return result;
     } 
 }

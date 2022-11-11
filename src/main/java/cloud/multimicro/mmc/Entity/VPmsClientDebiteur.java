@@ -28,17 +28,19 @@ public class VPmsClientDebiteur implements Serializable {
     @Id
     @Column(name = "compte_debiteur")
     private String compteDebiteur;
-
+    
+    @Id
     @Column(name = "solde_facture")
     private BigDecimal soldeFacture;
-
+    
     @Column(name = "solde_arrhe")
     private BigDecimal soldeArrhe;
 
     @Id
     @Column(name = "montant")
     private BigDecimal montant;
-
+    
+    @Id
     @Column(name = "nom")
     private String nom;
 
@@ -46,10 +48,10 @@ public class VPmsClientDebiteur implements Serializable {
     @Column(name = "numero_reservation")
     private String numReservation;
 
-    @Column(name = "num_facture")
+    /*@Column(name = "num_facture")
     private String numFacture;
 
     @Column(name = "date_facture")
-    private Date dateFacture;
+    private Date dateFacture;*/
     
 }
