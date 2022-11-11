@@ -60,6 +60,9 @@ public class TPmsEncaissement implements Serializable {
 
     @Column(name = "observation")
     private String observation;
+    
+    @Column(name = "is_reglmt_debiteur")
+    private Boolean isReglmtDebiteur;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     @Temporal(TemporalType.DATE)
