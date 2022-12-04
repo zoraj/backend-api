@@ -75,7 +75,7 @@ public class RateGridDetailDao {
     public List<VPmsTarifGrilleDetail> getDetailByRateGrid(String dateStart, String dateEnd, Integer rateGridId) {
         List<VPmsTarifGrilleDetail> lists = entityManager.createQuery(
                 
-                "FROM VPmsTarifGrilleDetail WHERE pmsTarifGrilleId =:rateGridId AND dateTarif BETWEEN :dateStart AND :dateEnd ORDER BY pmsTarifGrilleDetailId")
+                "FROM VPmsTarifGrilleDetail WHERE pmsTarifGrilleId =:rateGridId AND dateTarif BETWEEN :dateStart AND :dateEnd ORDER BY dateTarif")
                 .setParameter("dateStart", LocalDate.parse(dateStart)).setParameter("dateEnd", LocalDate.parse(dateEnd))
                 .setParameter("rateGridId", rateGridId).getResultList();
         return lists;
