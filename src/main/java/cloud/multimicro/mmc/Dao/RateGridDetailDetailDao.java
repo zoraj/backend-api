@@ -153,4 +153,12 @@ public class RateGridDetailDetailDao {
                         "UPDATE t_pms_tarif_grille_detail_detail SET date_deletion = CURRENT_TIMESTAMP WHERE id=:id")
                 .setParameter("id", id).executeUpdate();
     }
+    
+    public void deleteRateGridDetailDetail(String dateStart, String dateFin, Integer modelTarifId, Integer base) {
+        entityManager
+                .createNativeQuery(
+                        "DELETE FROM t_pms_tarif_grille_detail "
+                                + "WHERE date_tarif >= '" + dateStart + "' AND date_tarif <= '" + dateFin + "' "
+                                + "AND pms_model_tarif_id = '" + modelTarifId + "' AND base = '" + base + "'").executeUpdate();
+    }
 }

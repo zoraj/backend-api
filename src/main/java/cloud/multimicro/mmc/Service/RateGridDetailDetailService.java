@@ -105,4 +105,16 @@ public class RateGridDetailDetailService {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
+    
+    @Path("/{dateStart}/{dateEnd}/{modelTarifId}/{base}")
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteRateGridDetailDetail(@PathParam("dateStart") String dateStart, @PathParam("dateEnd") String dateEnd, @PathParam("modelTarifId") int modelTarifId, @PathParam("base") int base) {
+        try {
+            rateGridDetailDetailDao.deleteRateGridDetailDetail(dateStart, dateEnd, modelTarifId, base);
+            return Response.ok(modelTarifId, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
 }
