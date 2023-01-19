@@ -7,6 +7,7 @@ package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,30 +25,37 @@ import org.hibernate.annotations.Immutable;
 @Table(name = "v_pms_edition_arrivee_prevue")
 @Data
 public class VPmsEditionArriveePrevue implements Serializable {
-    @Column(name = "date_arrivee_prevu")
-    private Date dateArriveePrevu;
+    
+    @Column(name = "date_arrivee")
+    private LocalDate dateArrivee;
     
     @Id
     @Column(name = "numero_reservation")
     private String numeroReservation;
     
     @Column(name = "master")
-    private Integer master;
+    private String master;
     
     @Column(name = "num_chambre")
     private String numChambre;
     
-    @Column(name = "type")
-    private String type;
+    @Column(name = "type_chambre")
+    private String typeChambre;
     
     @Column(name = "nom")
     private String nom;
     
     @Column(name = "adult_enfant")
-    private Integer adultEnfant;
+    private String adultEnfant;
+    
+    @Column(name = "adult")
+    private Integer adult;
+    
+    @Column(name = "enfant")
+    private Integer enfant;
     
     @Column(name = "sejour")
-    private Integer sejour;
+    private String sejour;
     
     @Column(name = "qte")
     private Integer quantite;
@@ -60,4 +68,10 @@ public class VPmsEditionArriveePrevue implements Serializable {
     
     @Column(name = "total")
     private BigDecimal total;
+    
+    @Column(name = "id_sejour")
+    private Integer idSejour;
+    
+    @Column(name = "id_chambre_sejour")
+    private Integer idChambreSejour;
 }

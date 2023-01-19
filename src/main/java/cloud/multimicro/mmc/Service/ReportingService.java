@@ -141,8 +141,12 @@ public class ReportingService {
     @GET
     @Path("/pms/report-planned-arrival")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllEditionArrivalPrevu() {
-        List<VPmsEditionArriveePrevue> arrivalPrevu = reportingDao.getAllEditionArrivalPrevu();
+    public Response getAllEditionArrivalPrevu(@Context UriInfo info) {
+        String dateStart = info.getQueryParameters().getFirst("dateStart");
+        String dateEnd = info.getQueryParameters().getFirst("dateEnd");
+        String arrivalValue = info.getQueryParameters().getFirst("notArrival");
+        Integer notArrival = (!Objects.isNull(arrivalValue)) ? Integer.parseInt(arrivalValue) : 0;
+        JsonArray arrivalPrevu = reportingDao.getAllEditionArrivalPrevu(dateStart, dateEnd, notArrival);
         if (arrivalPrevu.isEmpty()) {
             throw new NotFoundException();
         }
