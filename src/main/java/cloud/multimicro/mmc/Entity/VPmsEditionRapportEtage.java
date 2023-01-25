@@ -6,6 +6,7 @@
 package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,29 +26,45 @@ import org.hibernate.annotations.Immutable;
 @Table(name = "v_pms_edition_rapport_etage")
 @Data
 public class VPmsEditionRapportEtage implements Serializable {
-   
+    
+    @Column(name = "date_arrivee")
+    private LocalDate dateArrivee;
+    
+    @Column(name = "date_depart")
+    private LocalDate dateDepart;
+    
     @Id    
     @Column(name = "num_etage")
     private String numEtage;
     
+    @Id 
+    @Column(name = "type")
+    private String type;
+    
+    @Id 
     @Column(name = "numero_chambre")
     private String numeroChambre;
     
-    @Column(name = "etat")
-    private String etat;
-    
-    @Column(name = "type")
-    private String type;    
-        
+    @Id 
     @Column(name = "nom")
     private String nom;
     
-    @Column(name = "adulte")
-    private String adulte;
+    @Column(name = "situation")
+    private String situation;
     
-    @Column(name = "date_arrivee")
-    private Date dateArrivee;
+    @Id 
+    @Column(name = "etat")
+    private String etat;    
+
+    @Column(name = "pax")
+    private Integer pax;
+
+    @Column(name = "sejour")
+    private String sejour;
     
-    @Column(name = "date_depart")
-    private Date dateDepart;
+    @Column(name = "pax_arrivee")
+    private Integer paxArrivee;
+    
+    @Column(name = "remarque")
+    private String remarque;
 }

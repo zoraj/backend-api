@@ -260,10 +260,101 @@ public class ReportingDao {
      * result; }
      */
 
-    public List<VPmsEditionRapportEtage> getAllRapportEtage() {
-        List<VPmsEditionRapportEtage> rapportEtage = entityManager.createQuery("FROM VPmsEditionRapportEtage")
+    public JsonArray getAllRapportEtage(String dateReference) {
+        Boolean isExist = false;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("FROM VPmsEditionRapportEtage  ");
+        if (!Objects.isNull(dateReference)) {
+            stringBuilder.append(" WHERE (dateArrivee <= '" + dateReference + "' AND dateDepart >= '" + dateReference + "') OR (dateArrivee is null AND dateDepart is null)");
+            isExist = true;
+        }
+        List<VPmsEditionRapportEtage> listeRapportEtage = entityManager.createQuery(stringBuilder.toString())
                 .getResultList();
-        return rapportEtage;
+        System.out.println("listeRapportEtage** :"+listeRapportEtage);
+        System.out.println("listeRapportEtage size** :"+listeRapportEtage.size());
+        var rapportEtageResults = Json.createArrayBuilder();
+        var rapportResults = Json.createArrayBuilder();
+        if (listeRapportEtage.size() > 0) {
+            VPmsEditionRapportEtage valueListRapportEtage = listeRapportEtage.get(0);
+            String numEtageInitial = valueListRapportEtage.getNumEtage();
+                      
+            var typeChambre = "";
+            var numChambre = "";
+            var nomReservation = "";
+            var situation = "";
+            var etat = "";
+            var pax = 0;
+            var sejour = "";
+            var paxArrivee = 0;
+            var remarque = "";
+
+            for (VPmsEditionRapportEtage listeEtage : listeRapportEtage) {
+                if (numEtageInitial.equals(listeEtage.getNumEtage())) {
+                    numEtageInitial = listeEtage.getNumEtage();
+                    typeChambre     = listeEtage.getType();
+                    numChambre      = listeEtage.getNumeroChambre();
+                    nomReservation  = listeEtage.getNom();
+                    situation       = listeEtage.getSituation();
+                    etat            = listeEtage.getEtat();
+                    pax             = listeEtage.getPax();
+                    sejour          = listeEtage.getSejour();
+                    paxArrivee      = listeEtage.getPaxArrivee();
+                    remarque        = listeEtage.getRemarque();
+
+                    var rapportList = Json.createObjectBuilder()
+                            .add("numEtage", numEtageInitial)
+                            .add("typeChambre", typeChambre)
+                            .add("numChambre", numChambre)
+                            .add("nomReservation", nomReservation)
+                            .add("situation", situation)
+                            .add("etat", etat)
+                            .add("pax", pax)
+                            .add("sejour", sejour)
+                            .add("paxArrivee", paxArrivee)
+                            .add("remarque", remarque).build();
+                    rapportResults.add(rapportList);
+                } else {
+                    var object = Json.createObjectBuilder()
+                            .add("numeroEtage", numEtageInitial)
+                            .add("listRapportEtage", rapportResults).build();
+
+                    rapportEtageResults.add(object);
+                    
+                    numEtageInitial = listeEtage.getNumEtage();
+                    typeChambre     = listeEtage.getType();
+                    numChambre      = listeEtage.getNumeroChambre();
+                    nomReservation  = listeEtage.getNom();
+                    situation       = listeEtage.getSituation();
+                    etat            = listeEtage.getEtat();
+                    pax             = listeEtage.getPax();
+                    sejour          = listeEtage.getSejour();
+                    paxArrivee      = listeEtage.getPaxArrivee();
+                    remarque        = listeEtage.getRemarque();
+                    
+                    var rapportList = Json.createObjectBuilder()
+                            .add("numEtage", numEtageInitial)
+                            .add("typeChambre", typeChambre)
+                            .add("numChambre", numChambre)
+                            .add("nomReservation", nomReservation)
+                            .add("situation", situation)
+                            .add("etat", etat)
+                            .add("pax", pax)
+                            .add("sejour", sejour)
+                            .add("paxArrivee", paxArrivee)
+                            .add("remarque", remarque).build();
+
+                    rapportResults = Json.createArrayBuilder();
+                    rapportResults.add(rapportList);
+                    numEtageInitial = numEtageInitial;
+                }
+            }
+            var object = Json.createObjectBuilder()
+                            .add("numeroEtage", numEtageInitial)
+                            .add("listRapportEtage", rapportResults).build();
+
+            rapportEtageResults.add(object);
+        }
+        return rapportEtageResults.build();
     }
 
     public List<VPmsEditionOccupation> getAllOccupation() {
