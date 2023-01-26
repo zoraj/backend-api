@@ -331,11 +331,158 @@ public class ReportingDao {
         }
         return departPrevuResults.build();
     }
-
-    public List<VPmsEditionArriveePrevue> getAllEditionArrivalPrevu() {
-        List<VPmsEditionArriveePrevue> arriveePrevu = entityManager.createQuery("FROM VPmsEditionArriveePrevue")
+    
+    public JsonArray getAllEditionArrivalPrevu(String dateStart, String dateEnd, Integer notArrival) {
+        Boolean isExist = false;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("FROM VPmsEditionArriveePrevue  ");
+        if (!Objects.isNull(dateStart)) {
+            stringBuilder.append(" WHERE dateArrivee >= '" + dateStart + "'");
+            isExist = true;
+        }
+        if (!Objects.isNull(dateEnd)) {
+            if (isExist == true) {
+                stringBuilder.append(" AND dateArrivee <= '" + dateEnd + "'");
+            } else {
+                stringBuilder.append(" WHERE dateArrivee <= '" + dateEnd + "'");
+            }
+        }
+        if (notArrival != 0) {
+            stringBuilder.append(" AND idSejour = null");
+        }
+        List<VPmsEditionArriveePrevue> listeArriveePrevu = entityManager.createQuery(stringBuilder.toString())
                 .getResultList();
-        return arriveePrevu;
+        
+        var arriveePrevuResults = Json.createArrayBuilder();
+        var arriveeResults = Json.createArrayBuilder();
+        if (listeArriveePrevu.size() > 0) {
+            VPmsEditionArriveePrevue valueListArriveePrevu = listeArriveePrevu.get(0);
+            LocalDate dateArrInitial = valueListArriveePrevu.getDateArrivee();
+            
+            var numReservation = "";
+            var master = "";
+            var numChambre = "";          
+            var typeChambre = "";
+            var nomReservation = "";
+            var adultEnfant = "";
+            var sejour = "";
+            var qte = 0;
+            var nationalite = "";
+            var segment = "";
+            var totalNote = new BigDecimal(0);
+            var idSejour = 0;
+            var adult = 0;
+            var enfant = 0;
+            var totalNbPax = 0;
+            var nbHorsChambre = 0;
+            var totalNbHorsChambre = 0;
+            var nbChambre = 0;
+            var totalNbChambre = 0;
+
+            for (VPmsEditionArriveePrevue listeArrivee : listeArriveePrevu) {
+                if (dateArrInitial.equals(listeArrivee.getDateArrivee())) {
+                    dateArrInitial  = listeArrivee.getDateArrivee();
+                    numReservation  = listeArrivee.getNumeroReservation();
+                    master          = listeArrivee.getMaster();
+                    numChambre      = listeArrivee.getNumChambre();
+                    typeChambre     = listeArrivee.getTypeChambre();
+                    nomReservation  = listeArrivee.getNom();
+                    adultEnfant     = listeArrivee.getAdultEnfant();
+                    sejour          = listeArrivee.getSejour();
+                    qte             = listeArrivee.getQuantite();
+                    nationalite     = listeArrivee.getNationalite();
+                    segment         = listeArrivee.getSegment();
+                    idSejour        = listeArrivee.getIdSejour() == null ? 0 : listeArrivee.getIdSejour();
+                    totalNote       = listeArrivee.getTotal();
+                    adult           += listeArrivee.getAdult();
+                    enfant          += listeArrivee.getEnfant();
+                    totalNbPax      = adult + enfant;
+                    nbHorsChambre   = listeArrivee.getIdChambreSejour()== 0 ? 1 : 0;
+                    totalNbHorsChambre += nbHorsChambre;
+                    nbChambre       = listeArrivee.getIdChambreSejour()> 0 ? 1 : 0;
+                    totalNbChambre  += nbChambre;
+
+                    var arriveeList = Json.createObjectBuilder()
+                            .add("dateArrivee", dateArrInitial.toString())
+                            .add("numReservation", numReservation)
+                            .add("master", master)
+                            .add("numChambre", (numChambre == null) ? "" : numChambre)
+                            .add("typeChambre", typeChambre)
+                            .add("nomReservation", nomReservation)
+                            .add("adultEnfant", adultEnfant)
+                            .add("sejour", sejour)
+                            .add("qte", qte)
+                            .add("nationalite", nationalite)
+                            .add("segment", segment)
+                            .add("totalNote", totalNote)
+                            .add("pmsSejourId", idSejour).build();
+                    arriveeResults.add(arriveeList);
+                } else {
+                    var object = Json.createObjectBuilder()
+                            .add("dateArriveePrevu", dateArrInitial.toString())
+                            .add("totalNbPax", totalNbPax)
+                            .add("totalNbChambre", totalNbChambre)
+                            .add("totalNbHorsChambre", totalNbHorsChambre)
+                            .add("listArriveePrevu", arriveeResults).build();
+
+                    arriveePrevuResults.add(object);
+                    adult = 0;
+                    enfant = 0;
+                    totalNbPax = 0;
+                    totalNbHorsChambre = 0;
+                    totalNbChambre = 0;
+
+                    dateArrInitial  = listeArrivee.getDateArrivee();
+                    numReservation  = listeArrivee.getNumeroReservation();
+                    master          = listeArrivee.getMaster();
+                    numChambre      = listeArrivee.getNumChambre();
+                    typeChambre     = listeArrivee.getTypeChambre();
+                    nomReservation  = listeArrivee.getNom();
+                    adultEnfant     = listeArrivee.getAdultEnfant();
+                    sejour          = listeArrivee.getSejour();
+                    qte             = listeArrivee.getQuantite();
+                    nationalite     = listeArrivee.getNationalite();
+                    segment         = listeArrivee.getSegment();
+                    idSejour        = listeArrivee.getIdSejour() == null ? 0 : listeArrivee.getIdSejour();
+                    totalNote       = listeArrivee.getTotal();
+                    adult           += listeArrivee.getAdult();
+                    enfant          += listeArrivee.getEnfant();
+                    totalNbPax      = adult + enfant;
+                    nbHorsChambre   = listeArrivee.getIdChambreSejour()== 0 ? 1 : 0;
+                    totalNbHorsChambre += nbHorsChambre;
+                    nbChambre       = listeArrivee.getIdChambreSejour()> 0 ? 1 : 0;
+                    totalNbChambre  += nbChambre;
+                    
+                    var arriveeList = Json.createObjectBuilder()
+                            .add("dateArrivee", dateArrInitial.toString())
+                            .add("numReservation", numReservation)
+                            .add("master", master)
+                            .add("numChambre", (numChambre == null) ? "" : numChambre)
+                            .add("typeChambre", typeChambre)
+                            .add("nomReservation", nomReservation)
+                            .add("adultEnfant", adultEnfant)
+                            .add("sejour", sejour)
+                            .add("qte", qte)
+                            .add("nationalite", nationalite)
+                            .add("segment", segment)
+                            .add("totalNote", totalNote)
+                            .add("pmsSejourId", idSejour).build();
+
+                    arriveeResults = Json.createArrayBuilder();
+                    arriveeResults.add(arriveeList);
+                    dateArrInitial = dateArrInitial;
+                }
+            }
+            var object = Json.createObjectBuilder()
+                            .add("dateArriveePrevu", dateArrInitial.toString())
+                            .add("totalNbPax", totalNbPax)
+                            .add("totalNbChambre", totalNbChambre)
+                            .add("totalNbHorsChambre", totalNbHorsChambre)
+                            .add("listArriveePrevu", arriveeResults).build();
+
+            arriveePrevuResults.add(object);
+        }
+        return arriveePrevuResults.build();
     }
 
     /**
