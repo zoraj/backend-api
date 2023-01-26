@@ -7,6 +7,7 @@ package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +56,11 @@ public class TPmsReservation implements Serializable {
     @Column(name = "date_option")
     @JsonbDateFormat("yyyy-MM-dd")
     private LocalDate dateOption;
+    
+    @NotNull
+    @Column(name = "date_saisie")
+    @JsonbDateFormat("yyyy-MM-dd")
+    private LocalDateTime dateSaisie;
 
     @NotNull @Size(min = 1, max = 45)
     @Column(name = "nom_reservation")
