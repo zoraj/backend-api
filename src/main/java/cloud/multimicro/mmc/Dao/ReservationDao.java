@@ -35,6 +35,9 @@ import cloud.multimicro.mmc.Entity.TPmsTarifGrilleDetail;
 import cloud.multimicro.mmc.Entity.VPmsReservationVentilation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Util.NullAwareBeanUtilsBean;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 
 /**
@@ -123,8 +126,11 @@ public class ReservationDao {
         try (Jsonb jsonb = JsonbBuilder.create()) { // Object mapping
             TPmsReservation reservation = jsonb.fromJson(object.toString(), TPmsReservation.class);
             // Global setting - Get the actual date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalTime currentTime = LocalTime.now();
             TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
-            LocalDate dateLogicielle = LocalDate.parse(settingData.getValeur());
+            LocalDate dateLogicielle = LocalDate.parse(settingData.getValeur(), formatter);
+            LocalDateTime dateTimeLogicielle = currentTime.atDate(dateLogicielle);
 
             if(dateLogicielle.isBefore(reservation.getDateArrivee()) && reservation.getDateArrivee().isBefore(reservation.getDateDepart()) || dateLogicielle.equals(reservation.getDateArrivee())) {
                 // Get the next reservation number
@@ -153,7 +159,8 @@ public class ReservationDao {
                     reservation.setMmcTypeClientId(client.getMmcTypeClientId());
                     reservation.setPmsPrescripteurId(client.getPmsPrescripteurId());
                 }
-
+                
+                reservation.setDateSaisie(dateTimeLogicielle);
                 entityManager.persist(reservation);
 
                 // We need to increment current reservation index after persisting the new reservation
