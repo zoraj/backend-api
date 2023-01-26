@@ -222,8 +222,9 @@ public class ReportingService {
     @GET
     @Path("/pms/report-floor")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllRapportEtage() {
-        List<VPmsEditionRapportEtage> rapportEtage = reportingDao.getAllRapportEtage();
+    public Response getAllRapportEtage(@Context UriInfo info) {
+        String dateReference = info.getQueryParameters().getFirst("dateReference");
+        JsonArray rapportEtage = reportingDao.getAllRapportEtage(dateReference);
         if (rapportEtage.isEmpty()) {
             throw new NotFoundException();
         }
