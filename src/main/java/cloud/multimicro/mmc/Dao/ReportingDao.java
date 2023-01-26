@@ -182,10 +182,154 @@ public class ReportingDao {
      * result; }
      */
 
-    public List<VPmsEditionDepartPrevu> getAllEditionDepartPrevu() {
-        List<VPmsEditionDepartPrevu> departPrevu = entityManager.createQuery("FROM VPmsEditionDepartPrevu")
+    public JsonArray getAllEditionDepartPrevu(String dateStart, String dateEnd) {
+        Boolean isExist = false;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("FROM VPmsEditionDepartPrevu  ");
+        if (!Objects.isNull(dateStart)) {
+            stringBuilder.append(" WHERE dateDepart >= '" + dateStart + "'");
+            isExist = true;
+        }
+        if (!Objects.isNull(dateEnd)) {
+            if (isExist == true) {
+                stringBuilder.append(" AND dateDepart <= '" + dateEnd + "'");
+            } else {
+                stringBuilder.append(" WHERE dateDepart <= '" + dateEnd + "'");
+            }
+        }
+        List<VPmsEditionDepartPrevu> listeDepartPrevu = entityManager.createQuery(stringBuilder.toString())
                 .getResultList();
-        return departPrevu;
+        
+        var departPrevuResults = Json.createArrayBuilder();
+        var departResults = Json.createArrayBuilder();
+        if (listeDepartPrevu.size() > 0) {
+            VPmsEditionDepartPrevu valueListDepartPrevu = listeDepartPrevu.get(0);
+            LocalDate dateDepInitial = valueListDepartPrevu.getDateDepart();
+            
+            var numReservation = "";
+            var master = "";
+            var numChambre = "";          
+            var typeChambre = "";
+            var nomReservation = "";
+            var adultEnfant = "";
+            var sejour = "";
+            var qte = 0;
+            var nationalite = "";
+            var segment = "";
+            var totalNote = new BigDecimal(0);
+            var idSejour = 0;
+            var adult = 0;
+            var enfant = 0;
+            var totalNbPax = 0;
+            var nbHorsChambre = 0;
+            var totalNbHorsChambre = 0;
+            var nbChambre = 0;
+            var totalNbChambre = 0;
+
+            for (VPmsEditionDepartPrevu listeDepart : listeDepartPrevu) {
+                if (dateDepInitial.equals(listeDepart.getDateDepart())) {
+                    dateDepInitial  = listeDepart.getDateDepart();
+                    numReservation  = listeDepart.getNumeroReservation();
+                    master          = listeDepart.getMaster();
+                    numChambre      = listeDepart.getNumChambre();
+                    typeChambre     = listeDepart.getTypeChambre();
+                    nomReservation  = listeDepart.getNom();
+                    adultEnfant     = listeDepart.getAdultEnfant();
+                    sejour          = listeDepart.getSejour();
+                    qte             = listeDepart.getQuantite();
+                    nationalite     = listeDepart.getNationalite();
+                    segment         = listeDepart.getSegment();
+                    idSejour        = listeDepart.getIdSejour() == null ? 0 : listeDepart.getIdSejour();
+                    totalNote       = listeDepart.getTotal();
+                    adult           += listeDepart.getAdult();
+                    enfant          += listeDepart.getEnfant();
+                    totalNbPax      = adult + enfant;
+                    nbHorsChambre   = listeDepart.getIdChambreSejour()== 0 ? 1 : 0;
+                    totalNbHorsChambre += nbHorsChambre;
+                    nbChambre       = listeDepart.getIdChambreSejour()> 0 ? 1 : 0;
+                    totalNbChambre  += nbChambre;
+
+                    var departList = Json.createObjectBuilder()
+                            .add("dateDepart", dateDepInitial.toString())
+                            .add("numReservation", numReservation)
+                            .add("master", master)
+                            .add("numChambre", (numChambre == null) ? "" : numChambre)
+                            .add("typeChambre", typeChambre)
+                            .add("nomReservation", nomReservation)
+                            .add("adultEnfant", adultEnfant)
+                            .add("sejour", sejour)
+                            .add("qte", qte)
+                            .add("nationalite", nationalite)
+                            .add("segment", segment)
+                            .add("totalNote", totalNote)
+                            .add("pmsSejourId", idSejour).build();
+                    departResults.add(departList);
+                } else {
+                    var object = Json.createObjectBuilder()
+                            .add("dateDepartPrevu", dateDepInitial.toString())
+                            .add("totalNbPax", totalNbPax)
+                            .add("totalNbChambre", totalNbChambre)
+                            .add("totalNbHorsChambre", totalNbHorsChambre)
+                            .add("listDepartPrevu", departResults).build();
+
+                    departPrevuResults.add(object);
+                    adult = 0;
+                    enfant = 0;
+                    totalNbPax = 0;
+                    totalNbHorsChambre = 0;
+                    totalNbChambre = 0;
+
+                    dateDepInitial  = listeDepart.getDateDepart();
+                    numReservation  = listeDepart.getNumeroReservation();
+                    master          = listeDepart.getMaster();
+                    numChambre      = listeDepart.getNumChambre();
+                    typeChambre     = listeDepart.getTypeChambre();
+                    nomReservation  = listeDepart.getNom();
+                    adultEnfant     = listeDepart.getAdultEnfant();
+                    sejour          = listeDepart.getSejour();
+                    qte             = listeDepart.getQuantite();
+                    nationalite     = listeDepart.getNationalite();
+                    segment         = listeDepart.getSegment();
+                    idSejour        = listeDepart.getIdSejour() == null ? 0 : listeDepart.getIdSejour();
+                    totalNote       = listeDepart.getTotal();
+                    adult           += listeDepart.getAdult();
+                    enfant          += listeDepart.getEnfant();
+                    totalNbPax      = adult + enfant;
+                    nbHorsChambre   = listeDepart.getIdChambreSejour()== 0 ? 1 : 0;
+                    totalNbHorsChambre += nbHorsChambre;
+                    nbChambre       = listeDepart.getIdChambreSejour()> 0 ? 1 : 0;
+                    totalNbChambre  += nbChambre;
+                    
+                    var departList = Json.createObjectBuilder()
+                            .add("dateDepart", dateDepInitial.toString())
+                            .add("numReservation", numReservation)
+                            .add("master", master)
+                            .add("numChambre", (numChambre == null) ? "" : numChambre)
+                            .add("typeChambre", typeChambre)
+                            .add("nomReservation", nomReservation)
+                            .add("adultEnfant", adultEnfant)
+                            .add("sejour", sejour)
+                            .add("qte", qte)
+                            .add("nationalite", nationalite)
+                            .add("segment", segment)
+                            .add("totalNote", totalNote)
+                            .add("pmsSejourId", idSejour).build();
+
+                    departResults = Json.createArrayBuilder();
+                    departResults.add(departList);
+                    dateDepInitial = dateDepInitial;
+                }
+            }
+            var object = Json.createObjectBuilder()
+                            .add("dateDepartPrevu", dateDepInitial.toString())
+                            .add("totalNbPax", totalNbPax)
+                            .add("totalNbChambre", totalNbChambre)
+                            .add("totalNbHorsChambre", totalNbHorsChambre)
+                            .add("listDepartPrevu", departResults).build();
+
+            departPrevuResults.add(object);
+        }
+        return departPrevuResults.build();
     }
 
     public List<VPmsEditionArriveePrevue> getAllEditionArrivalPrevu() {

@@ -130,8 +130,10 @@ public class ReportingService {
     @GET
     @Path("/pms/report-planned-departure")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllEditionDepartPrevu() {
-        List<VPmsEditionDepartPrevu> departPrevu = reportingDao.getAllEditionDepartPrevu();
+    public Response getAllEditionDepartPrevu(@Context UriInfo info) {
+        String dateStart = info.getQueryParameters().getFirst("dateStart");
+        String dateEnd = info.getQueryParameters().getFirst("dateEnd");
+        JsonArray departPrevu = reportingDao.getAllEditionDepartPrevu(dateStart, dateEnd);
         if (departPrevu.isEmpty()) {
             throw new NotFoundException();
         }
