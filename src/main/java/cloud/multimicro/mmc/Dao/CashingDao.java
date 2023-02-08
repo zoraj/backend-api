@@ -165,6 +165,7 @@ public class CashingDao {
                     //tauxRemise = tauxRemise.add(montantHt);
                     //BigDecimal montantRemise = montantHt.multiply(noteDetailList.getTauxRemise());
                     facture.setMontantRemise(noteDetailList.getTauxRemise());
+                    factureDetail.setQteCde(noteDetailList.getQte()); 
                 }
                 for(TPmsPrestation PrestationList : Prestation ){
                     if(noteDetailList.getPmsPrestationId().equals(PrestationList.getId())){
@@ -196,7 +197,7 @@ public class CashingDao {
                 }
             }
             factureDetail.setPmsFactureNumero(numFact);
-            factureDetail.setQteCde(2);           
+            //factureDetail.setQteCde(2);           
             if(amountCashed.equals(totalNote) || amountCashed.compareTo(totalNote) == 1 || totalAmount.equals(totalNote) || totalAmount.compareTo(totalNote) == 1){
                 noteHeader.setEtat("SOLDE");
                 noteHeader.setDateEtatSolde(dateEtatSolde);
