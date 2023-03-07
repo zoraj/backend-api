@@ -384,7 +384,11 @@ public class ReservationDao {
         for (int i = 0; i < jsonArray.size(); i++) {
             var reservationRate = new TPmsReservationTarif();
             JsonObject rowObject = jsonArray.getJsonObject(i);
-            reservationRate.setPmsReservationId(getLastIdReservation());
+            if(!rowObject.containsKey("pmsReservationId")){
+                reservationRate.setPmsReservationId(getLastIdReservation());
+            }else{
+                reservationRate.setPmsReservationId(rowObject.getInt("pmsReservationId"));
+            }
             reservationRate.setPmsTypeChambreId(rowObject.getInt("pmsTypeChambreId"));
             reservationRate.setNbAdult(rowObject.getInt("nbAdult"));
             reservationRate.setNbEnf(rowObject.getInt("nbEnf"));
