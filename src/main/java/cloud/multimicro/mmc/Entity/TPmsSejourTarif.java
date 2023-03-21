@@ -46,8 +46,8 @@ public class TPmsSejourTarif implements Serializable {
     private Date dateSejour;
 
     @NotNull
-    @Column(name = "pms_model_tarif_id")
-    private Integer pmsModelTarifId;
+    @Column(name = "pms_tarif_grille_detail_id")
+    private Integer pmsTarifGrilleDetailId;
 
     @NotNull
     @Column(name = "base")
