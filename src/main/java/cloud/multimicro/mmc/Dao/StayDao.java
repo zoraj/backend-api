@@ -116,7 +116,7 @@ public class StayDao {
                 }
 
                 object.setPmsSejourId(Integer.parseInt(room.get("pmsSejourId").toString()));
-                object.setPmsModelTarifId(Integer.parseInt(room.get("pmsModelTarifId").toString()));
+                object.setPmsTarifGrilleDetailId(Integer.parseInt(room.get("pmsTarifGrilleDetailId").toString()));
                 object.setBase(Integer.parseInt(room.get("base").toString()));
                 try {
                     entityManager.persist(object);
