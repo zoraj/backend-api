@@ -42,8 +42,8 @@ public class Jwt {
                 .signWith(signingKey);
 
         //if it has been specified, let's add the expiration
-        if (Constant.MMC_JWT_TTL >= 0) {
-            long expMillis = nowMillis + Constant.MMC_JWT_TTL;
+        if (Constant.MMC_JWT_TTL_30_D >= 0) {
+            long expMillis = nowMillis + Constant.MMC_JWT_TTL_30_D;
             Date exp = new Date(expMillis);
             builder.setExpiration(exp);
         }

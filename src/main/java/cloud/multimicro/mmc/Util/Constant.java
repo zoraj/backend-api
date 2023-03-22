@@ -8,4 +8,5 @@ public class Constant {
     public static final String MMC_JWT_ISSUER = "MMC";
     public static final String MMC_JWT_SUBJECT = "MMC Token for backend";
     public static final long MMC_JWT_TTL = 3600000; // in Milliseconds
+    public static final long MMC_JWT_TTL_30_D = 2592000000L;
 }
