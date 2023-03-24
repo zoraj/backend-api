@@ -20,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import cloud.multimicro.mmc.Dao.RateDao;
+import cloud.multimicro.mmc.Dao.SettingDao;
 import cloud.multimicro.mmc.Entity.TPmsCategorieTarif;
 import cloud.multimicro.mmc.Entity.TPmsModelTarif;
 import cloud.multimicro.mmc.Entity.TPmsModelTarifDetail;
@@ -41,8 +42,12 @@ import javax.ws.rs.PUT;
 public class RateService {
 
     private static final Logger LOGGER = Logger.getLogger(ProductService.class);
+    
     @Inject
     RateDao rateDao;
+    
+    @Inject
+    SettingDao settingDao;
 
     //PMS MODEL TARIF
     @GET
@@ -86,6 +91,7 @@ public class RateService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response setPmsFareModel(TPmsModelTarif pmsModelTarif) {
         try {
+            pmsModelTarif.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             rateDao.setPmsFareModel(pmsModelTarif);
             return Response.status(Response.Status.CREATED).entity(pmsModelTarif).build();
         } catch (CustomConstraintViolationException ex) {

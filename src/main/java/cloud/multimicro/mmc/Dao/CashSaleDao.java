@@ -5,10 +5,12 @@
  */
 package cloud.multimicro.mmc.Dao;
 
+import cloud.multimicro.mmc.Entity.TMmcTva;
 import cloud.multimicro.mmc.Entity.TPmsArrhe;
 import cloud.multimicro.mmc.Entity.TPmsPrestation;
 import cloud.multimicro.mmc.Entity.TPmsVenteComptant;
 import cloud.multimicro.mmc.Entity.TPmsVenteComptantDetail;
+import cloud.multimicro.mmc.Entity.TPmsVenteComptantEncaissement;
 import cloud.multimicro.mmc.Entity.TPosPrestation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import java.math.BigDecimal;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -34,6 +37,9 @@ public class CashSaleDao {
     
     @PersistenceContext
     private EntityManager entityManager;
+    
+    @Inject
+    SettingDao settingDao;
     
     //Vente comptant
     public List<TPmsVenteComptant> getCashSales() {
@@ -77,7 +83,7 @@ public class CashSaleDao {
     
     //Vente comptant detail
     public List<TPmsVenteComptantDetail> getCashSalesDetail() {
-        List<TPmsVenteComptantDetail> cashSalesDetail = entityManager.createQuery("FROM TPmsVenteComptantDetail  WHERE dateDeletion = null")
+        List<TPmsVenteComptantDetail> cashSalesDetail = entityManager.createQuery("FROM TPmsVenteComptantDetail ")
                 .getResultList();
         return cashSalesDetail;
     }
@@ -89,6 +95,8 @@ public class CashSaleDao {
     
     public void setCashSalesDetail(TPmsVenteComptantDetail cashSalesDetail) throws CustomConstraintViolationException {
         try {
+            cashSalesDetail.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
+            cashSalesDetail.setTva(getMmcTvaFromPmsPrestationId(cashSalesDetail.getPmsPrestationId()).getValeur());
             entityManager.persist(cashSalesDetail);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
@@ -103,7 +111,8 @@ public class CashSaleDao {
         venteComptantDetailUpdate.setPmsVenteComptantId(venteComptantDetail.getPmsVenteComptantId());
         venteComptantDetailUpdate.setPmsPrestationId(venteComptantDetail.getPmsPrestationId());
         venteComptantDetailUpdate.setQte(venteComptantDetail.getQte()*(-1));
-        venteComptantDetailUpdate.setPu(venteComptantDetail.getPu());        
+        venteComptantDetailUpdate.setPu(venteComptantDetail.getPu());
+        venteComptantDetailUpdate.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
         venteComptantDetailUpdate.setRemise(venteComptantDetail.getRemise());
         venteComptantDetailUpdate.setCommission(venteComptantDetail.getCommission());
         venteComptantDetailUpdate.setOrigine(venteComptantDetail.getOrigine());
@@ -118,7 +127,8 @@ public class CashSaleDao {
         newVenteComptantDetail.setPmsVenteComptantId(venteComptantDetail.getPmsVenteComptantId());
         newVenteComptantDetail.setPmsPrestationId(Integer.parseInt(request.get("pmsPrestationId").toString()));
         newVenteComptantDetail.setQte(Integer.parseInt(request.get("qte").toString()));
-        newVenteComptantDetail.setPu(new BigDecimal(request.get("pu").toString()));        
+        newVenteComptantDetail.setPu(new BigDecimal(request.get("pu").toString()));
+        newVenteComptantDetail.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
         newVenteComptantDetail.setRemise(new BigDecimal(request.get("remise").toString()));
         newVenteComptantDetail.setCommission(new BigDecimal(request.get("commission").toString()));
         newVenteComptantDetail.setOrigine(venteComptantDetail.getOrigine());
@@ -131,4 +141,34 @@ public class CashSaleDao {
         }
         return newVenteComptantDetail;
     }
+    
+    private TMmcTva getMmcTvaFromPmsPrestationId(Integer pmsPrestationId) {
+        String sql = "select tva from TPmsPrestation p join TMmcSousFamilleCa sf on p.mmcSousFamilleCaId = sf.id "+
+                     "join TMmcTva tva on sf.mmcTvaId = tva.id "+
+                     "where p.id = :id";
+        TMmcTva tva = (TMmcTva) entityManager.createQuery(sql).setParameter("id", pmsPrestationId).getSingleResult();
+        return tva;
+    }
+    
+    //Vente comptant encaissement
+    public List<TPmsVenteComptantEncaissement> getCashSalesEncaissement() {
+        List<TPmsVenteComptantEncaissement> cashSalesEncaissement = entityManager.createQuery("FROM TPmsVenteComptantEncaissement")
+                .getResultList();
+        return cashSalesEncaissement;
+    }
+    
+    public void setCashSalesEncaissement(TPmsVenteComptantEncaissement cashSalesEncaissement) throws CustomConstraintViolationException {
+        try {
+            cashSalesEncaissement.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
+            entityManager.persist(cashSalesEncaissement);
+        } catch (ConstraintViolationException ex) {
+            throw new CustomConstraintViolationException(ex);
+        }
+    }
+    
+    public TPmsVenteComptantEncaissement getCashSalesEncaissementById(int id) {
+        TPmsVenteComptantEncaissement cashSales = entityManager.find(TPmsVenteComptantEncaissement.class, id);
+        return cashSales;
+    }
+    
 }

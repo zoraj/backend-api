@@ -62,6 +62,10 @@ public class TPmsModelTarifDetail implements Serializable {
 
     @Column(name = "pu")
     private BigDecimal pu;
+    
+    @NotNull
+    @Column(name = "devise")
+    private String devise;
 
     @Column(name = "remise")
     private Boolean remise;

@@ -57,6 +57,10 @@ public class TPmsEncaissement implements Serializable {
 
     @Column(name = "montant")
     private BigDecimal montant;
+    
+    @NotNull
+    @Column(name = "devise")
+    private String devise;
 
     @Column(name = "observation")
     private String observation;

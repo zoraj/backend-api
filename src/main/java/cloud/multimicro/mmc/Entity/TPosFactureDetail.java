@@ -51,4 +51,9 @@ public class TPosFactureDetail implements Serializable {
     @NotNull
     @Column(name = "montant_ht")
     private BigDecimal montantHt;
+    
+    @NotNull
+    @Column(name = "devise")
+    private String devise;
+    
 }

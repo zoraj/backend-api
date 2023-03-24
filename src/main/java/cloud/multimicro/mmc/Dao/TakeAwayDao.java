@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.bind.Jsonb;
@@ -37,11 +38,15 @@ import javax.validation.ConstraintViolationException;
 @Stateless
 @SuppressWarnings("unchecked")
 public class TakeAwayDao {
+    
     @PersistenceContext
     private EntityManager entityManager;
+    
     @PersistenceContext(unitName = "cloud.multimicro_Establishement_PU")
     private EntityManager entityManagerEstablishement;
     
+    @Inject
+    SettingDao settingDao;
     
     public List<TPosPrestation> getPosProduct() {
         List<TPosPrestation> products = entityManager
@@ -133,6 +138,7 @@ public class TakeAwayDao {
                 TPosNoteDetailCommande detailcommandes = jsonb.fromJson(jsonArray.getJsonObject(i).toString(), TPosNoteDetailCommande.class);
                 noteDetail = jsonb.fromJson(jsonArrayNotedetail.getJsonObject(i).toString(), TPosNoteDetail.class);
                 noteDetail.setPosNoteEnteteId(noteEntete.getId());
+                noteDetail.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                 entityManager.persist(noteDetail);  
                 detailcommandes.setPosNoteDetailId(noteDetail.getId());
                 entityManager.persist(detailcommandes);

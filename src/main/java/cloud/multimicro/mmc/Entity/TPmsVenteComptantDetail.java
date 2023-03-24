@@ -49,10 +49,17 @@ public class TPmsVenteComptantDetail implements Serializable {
     @Column(name = "pu")
     private BigDecimal pu;
     
-    @Column(name = "remise")
+    @NotNull
+    @Column(name = "devise")
+    private String devise;
+    
+    @Column(name = "taux_tva")
+    private BigDecimal tva;
+    
+    @Column(name = "taux_remise")
     private BigDecimal remise;
     
-    @Column(name = "commission")
+    @Column(name = "taux_commission")
     private BigDecimal commission;
     
     @Size(min = 1, max = 45)

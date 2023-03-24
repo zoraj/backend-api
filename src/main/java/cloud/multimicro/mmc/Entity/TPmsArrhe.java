@@ -43,6 +43,10 @@ public class TPmsArrhe implements Serializable{
     
     @NotNull @Column(name = "montant")
     private BigDecimal montant;
+    
+    @NotNull
+    @Column(name = "devise")
+    private String devise;
 
     @NotNull
     @Column(name = "mmc_mode_encaissement_id")
