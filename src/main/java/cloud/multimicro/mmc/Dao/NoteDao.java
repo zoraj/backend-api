@@ -206,11 +206,13 @@ public class NoteDao {
 
     public List<TPosNoteEntete> getPosVaeNote() {       
         TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        TMmcParametrage vaeUuidDevice = entityManager.find(TMmcParametrage.class, "VAE_UUID_DEVICE");
         String dateLogiciel = parametrageDateLogicielle.getValeur();
+        String vaeUuidDeviceValue = vaeUuidDevice.getValeur();
         LOGGER.info(" dateLogiciel " + dateLogiciel);
         
-        List<TPosNoteEntete> noteEntete = entityManager.createQuery("FROM TPosNoteEntete WHERE poste_uuid = '_VAE_' AND date_note >= :dateLogiciel ")
-                .setParameter("dateLogiciel", dateLogiciel).getResultList();      
+        List<TPosNoteEntete> noteEntete = entityManager.createQuery("FROM TPosNoteEntete WHERE poste_uuid = :vaeUuidDeviceValue AND date_note >= :dateLogiciel ")
+                .setParameter("dateLogiciel", dateLogiciel).setParameter("vaeUuidDeviceValue", vaeUuidDeviceValue).getResultList();      
         return noteEntete;   
     }
 
