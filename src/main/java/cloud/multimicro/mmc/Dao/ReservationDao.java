@@ -38,6 +38,7 @@ import cloud.multimicro.mmc.Util.NullAwareBeanUtilsBean;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import javax.inject.Inject;
 
 
 /**
@@ -47,8 +48,12 @@ import java.time.format.DateTimeFormatter;
 @Stateless
 @SuppressWarnings("unchecked")
 public class ReservationDao {
+    
     @PersistenceContext
     EntityManager entityManager;
+    
+    @Inject
+    SettingDao settingDao;
 
     private static final Logger LOGGER = Logger.getLogger(ReservationDao.class);
     private static final String DATE_FORMAT = "yyyy-MM-dd";
@@ -446,6 +451,7 @@ public class ReservationDao {
     
     public void setReservationTarifPrestation(TPmsReservationTarifPrestation reservationTarifPresta) throws CustomConstraintViolationException {
         try {
+            reservationTarifPresta.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             entityManager.persist(reservationTarifPresta);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
@@ -454,6 +460,7 @@ public class ReservationDao {
     
     public TPmsReservationTarifPrestation updateReservationTarifPrestation(TPmsReservationTarifPrestation reservationTarifPresta) throws CustomConstraintViolationException {
         try {
+            reservationTarifPresta.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             return entityManager.merge(reservationTarifPresta);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);

@@ -18,6 +18,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
 
@@ -55,6 +56,10 @@ public class TPmsClotureDefinitive implements Serializable {
 
     @Column(name = "montant_annee")
     private BigDecimal montantAnnee;
+    
+    @NotNull
+    @Column(name = "devise")
+    private String devise;
 
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     @Temporal(TemporalType.DATE)

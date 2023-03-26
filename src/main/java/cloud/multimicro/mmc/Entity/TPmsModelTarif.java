@@ -53,6 +53,10 @@ public class TPmsModelTarif implements Serializable {
     @NotNull
     @Column(name = "prix_par_defaut")
     private BigDecimal prixParDefaut;
+    
+    @NotNull
+    @Column(name = "devise")
+    private String devise;
 
     @Column(name = "type")
     private String type;

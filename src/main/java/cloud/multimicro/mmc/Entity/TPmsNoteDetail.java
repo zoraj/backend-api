@@ -47,6 +47,10 @@ public class TPmsNoteDetail implements Serializable {
 
     @Column(name = "pu")
     private BigDecimal pu;
+    
+    @NotNull
+    @Column(name = "devise")
+    private String devise;
 
     @Column(name = "taux_remise")
     private BigDecimal tauxRemise;

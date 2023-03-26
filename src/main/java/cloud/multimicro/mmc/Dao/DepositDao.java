@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -33,11 +34,15 @@ public class DepositDao {
 
     @PersistenceContext
     private EntityManager entityManager;
+    
+    @Inject
+    SettingDao settingDao;
 
     public void setDeposit(TPmsArrhe pmsArrhe) throws CustomConstraintViolationException{
        try {
-        entityManager.persist(pmsArrhe);
-         } catch (ConstraintViolationException ex) {
+           pmsArrhe.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
+           entityManager.persist(pmsArrhe);
+        } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
     }
@@ -48,6 +53,7 @@ public class DepositDao {
            addDeposit.setMmcModeEncaissementId(request.getInt("mmcModeEncaissementId"));
            addDeposit.setMmcClientId(request.getInt("mmcClientId"));
            addDeposit.setMontant(new BigDecimal(request.get("montant").toString()));
+           addDeposit.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
            LocalDate dateReglement = LocalDate.parse(request.getString("dateReglement"));
            addDeposit.setDateReglement(dateReglement);
            if(!request.containsKey("pmsReservationId")){
@@ -74,6 +80,7 @@ public class DepositDao {
         depositToModify.setDateReglement(dateReglement);
         depositToModify.setMmcClientId(pmsArrheToModify.getMmcClientId());
         depositToModify.setMontant((pmsArrheToModify.getMontant()).multiply(new BigDecimal(-1.00)));
+        depositToModify.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
         depositToModify.setMmcModeEncaissementId(Integer.parseInt(request.get("mmcModeEncaissementId").toString()));
         depositToModify.setPmsReservationId(pmsArrheToModify.getPmsReservationId());
 
@@ -86,6 +93,7 @@ public class DepositDao {
         newDeposit.setDateReglement(dateReglement);
         newDeposit.setMmcClientId(pmsArrheToModify.getMmcClientId());
         newDeposit.setMontant(new BigDecimal(request.get("montant").toString()));
+        newDeposit.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
         newDeposit.setMmcModeEncaissementId(Integer.parseInt(request.get("mmcModeEncaissementId").toString()));
         if(pmsArrheToModify.getPmsReservationId() != null){
             newDeposit.setPmsReservationId(pmsArrheToModify.getPmsReservationId());

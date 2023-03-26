@@ -32,6 +32,7 @@ import cloud.multimicro.mmc.Entity.TPosTarifPrestation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
 import java.math.BigDecimal;
+import javax.inject.Inject;
 import javax.persistence.Query;
 import javax.validation.ConstraintViolationException;
 
@@ -44,6 +45,9 @@ public class ProductDao {
 
     @PersistenceContext
     private EntityManager entityManager;
+    
+    @Inject
+    SettingDao settingDao;
 
     public List<TPosPrestation> getPosProduct() {
         List<TPosPrestation> products = entityManager
@@ -124,7 +128,7 @@ public class ProductDao {
         List<Object[]> natureProducts = entityManager
                 .createQuery("FROM TPosPrestation p "
                         + "LEFT JOIN TMmcClient c ON  (p.code = c.codeSubvention or p.code = c.codeAdmission) "
-                        + "WHERE (p.nature =:admission OR p.nature =:subvention)and c.id =:client ")
+                        + "WHERE (p.nature =:admission OR p.nature =:subvention) and c.id =:client ")
                 .setParameter("admission", admission).setParameter("subvention", subvention)
                 .setParameter("client", client).getResultList();
 
@@ -211,6 +215,7 @@ public class ProductDao {
     // PUT PMS
     public TPmsPrestation updateProduct(TPmsPrestation pmsPrestation) throws CustomConstraintViolationException {
         try {
+            pmsPrestation.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             return entityManager.merge(pmsPrestation);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);

@@ -20,6 +20,7 @@ import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
 import cloud.multimicro.mmc.Util.Util;
+import static cloud.multimicro.mmc.Util.Util.generateRandomUUID;
 import java.io.StringReader;
 import java.time.LocalDateTime;
 import javax.json.Json;
@@ -79,7 +80,7 @@ public class SettingDao {
 
             TMmcParametrage settingLanguage = new TMmcParametrage();
             settingLanguage.setCle("LANGUAGE");
-            settingLanguage.setValeur("fr");
+            settingLanguage.setValeur("fr-fr");
             entityManager.persist(settingLanguage);
 
             TMmcParametrage settingSalonManagement = new TMmcParametrage();
@@ -491,6 +492,11 @@ public class SettingDao {
             settingCashingModeVae.setCle("VAE_CASHING_MODE_ID");
             settingCashingModeVae.setValeur("1");
             entityManager.persist(settingCashingModeVae);
+            
+            TMmcParametrage vaeUuidDeviceKey = new TMmcParametrage();
+            vaeUuidDeviceKey.setCle("VAE_UUID_DEVICE");
+            vaeUuidDeviceKey.setValeur("");
+            entityManager.persist(vaeUuidDeviceKey);
                  
         } catch (Exception e) {
             LOGGER.error("Setting initialization went wrong");
@@ -533,16 +539,21 @@ public class SettingDao {
             
             if (key.equals("TAKEAWAY_ACTIVATED")){
                 if(valeur.equals("1")){
+                    TMmcParametrage defaultCurrency = entityManager.find(TMmcParametrage.class, "DEFAULT_CURRENCY");
+                    TMmcParametrage defaultLanguage = entityManager.find(TMmcParametrage.class, "LANGUAGE");
+                    TMmcParametrage vaeUuidDevice   = entityManager.find(TMmcParametrage.class, "VAE_UUID_DEVICE");
                     JsonObject siteCodeObject = stringToJsonObject(siteCode);
                     siteCode = siteCodeObject.getString("siteCode");
                     String name                                = "VAE";
                     String site_code                           = siteCode;
-                    String uuid                                = "_VAE_";
-                    String currency                            = "€";
-                    String language                            = "FR_fr";
+                    String uuid                                = generateRandomUUID();
+                    vaeUuidDevice.setValeur(uuid);
+                    String currency                            = defaultCurrency.getValeur();
+                    String language                            = defaultLanguage.getValeur();
                     int invoice_current_num                    = 1;
-                    String invoice_prefix                      = "VAE";
-                    entityManagerEstablishement.createNativeQuery("INSERT INTO t_device(uuid, site_code, name, currency, language, invoice_current_num, invoice_prefix) VALUES('"+uuid+"','"+site_code+"','"+name+"','"+currency+"','"+language+"','"+invoice_current_num+"','"+invoice_prefix+"')").executeUpdate();
+                    String invoice_prefix                      = "VAE";  
+                    entityManagerEstablishement.createNativeQuery("INSERT INTO t_device(uuid, site_code, name, currency, language, invoice_current_num, invoice_prefix) VALUES('"+uuid+"','"+site_code+"','"+name+"','"+currency+"','"+language+"','"+invoice_current_num+"','"+invoice_prefix+"')").executeUpdate();                                     
+                    
                 }
 
             }

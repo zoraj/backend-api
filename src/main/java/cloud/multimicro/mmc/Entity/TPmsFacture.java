@@ -67,6 +67,10 @@ public class TPmsFacture implements Serializable {
     private BigDecimal montantRemise;
     
     @NotNull
+    @Column(name = "devise")
+    private String devise;
+    
+    @NotNull
     @Column(name = "device_uuid")
     private String deviceUuid;
     

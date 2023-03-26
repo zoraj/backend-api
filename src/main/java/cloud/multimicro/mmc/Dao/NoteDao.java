@@ -45,6 +45,7 @@ import cloud.multimicro.mmc.Exception.DataException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import javax.inject.Inject;
 
 
 
@@ -58,6 +59,10 @@ public class NoteDao {
 
     @PersistenceContext
     EntityManager entityManager;
+    
+    @Inject
+    SettingDao settingDao;
+    
     private static final org.jboss.logging.Logger LOGGER = org.jboss.logging.Logger.getLogger(NoteDao.class);
     
     public void setPosNoteEntete(TPosNoteEntete headerNote) throws CustomConstraintViolationException {
@@ -109,7 +114,7 @@ public class NoteDao {
                     && (dateEmp == null || dateLogicielle.isAfter(dateEmp))) {
                 throw new DataException("the date should not be null");
             }
-
+            detailNote.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             entityManager.persist(detailNote);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
@@ -153,6 +158,7 @@ public class NoteDao {
         noteDetail = jsonb.fromJson(jsonObject.toString(), TPosNoteDetail.class);
 
         try {
+            noteDetail.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             entityManager.persist(noteDetail);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
@@ -206,11 +212,13 @@ public class NoteDao {
 
     public List<TPosNoteEntete> getPosVaeNote() {       
         TMmcParametrage parametrageDateLogicielle = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        TMmcParametrage vaeUuidDevice = entityManager.find(TMmcParametrage.class, "VAE_UUID_DEVICE");
         String dateLogiciel = parametrageDateLogicielle.getValeur();
+        String vaeUuidDeviceValue = vaeUuidDevice.getValeur();
         LOGGER.info(" dateLogiciel " + dateLogiciel);
         
-        List<TPosNoteEntete> noteEntete = entityManager.createQuery("FROM TPosNoteEntete WHERE poste_uuid = '_VAE_' AND date_note >= :dateLogiciel ")
-                .setParameter("dateLogiciel", dateLogiciel).getResultList();      
+        List<TPosNoteEntete> noteEntete = entityManager.createQuery("FROM TPosNoteEntete WHERE poste_uuid = :vaeUuidDeviceValue AND date_note >= :dateLogiciel ")
+                .setParameter("dateLogiciel", dateLogiciel).setParameter("vaeUuidDeviceValue", vaeUuidDeviceValue).getResultList();      
         return noteEntete;   
     }
 
@@ -881,11 +889,11 @@ public class NoteDao {
             dateNote = row.get("dateNote").toString();
             LocalDate daten = LocalDate.parse(dateNote.replaceAll("\"", ""));
             object.setDateNote(daten);
-
             object.setPmsNoteEnteteId(Integer.parseInt(row.get("pmsNoteEnteteId").toString()));
             object.setPmsPrestationId(Integer.parseInt(row.get("pmsPrestationId").toString()));
             object.setQte(Integer.parseInt(row.get("qte").toString()));
             object.setPu(new BigDecimal(row.get("pu").toString().replaceAll("\"", "")));
+            object.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             object.setTauxRemise(new BigDecimal(row.get("tauxRemise").toString().replaceAll("\"", "")));
             object.setTauxCommission(new BigDecimal(row.get("tauxCommission").toString().replaceAll("\"", "")));
             object.setTauxTva(new BigDecimal(row.get("tauxTva").toString().replaceAll("\"", "")));
@@ -900,6 +908,7 @@ public class NoteDao {
     public TPmsNoteDetail updatePmsNoteDetailed(TPmsNoteDetail pmsNoteDetail)
             throws CustomConstraintViolationException {
         try {
+            pmsNoteDetail.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             return entityManager.merge(pmsNoteDetail);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
