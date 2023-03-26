@@ -23,21 +23,21 @@
          </properties>
      </profile>
      <profile>
-        <id>prod-a-template</id>
-        <properties>
-        <webXmlPath>src/main/webapp/WEB-INF/web.prod.a.template.xml</webXmlPath>
-        </properties>
-      </profile>
+         <id>preprod</id>
+         <properties>
+           <webXmlPath>src/main/webapp/WEB-INF/web.pre.prod.xml</webXmlPath>
+         </properties>
+     </profile>
       <profile>
-          <id>prod-a-node-a</id>
+          <id>prod-a</id>
           <properties>
-            <webXmlPath>src/main/webapp/WEB-INF/web.prod.a.node.a.xml</webXmlPath>
+            <webXmlPath>src/main/webapp/WEB-INF/web.prod.a.xml</webXmlPath>
           </properties>
       </profile>
       <profile>
-          <id>prod-a-node-b</id>
+          <id>prod-b</id>
           <properties>
-            <webXmlPath>src/main/webapp/WEB-INF/web.prod.a.node.b.xml</webXmlPath>
+            <webXmlPath>src/main/webapp/WEB-INF/web.prod.b.xml</webXmlPath>
           </properties>
       </profile>      
    </profiles>  
