@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -36,6 +37,9 @@ public class RateDao {
 
     @PersistenceContext
     private EntityManager entityManager;
+    
+    @Inject
+    SettingDao settingDao;
 
     // Fare category
     public List<TPmsCategorieTarif> getPmsFareCategory() {
@@ -103,6 +107,7 @@ public class RateDao {
     // Update
     public TPmsModelTarif updatePmsFareModel(TPmsModelTarif categorieTarif) throws CustomConstraintViolationException {
         try {
+            categorieTarif.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             return entityManager.merge(categorieTarif);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
@@ -111,6 +116,7 @@ public class RateDao {
 
     public void setPmsFareModel(TPmsModelTarif modele) throws CustomConstraintViolationException {
         try {
+            modele.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             entityManager.persist(modele);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
@@ -129,6 +135,7 @@ public class RateDao {
 
     public void setPmsFareModelDetailed(TPmsModelTarifDetail modeleDetail) throws CustomConstraintViolationException {
         try {
+            modeleDetail.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             entityManager.persist(modeleDetail);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
@@ -181,6 +188,7 @@ public class RateDao {
                 pmsModelTarifDetail.setPmsPrestationId(Integer.parseInt(detailToAdd.get("pmsPrestationId").toString()));
                 pmsModelTarifDetail.setPromotion(Boolean.parseBoolean(detailToAdd.get("promotion").toString()));
                 pmsModelTarifDetail.setPu(new BigDecimal(detailToAdd.get("pu").toString()));
+                pmsModelTarifDetail.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                 pmsModelTarifDetail.setRecouche(Boolean.parseBoolean(detailToAdd.get("recouche").toString()));
                 pmsModelTarifDetail.setRemise(Boolean.parseBoolean(detailToAdd.get("remise").toString()));
                 pmsModelTarifDetail.setUnite(detailToAdd.get("unite").toString().replaceAll("\"", ""));

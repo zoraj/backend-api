@@ -62,6 +62,10 @@ public class TPosNoteDetail implements Serializable {
     @NotNull
     @Column(name = "pos_prestation_prix")
     private BigDecimal posPrestationPrix;
+    
+    @NotNull
+    @Column(name = "devise")
+    private String devise;
 
     @NotNull
     @Column(name = "ordre")

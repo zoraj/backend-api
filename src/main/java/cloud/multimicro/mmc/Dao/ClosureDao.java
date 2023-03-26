@@ -33,6 +33,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -47,6 +48,10 @@ public class ClosureDao {
 
     @PersistenceContext
     EntityManager entityManager;
+    
+    @Inject
+    SettingDao settingDao;
+    
     private static final Logger LOGGER = Logger.getLogger(ClosureDao.class);
 
     public TMmcParametrage getDateLogicielleIncrement() {
@@ -773,6 +778,7 @@ public class ClosureDao {
         StringBuilder stringBuilderCa = new StringBuilder();
         stringBuilderCa.append("FROM VPmsCa  ");
         TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        
         String dateLog = settingData.getValeur();
         var dateEntry = "";
         var dateMonthEntry = "";
@@ -825,6 +831,7 @@ public class ClosureDao {
                     family.setMontantPeriode(totalMontantCaJour);
                     family.setMontantMois(totalMontantCaMois);
                     family.setMontantAnnee(totalMontantCaAnnee);
+                    family.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     
                     if(idSousfamilleInitial.equals(caList.getIdSousFamille())){                        
                         //cumul CA par sous famille
@@ -838,6 +845,7 @@ public class ClosureDao {
                         subFamily.setMontantPeriode(montantCaJour);
                         subFamily.setMontantMois(montantCaMois);
                         subFamily.setMontantAnnee(montantCaAnnee);
+                        subFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                         
                     } else {                    
                         try {
@@ -847,6 +855,7 @@ public class ClosureDao {
                             subFamily.setMontantPeriode(montantCaJour);
                             subFamily.setMontantMois(montantCaMois);
                             subFamily.setMontantAnnee(montantCaAnnee);
+                            subFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                             entityManager.persist(subFamily);
                         } catch (ConstraintViolationException ex) {
                             throw new CustomConstraintViolationException(ex);
@@ -857,6 +866,7 @@ public class ClosureDao {
                         subFamily.setMontantPeriode(sumCaDayBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry));
                         subFamily.setMontantMois(sumCaMonthBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry, dateMonthEntry));
                         subFamily.setMontantAnnee(sumCaYearBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry, dateYearEntry));
+                        subFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                         
                         idSousfamilleInitial    = caList.getIdSousFamille();
                         libelleSousFamille      = caList.getLibelleSousFamille();                       
@@ -869,8 +879,10 @@ public class ClosureDao {
                 }else{
                     try {
                         subFamily.setDateCloture(dateRef);
+                        subFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                         entityManager.persist(subFamily);
                         family.setDateCloture(dateRef);
+                        family.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                         entityManager.persist(family);
                     } catch (ConstraintViolationException ex) {
                         throw new CustomConstraintViolationException(ex);
@@ -897,6 +909,7 @@ public class ClosureDao {
                     subFamily.setMontantPeriode(montantCaJour);
                     subFamily.setMontantMois(montantCaMois);
                     subFamily.setMontantAnnee(montantCaAnnee);
+                    subFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                             
                     totalMontantCaJour      = BigDecimal.ZERO;
                     totalMontantCaMois      = BigDecimal.ZERO;
@@ -911,6 +924,7 @@ public class ClosureDao {
                     family.setMontantPeriode(totalMontantCaJour);
                     family.setMontantMois(totalMontantCaMois);
                     family.setMontantAnnee(totalMontantCaAnnee);
+                    family.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                 }
             }
             try {
@@ -972,6 +986,7 @@ public class ClosureDao {
                     cashing.setMontantPeriode(montantCashingJour);
                     cashing.setMontantMois(montantCashingMois);
                     cashing.setMontantAnnee(montantCashingAnnee);
+                    cashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                 } else {
                     try {
                         cashing.setDateCloture(dateRef);
@@ -985,6 +1000,7 @@ public class ClosureDao {
                     cashing.setMontantPeriode(sumCashingDay(cashingList.getIdModeEncaissement(), dateEntryCashing));
                     cashing.setMontantMois(sumCashingMonth(cashingList.getIdModeEncaissement(), dateEntryCashing, dateMonthEntryCashing));
                     cashing.setMontantAnnee(sumCashingYear(cashingList.getIdModeEncaissement(), dateEntryCashing, dateYearEntryCashing));
+                    cashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     
                     montantCashingJour   = BigDecimal.ZERO;
                     montantCashingMois   = BigDecimal.ZERO;
@@ -1006,6 +1022,7 @@ public class ClosureDao {
             totalCashing.setMontantPeriode(totalMontantCashingJour);
             totalCashing.setMontantMois(totalMontantCashingMois);
             totalCashing.setMontantAnnee(totalMontantCashingAnnee);
+            totalCashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             
             try {
                 cashing.setDateCloture(dateRef);
@@ -1097,6 +1114,7 @@ public class ClosureDao {
                     family.setMontantPeriode(totalMontantCaJour);
                     family.setMontantMois(totalMontantCaMois);
                     family.setMontantAnnee(totalMontantCaAnnee);
+                    family.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     
                     if(idSousfamilleInitial.equals(caList.getIdSousFamille())){                        
                         //cumul CA par sous famille
@@ -1110,6 +1128,7 @@ public class ClosureDao {
                         subFamily.setMontantPeriode(montantCaJour);
                         subFamily.setMontantMois(montantCaMois);
                         subFamily.setMontantAnnee(montantCaAnnee);
+                        subFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                         
                     } else {                    
                         try {
@@ -1119,6 +1138,7 @@ public class ClosureDao {
                             subFamily.setMontantPeriode(montantCaJour);
                             subFamily.setMontantMois(montantCaMois);
                             subFamily.setMontantAnnee(montantCaAnnee);
+                            subFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                             entityManager.persist(subFamily);
                         } catch (ConstraintViolationException ex) {
                             throw new CustomConstraintViolationException(ex);
@@ -1129,6 +1149,7 @@ public class ClosureDao {
                         subFamily.setMontantPeriode(sumCaDayBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry));
                         subFamily.setMontantMois(sumCaMonthBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry, dateMonthEntry));
                         subFamily.setMontantAnnee(sumCaYearBySubFamily(caList.getIdFamille(), caList.getIdSousFamille(), dateEntry, dateYearEntry));
+                        subFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                         
                         idSousfamilleInitial    = caList.getIdSousFamille();
                         libelleSousFamille      = caList.getLibelleSousFamille();                       
@@ -1141,6 +1162,7 @@ public class ClosureDao {
                 }else{
                     try {
                         subFamily.setDateCloture(dateRef);
+                        subFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                         entityManager.persist(subFamily);
                         family.setDateCloture(dateRef);
                         entityManager.persist(family);
@@ -1169,6 +1191,7 @@ public class ClosureDao {
                     subFamily.setMontantPeriode(montantCaJour);
                     subFamily.setMontantMois(montantCaMois);
                     subFamily.setMontantAnnee(montantCaAnnee);
+                    subFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     
                     totalMontantCaJour      = BigDecimal.ZERO;
                     totalMontantCaMois      = BigDecimal.ZERO;
@@ -1182,11 +1205,13 @@ public class ClosureDao {
                     family.setMontantJour(totalMontantCaJour);
                     family.setMontantPeriode(totalMontantCaJour);
                     family.setMontantMois(totalMontantCaMois);
-                    family.setMontantAnnee(totalMontantCaAnnee);                    
+                    family.setMontantAnnee(totalMontantCaAnnee);
+                    family.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                 }
             }
             try {
                 subFamily.setDateCloture(dateRef);
+                subFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                 entityManager.persist(subFamily);
                 family.setDateCloture(dateRef);
                 entityManager.persist(family);
@@ -1244,9 +1269,12 @@ public class ClosureDao {
                     cashing.setMontantPeriode(montantCashingJour);
                     cashing.setMontantMois(montantCashingMois);
                     cashing.setMontantAnnee(montantCashingAnnee);
+                    cashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
+                    
                 } else {
                     try {
                         cashing.setDateCloture(dateRef);
+                        cashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                         entityManager.persist(cashing);
                     } catch (ConstraintViolationException ex) {
                         throw new CustomConstraintViolationException(ex);
@@ -1257,6 +1285,7 @@ public class ClosureDao {
                     cashing.setMontantPeriode(sumCashingDay(cashingList.getIdModeEncaissement(), dateEntryCashing));
                     cashing.setMontantMois(sumCashingMonth(cashingList.getIdModeEncaissement(), dateEntryCashing, dateMonthEntryCashing));
                     cashing.setMontantAnnee(sumCashingYear(cashingList.getIdModeEncaissement(), dateEntryCashing, dateYearEntryCashing));
+                    cashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     
                     montantCashingJour   = BigDecimal.ZERO;
                     montantCashingMois   = BigDecimal.ZERO;
@@ -1278,6 +1307,7 @@ public class ClosureDao {
             totalCashing.setMontantPeriode(totalMontantCashingJour);
             totalCashing.setMontantMois(totalMontantCashingMois);
             totalCashing.setMontantAnnee(totalMontantCashingAnnee);
+            totalCashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             
             try {
                 cashing.setDateCloture(dateRef);
@@ -1428,6 +1458,7 @@ public class ClosureDao {
                     caSubFamily.setMontantTtc(montantCa);
                     caSubFamily.setMontantRemise(remise);
                     caSubFamily.setMontantOffert(offert);
+                    caSubFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     caSubFamily.setNbCouvert(nbCouvert.intValue());
                     caSubFamily.setService(service);
                 }else{
@@ -1445,6 +1476,7 @@ public class ClosureDao {
                     caSubFamily.setMontantTtc(caList.getMontantCa());
                     caSubFamily.setMontantRemise(caList.getRemise());
                     caSubFamily.setMontantOffert(caList.getOffert());
+                    caSubFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     caSubFamily.setNbCouvert(caList.getNbCouvert().intValue());
                     caSubFamily.setService(caList.getService());
                     
@@ -1480,6 +1512,7 @@ public class ClosureDao {
             totalCaSubFamily.setMontantTtc(totalMontantCa);
             totalCaSubFamily.setMontantRemise(totalRemise);
             totalCaSubFamily.setMontantOffert(totalOffert);
+            totalCaSubFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             totalCaSubFamily.setNbCouvert(totalNbCouvert);
             totalCaSubFamily.setService("0");
             
@@ -1524,9 +1557,11 @@ public class ClosureDao {
                     
                     cashing.setLibelle(cashingList.getLibelleModeEncaissement());
                     cashing.setMontantEncaissement(totalMontantCashing);
+                    cashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                 }else{
                     try {
                         cashing.setDateCloture(dateRef);
+                        cashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                         entityManager.persist(cashing);
                     } catch (ConstraintViolationException ex) {
                         throw new CustomConstraintViolationException(ex);
@@ -1546,6 +1581,7 @@ public class ClosureDao {
                     }
                     totalMontantCashing = montantCashingMidi.add(montantCashingSoir);
                     cashing.setMontantEncaissement(totalMontantCashing);
+                    cashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     idModeCashingInit = cashingList.getMmcModeEncaissementId();
                     libelleModeCashing = cashingList.getLibelleModeEncaissement();
                 }
@@ -1554,6 +1590,7 @@ public class ClosureDao {
             
             totalCashing.setLibelle("TOTAL ENCAISSEMENT");
             totalCashing.setMontantEncaissement(totalMontantEncaissement);
+            totalCashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             
             try {
                 cashing.setDateCloture(dateRef);
@@ -1647,10 +1684,12 @@ public class ClosureDao {
                     caSubFamily.setMontantTtc(montantCa);
                     caSubFamily.setMontantRemise(remise);
                     caSubFamily.setMontantOffert(offert);
+                    caSubFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     caSubFamily.setNbCouvert(nbCouvert.intValue());
                     caSubFamily.setService(service);
                 }else{
                     try {
+                        caSubFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                         caSubFamily.setDateCloture(dateRef);
                         entityManager.persist(caSubFamily);
                     } catch (ConstraintViolationException ex) {
@@ -1664,6 +1703,7 @@ public class ClosureDao {
                     caSubFamily.setMontantTtc(caList.getMontantCa());
                     caSubFamily.setMontantRemise(caList.getRemise());
                     caSubFamily.setMontantOffert(caList.getOffert());
+                    caSubFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     caSubFamily.setNbCouvert(caList.getNbCouvert().intValue());
                     caSubFamily.setService(caList.getService());
                     
@@ -1699,6 +1739,7 @@ public class ClosureDao {
             totalCaSubFamily.setMontantTtc(totalMontantCa);
             totalCaSubFamily.setMontantRemise(totalRemise);
             totalCaSubFamily.setMontantOffert(totalOffert);
+            totalCaSubFamily.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             totalCaSubFamily.setNbCouvert(totalNbCouvert);
             totalCaSubFamily.setService("0");
             
@@ -1744,6 +1785,7 @@ public class ClosureDao {
                     
                     cashing.setLibelle(cashingList.getLibelleModeEncaissement());
                     cashing.setMontantEncaissement(totalMontantCashing);
+                    cashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                 }else{
                     try {
                         cashing.setDateCloture(dateRef);
@@ -1766,6 +1808,7 @@ public class ClosureDao {
                     }
                     totalMontantCashing = montantCashingMidi.add(montantCashingSoir);
                     cashing.setMontantEncaissement(totalMontantCashing);
+                    cashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     idModeCashingInit = cashingList.getMmcModeEncaissementId();
                     libelleModeCashing = cashingList.getLibelleModeEncaissement();
                 }
@@ -1774,6 +1817,7 @@ public class ClosureDao {
             
             totalCashing.setLibelle("TOTAL ENCAISSEMENT");
             totalCashing.setMontantEncaissement(totalMontantEncaissement);
+            totalCashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             
             try {
                 cashing.setDateCloture(dateRef);

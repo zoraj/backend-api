@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Objects;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -56,8 +57,12 @@ public class CashingDao {
 
     @PersistenceContext
     private EntityManager entityManager;
+    
     @PersistenceContext(unitName = "cloud.multimicro_Establishement_PU")
     private EntityManager entityManagerEstablishement;
+    
+    @Inject
+    SettingDao settingDao;
 
     // CASHING MODE
     public List<TMmcModeEncaissement> getAll() {
@@ -162,14 +167,17 @@ public class CashingDao {
                     montantTtc = montantTtc.add(montantHt);                   
                     facture.setMontantTtc(montantTtc);
                     factureDetail.setMontantTtc(montantTtc);
+                    factureDetail.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     //tauxRemise = tauxRemise.add(montantHt);
                     //BigDecimal montantRemise = montantHt.multiply(noteDetailList.getTauxRemise());
                     facture.setMontantRemise(noteDetailList.getTauxRemise());
+                    facture.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     factureDetail.setQteCde(noteDetailList.getQte()); 
                 }
                 for(TPmsPrestation PrestationList : Prestation ){
                     if(noteDetailList.getPmsPrestationId().equals(PrestationList.getId())){
-                       factureDetail.setLibellePrestation(PrestationList.getLibelle()); 
+                       factureDetail.setLibellePrestation(PrestationList.getLibelle());
+                       break;
                     }
                 }
             } 
@@ -178,12 +186,11 @@ public class CashingDao {
             String numFact = getInvoiceNumber("INVOICE_INDEX", data[0]);
             noteHeader.setNumFacture(numFact);
             noteHeader.setDateFacture(dateLogiciel);
-            //
+            
             facture.setNumero(numFact);
             facture.setDateFacture(dateLogiciel);
             facture.setDateEcheance(dateLogiciel);
-            facture.setEntete1(invoiceHeader1.getValeur()); 
-            
+            facture.setEntete1(invoiceHeader1.getValeur());
             
             facture.setEntete2(invoiceHeader2.getValeur());
             facture.setEntete3(invoiceHeader3.getValeur());
@@ -194,6 +201,7 @@ public class CashingDao {
             for (TMmcUser userList : User) {
                 if(userList.getId().equals(encaissement.getMmcUserId())){
                     facture.setUtilisateur(userList.getFirstname());
+                    break;
                 }
             }
             factureDetail.setPmsFactureNumero(numFact);
@@ -213,6 +221,7 @@ public class CashingDao {
             }
         }
         try {
+            encaissement.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             encaissement.setDateEncaissement(dateLogiciel);
             entityManager.persist(encaissement);
         } catch (ConstraintViolationException ex) {
@@ -233,6 +242,7 @@ public class CashingDao {
 
     public TPmsEncaissement updatePmsEncaissement(TPmsEncaissement cashing) throws CustomConstraintViolationException {
         try {
+            cashing.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             return entityManager.merge(cashing);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
@@ -367,6 +377,7 @@ public class CashingDao {
                     facturePos.setMontantHt(montantHt);
                     factureDetailPos.setMontantHt(montantHt);
                     facturePos.setMontantTtc(montantHt);
+                    facturePos.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                     factureDetailPos.setQteCde(noteDetailList.getQteCdeMarche());
                 }
                 for(TPosPrestation PrestationList : Prestation ){
@@ -398,9 +409,8 @@ public class CashingDao {
             }
              //
             factureDetailPos.setPosFactureNumero(numFact);
-                    
-            
             factureDetailPos.setMontantTtc(new BigDecimal(0));
+            factureDetailPos.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             try {
                 entityManager.merge(noteHeader);
                 entityManager.persist(facturePos);
@@ -477,6 +487,7 @@ public class CashingDao {
             pmsEncaissement.setDateEncaissement(softwareDate);
             BigDecimal amount = new BigDecimal(amountStr);
             pmsEncaissement.setMontant(amount.multiply(new BigDecimal("-1")));
+            pmsEncaissement.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             pmsEncaissement.setPosteUuid(object.getString("posteUuid"));
             pmsEncaissement.setMmcUserId(mmcUserId);
             pmsEncaissement.setPmsNoteEnteteId(Integer.parseInt(object.get("pmsNoteEnteteId").toString()));

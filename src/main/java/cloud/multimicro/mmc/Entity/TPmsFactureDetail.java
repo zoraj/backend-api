@@ -25,7 +25,9 @@ import lombok.Data;
 @Table(name = "t_pms_facture_detail")
 @Data
 public class TPmsFactureDetail implements Serializable {
+    
     private static final long serialVersionUID = 1L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -51,4 +53,9 @@ public class TPmsFactureDetail implements Serializable {
     @NotNull
     @Column(name = "montant_ht")
     private BigDecimal montantHt;
+    
+    @NotNull
+    @Column(name = "devise")
+    private String devise;
+    
 }

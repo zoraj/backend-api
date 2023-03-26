@@ -6,6 +6,7 @@
 package cloud.multimicro.mmc.Service;
 
 import cloud.multimicro.mmc.Dao.DepositDao;
+import cloud.multimicro.mmc.Dao.SettingDao;
 import cloud.multimicro.mmc.Entity.TMmcModeEncaissement;
 import cloud.multimicro.mmc.Entity.TPmsArrhe;
 import cloud.multimicro.mmc.Entity.VPmsArrhesClient;
@@ -37,6 +38,9 @@ import org.jboss.logging.Logger;
 public class DepositService {
 
     @Inject
+    SettingDao settingDao;
+    
+    @Inject
     DepositDao depositDao;
 
     @Path("/")
@@ -44,6 +48,7 @@ public class DepositService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addDeposit(TPmsArrhe pmsArrhe) {
         try {
+            pmsArrhe.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             depositDao.setDeposit(pmsArrhe);
             return Response.ok(pmsArrhe, MediaType.APPLICATION_JSON).build();
         } catch (CustomConstraintViolationException e) {

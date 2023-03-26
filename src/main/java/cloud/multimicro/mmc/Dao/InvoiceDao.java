@@ -13,6 +13,7 @@ import cloud.multimicro.mmc.Entity.VPmsFactureDetail;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import java.util.List;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -25,8 +26,12 @@ import javax.validation.ConstraintViolationException;
  */
 @Stateless
 public class InvoiceDao {
+    
     @PersistenceContext
     EntityManager entityManager;
+    
+    @Inject
+    SettingDao settingDao;
     
     public List<TPmsFacture> getTpmsFacture() {
         List<TPmsFacture> facture = entityManager.createQuery(" FROM TPmsFacture  ").getResultList();
@@ -50,7 +55,8 @@ public class InvoiceDao {
     
     public void setTpmsFacture(TPmsFacture facture) throws CustomConstraintViolationException {
         try{
-        entityManager.persist(facture);
+            facture.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
+            entityManager.persist(facture);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
@@ -63,7 +69,8 @@ public class InvoiceDao {
     
     public void setTpmsFactureDetail(TPmsFactureDetail facture) throws CustomConstraintViolationException {
         try{
-        entityManager.persist(facture);
+            facture.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
+            entityManager.persist(facture);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
@@ -76,7 +83,8 @@ public class InvoiceDao {
     
     public void setTposFacture(TPosFacture facture) throws CustomConstraintViolationException {
         try{
-        entityManager.persist(facture);
+            facture.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
+            entityManager.persist(facture);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
@@ -89,7 +97,8 @@ public class InvoiceDao {
     
     public void setTposFactureDetail(TPosFactureDetail factureDetail) throws CustomConstraintViolationException {
         try{
-        entityManager.persist(factureDetail);
+            factureDetail.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
+            entityManager.persist(factureDetail);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }

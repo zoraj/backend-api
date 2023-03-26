@@ -29,6 +29,7 @@ import cloud.multimicro.mmc.Entity.TPmsSejour;
 import cloud.multimicro.mmc.Entity.TPmsSejourTarif;
 import cloud.multimicro.mmc.Entity.TPmsSejourTarifDetail;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
+import javax.inject.Inject;
 
 /**
  *
@@ -37,9 +38,14 @@ import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 @Stateless
 @SuppressWarnings("unchecked")
 public class StayDao {
+    
     @PersistenceContext
     EntityManager entityManager;
+    
     private static final Logger LOGGER = Logger.getLogger(StayDao.class);
+    
+    @Inject
+    SettingDao settingDao;
 
     // TPmsSejour
     
@@ -165,12 +171,13 @@ public class StayDao {
                 object.setPmsPrestationId(Integer.parseInt(room.get("pmsPrestationId").toString()));
                 object.setQte(Integer.parseInt(room.get("qte").toString()));
                 object.setPu(new BigDecimal(room.get("pu").toString().replaceAll("\"","")));
+                object.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
                 object.setTauxRemise(new BigDecimal(room.get("tauxRemise").toString().replaceAll("\"","")));
                 object.setTauxCommission(new BigDecimal(room.get("tauxCommission").toString().replaceAll("\"","")));
                 object.setTauxTva(new BigDecimal(room.get("tauxTva").toString().replaceAll("\"","")));
-                object.setIsONG(room.get("isONG").toString().replaceAll("\"",""));
-                object.setIsExtra(Integer.parseInt(room.get("isExtra").toString()));
-                object.setIsRecouche(Integer.parseInt(room.get("isRecouche").toString()));
+                object.setIsONG(String.valueOf(room.get("isONG")).replaceAll("\"",""));
+                object.setIsExtra(Integer.parseInt(String.valueOf(room.get("isExtra")).replaceAll("\"","")));
+                object.setIsRecouche(Integer.parseInt(String.valueOf(room.get("isRecouche")).replaceAll("\"","")));
                 try {
                     entityManager.persist(object);
                 } catch (ConstraintViolationException ex) {
@@ -181,6 +188,7 @@ public class StayDao {
 
     public TPmsSejourTarifDetail updateStayRateDetailed(TPmsSejourTarifDetail pmsSejourTarif)  throws CustomConstraintViolationException {
         try {
+            pmsSejourTarif.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             return entityManager.merge(pmsSejourTarif);
         }
         catch(ConstraintViolationException ex) {

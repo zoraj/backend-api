@@ -9,6 +9,7 @@ import cloud.multimicro.mmc.Dao.CashSaleDao;
 import cloud.multimicro.mmc.Entity.TPmsArrhe;
 import cloud.multimicro.mmc.Entity.TPmsVenteComptant;
 import cloud.multimicro.mmc.Entity.TPmsVenteComptantDetail;
+import cloud.multimicro.mmc.Entity.TPmsVenteComptantEncaissement;
 import cloud.multimicro.mmc.Entity.TPosPrestation;
 import cloud.multimicro.mmc.Entity.TPosPrestationGroupe;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
@@ -138,4 +139,41 @@ public class CashSaleService {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
+    
+    //Vente comptant encaissement
+    @GET
+    @Path("/encaissement")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllCashSaleEncaissement() {
+        List<TPmsVenteComptantEncaissement> cashSaleEncaissement = cashSaleDao.getCashSalesEncaissement();
+        if (cashSaleEncaissement.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(cashSaleEncaissement, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @Path("/encaissement")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addCashSaleEncaissement(TPmsVenteComptantEncaissement cashSaleEncaissement) {
+        try {
+            cashSaleDao.setCashSalesEncaissement(cashSaleEncaissement);
+            return Response.status(Response.Status.CREATED).entity(cashSaleEncaissement).build();
+        } catch (CustomConstraintViolationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+    
+    @GET
+    @Path("/encaissement/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCashSalesEncaissementById(@PathParam("id") int id) {
+        TPmsVenteComptantEncaissement cashSale = cashSaleDao.getCashSalesEncaissementById(id);
+        if (cashSale == null) {
+            throw new NotFoundException();
+            //return Response.status(Response.Status.NOT_FOUND).entity("Object not found.").build();  
+        }
+        return Response.ok(cashSale, MediaType.APPLICATION_JSON).build();
+    }
+    
 }

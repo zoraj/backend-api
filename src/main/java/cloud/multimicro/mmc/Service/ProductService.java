@@ -20,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import cloud.multimicro.mmc.Dao.ProductDao;
+import cloud.multimicro.mmc.Dao.SettingDao;
 import cloud.multimicro.mmc.Entity.TPmsPrestation;
 import cloud.multimicro.mmc.Entity.TPosAccompagnement;
 import cloud.multimicro.mmc.Entity.TPosActivitePrestation;
@@ -47,6 +48,10 @@ import javax.ws.rs.PUT;
 public class ProductService {
 
     private static final Logger LOGGER = Logger.getLogger(ProductService.class);
+    
+    @Inject
+    SettingDao settingDao;
+    
     @Inject
     ProductDao productDao;
 
@@ -266,6 +271,7 @@ public class ProductService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateProduct(TPmsPrestation prestation) {
         try {
+            prestation.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             productDao.updateProduct(prestation);
             return Response.status(Response.Status.OK).entity(prestation).build();
         } catch (CustomConstraintViolationException ex) {
@@ -315,6 +321,7 @@ public class ProductService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addProduct(TPmsPrestation prestation) {
         try {
+            prestation.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             productDao.setProduct(prestation);
             return Response.status(Response.Status.CREATED).entity(prestation).build();
         } catch (Exception ex) {
