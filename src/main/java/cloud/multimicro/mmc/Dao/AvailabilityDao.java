@@ -9,6 +9,7 @@ import cloud.multimicro.mmc.Entity.TotalRoomByType;
 import cloud.multimicro.mmc.Entity.TotalRoomCountAvailable;
 import cloud.multimicro.mmc.Entity.TotalRoomCountUnavailable;
 import cloud.multimicro.mmc.Entity.TotalRoomOutOfOrderByType;
+import cloud.multimicro.mmc.Entity.VPmsChambreDisponibiliteEtat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -72,10 +73,10 @@ public class AvailabilityDao {
     }
     
     public List<TotalRoomCountUnavailable> getRoomCountUnavailable(LocalDate startDate, LocalDate endDate) {
-        List<Object[]> roomsCountUnavailable  = entityManager.createNativeQuery("SELECT pms_type_chambre_id, resa.date_arrivee, resa.date_depart, qte_chb "
+        List<Object[]> roomsCountUnavailable  = entityManager.createNativeQuery("SELECT pms_type_chambre_id, resa.date_arrivee, resa.date_depart "
                 + " FROM t_pms_reservation_ventilation v LEFT JOIN t_pms_reservation resa ON v.pms_reservation_id = resa.id "
                 + " WHERE (resa.date_arrivee >= '" + startDate + "' OR resa.date_arrivee < '" + startDate + "') AND (resa.date_depart <= '" + endDate + "' OR resa.date_depart > '" + endDate + "') "
-                + " GROUP BY v.pms_type_chambre_id, resa.date_arrivee, resa.date_depart, qte_chb ").getResultList();
+                + " GROUP BY v.pms_type_chambre_id, resa.date_arrivee, resa.date_depart ").getResultList();
 
         List<TotalRoomCountUnavailable> result = new ArrayList<TotalRoomCountUnavailable>();
         
@@ -91,7 +92,7 @@ public class AvailabilityDao {
                if ((dateOccupation.equals(dateDebut) || dateDebut.isBefore(dateOccupation)) && (dateOccupation.equals(dateEnd) || dateOccupation.isBefore(dateEnd))) {
                    var room = new TotalRoomCountUnavailable();
                    room.setTypeChambreId(Integer.parseInt(n[0].toString()));
-                   room.setRoomCountUnavailable(Integer.parseInt(n[3].toString()));
+                   room.setRoomCountUnavailable(1);
                    room.setDateUnavailable(dateOccupation);
                    result.add(room);
                }
@@ -149,6 +150,12 @@ public class AvailabilityDao {
             
             result.add(roomsCountAvailable);
         }
+        return result;
+    }
+    
+    public List<VPmsChambreDisponibiliteEtat> getRoomsAvailabilityStatus() {
+        List<VPmsChambreDisponibiliteEtat> result = entityManager
+                .createQuery("FROM VPmsChambreDisponibiliteEtat ORDER BY idTypeChambre ").getResultList();
         return result;
     }
       
