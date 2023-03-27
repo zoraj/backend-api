@@ -364,9 +364,17 @@ public class RoomDao {
 
     public void addTPmsChambreHorsService(TPmsChambreHorsService pmsChambreHorsService)
             throws CustomConstraintViolationException, ParseException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate dateLogicielle = LocalDate.parse(settingData.getValeur(), formatter);
         try {
-            entityManager.persist(pmsChambreHorsService);
-            putOutService(pmsChambreHorsService);
+            if(dateLogicielle.equals(pmsChambreHorsService.getDateDebut()) || dateLogicielle.isBefore(pmsChambreHorsService.getDateDebut()) && pmsChambreHorsService.getDateDebut().isBefore(pmsChambreHorsService.getDateFin()) || 
+                    pmsChambreHorsService.getDateDebut().equals(pmsChambreHorsService.getDateFin())){
+                entityManager.persist(pmsChambreHorsService);
+                putOutService(pmsChambreHorsService);
+            }else{
+                throw new CustomConstraintViolationException("Please, check your date");
+            }          
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
