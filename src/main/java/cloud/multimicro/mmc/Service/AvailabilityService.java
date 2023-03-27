@@ -10,6 +10,7 @@ import cloud.multimicro.mmc.Entity.TotalRoomByType;
 import cloud.multimicro.mmc.Entity.TotalRoomCountAvailable;
 import cloud.multimicro.mmc.Entity.TotalRoomCountUnavailable;
 import cloud.multimicro.mmc.Entity.TotalRoomOutOfOrderByType;
+import cloud.multimicro.mmc.Entity.VPmsChambreDisponibiliteEtat;
 import cloud.multimicro.mmc.Exception.DataException;
 import java.time.LocalDate;
 import java.util.List;
@@ -107,6 +108,17 @@ public class AvailabilityService {
         } catch (Exception ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
+    }
+    
+    @GET
+    @Path("/availability-status")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRoomsAvailabilityStatus() {
+        List<VPmsChambreDisponibiliteEtat> availableStatus = availabilityDao.getRoomsAvailabilityStatus();
+        if (availableStatus.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(availableStatus, MediaType.APPLICATION_JSON).build();
     }
     
 }
