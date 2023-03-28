@@ -52,10 +52,6 @@ public class TPmsPrestation implements Serializable {
     @Column(name = "prix")
     private BigDecimal prix;
     
-    @NotNull
-    @Column(name = "devise")
-    private String devise;
-
     @Column(name = "remise")
     private Boolean remise;
 

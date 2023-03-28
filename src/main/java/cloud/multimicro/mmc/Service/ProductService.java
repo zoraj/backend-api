@@ -271,7 +271,6 @@ public class ProductService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateProduct(TPmsPrestation prestation) {
         try {
-            prestation.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             productDao.updateProduct(prestation);
             return Response.status(Response.Status.OK).entity(prestation).build();
         } catch (CustomConstraintViolationException ex) {
@@ -321,7 +320,6 @@ public class ProductService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addProduct(TPmsPrestation prestation) {
         try {
-            prestation.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             productDao.setProduct(prestation);
             return Response.status(Response.Status.CREATED).entity(prestation).build();
         } catch (Exception ex) {

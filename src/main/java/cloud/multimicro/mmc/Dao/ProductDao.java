@@ -215,7 +215,6 @@ public class ProductDao {
     // PUT PMS
     public TPmsPrestation updateProduct(TPmsPrestation pmsPrestation) throws CustomConstraintViolationException {
         try {
-            pmsPrestation.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             return entityManager.merge(pmsPrestation);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
