@@ -30,8 +30,9 @@ public class AvailabilityDao {
     EntityManager entityManager;
     
     public List<TotalRoomByType> getRoomCountByType() {
-        List<Object[]> roomsCount  = entityManager.createNativeQuery("SELECT pms_type_chambre_id, COUNT(*) FROM t_pms_chambre "
-                + " GROUP BY pms_type_chambre_id ").getResultList();
+        List<Object[]> roomsCount  = entityManager.createNativeQuery("SELECT tch.id, COALESCE(COUNT(ch.id), 0) FROM t_pms_type_chambre tch "
+                + "LEFT JOIN t_pms_chambre ch ON tch.id = ch.pms_type_chambre_id"
+                + " GROUP BY tch.id ").getResultList();
         List<TotalRoomByType> result = new ArrayList<TotalRoomByType>();
         for (Object[] n : roomsCount ) {
             if (n.length > 1) {
@@ -44,11 +45,13 @@ public class AvailabilityDao {
         return result;
     }
     
-    public List<TotalRoomOutOfOrderByType> getRoomCountByTypeOutOfOrder(LocalDate startDate, LocalDate endDate) {
-        List<Object[]> roomsCountOut  = entityManager.createNativeQuery("SELECT pms_type_chambre_id, chs.date_debut, chs.date_fin, COUNT(*) "
-                + " FROM t_pms_chambre c LEFT JOIN t_pms_chambre_hors_service chs ON chs.pms_chambre_id = c.id "
-                + " WHERE c.etat_chambre = 'OUT' AND (chs.date_debut >= '" + startDate + "' OR chs.date_debut < '" + startDate + "') AND (chs.date_fin <= '" + endDate + "' OR chs.date_fin > '" + endDate + "') "
-                + " GROUP BY c.pms_type_chambre_id, chs.date_debut, chs.date_fin ").getResultList();
+    public List<TotalRoomOutOfOrderByType> getRoomCountByTypeOutOfOrder(LocalDate startDate) {
+        LocalDate endDate = startDate.plusDays(13);
+        List<Object[]> roomsCountOut  = entityManager.createNativeQuery("SELECT tc.id, chs.date_debut, chs.date_fin, COALESCE(COUNT(c.id), 0) "
+                + " FROM t_pms_type_chambre tc LEFT JOIN t_pms_chambre c ON tc.id = c.pms_type_chambre_id "
+                + " LEFT JOIN t_pms_chambre_hors_service chs ON chs.pms_chambre_id = c.id "
+                + " WHERE chs.is_soustraire_dispo = true AND (chs.date_debut >= '" + startDate + "' OR chs.date_debut < '" + startDate + "') AND (chs.date_fin <= '" + endDate + "' OR chs.date_fin > '" + endDate + "') "
+                + " GROUP BY tc.id, chs.date_debut, chs.date_fin ").getResultList();
 
         List<TotalRoomOutOfOrderByType> result = new ArrayList<TotalRoomOutOfOrderByType>();
         
@@ -72,7 +75,8 @@ public class AvailabilityDao {
         return result;
     }
     
-    public List<TotalRoomCountUnavailable> getRoomCountUnavailable(LocalDate startDate, LocalDate endDate) {
+    public List<TotalRoomCountUnavailable> getRoomCountUnavailable(LocalDate startDate) {
+        LocalDate endDate = startDate.plusDays(13);
         List<Object[]> roomsCountUnavailable  = entityManager.createNativeQuery("SELECT pms_type_chambre_id, resa.date_arrivee, resa.date_depart "
                 + " FROM t_pms_reservation_ventilation v LEFT JOIN t_pms_reservation resa ON v.pms_reservation_id = resa.id "
                 + " WHERE (resa.date_arrivee >= '" + startDate + "' OR resa.date_arrivee < '" + startDate + "') AND (resa.date_depart <= '" + endDate + "' OR resa.date_depart > '" + endDate + "') "
@@ -102,18 +106,21 @@ public class AvailabilityDao {
         return result;
     }
     
-    public List<TotalRoomCountAvailable> getRoomCountAvailables(LocalDate startDate, LocalDate endDate) {
+    public List<TotalRoomCountAvailable> getRoomCountAvailables(LocalDate startDate) {
+        LocalDate endDate = startDate.plusDays(13);
         List<TotalRoomCountAvailable> result = new ArrayList<>();
         List<TotalRoomByType> totalRooms = getRoomCountByType();        
-        List<TotalRoomOutOfOrderByType> totalRoomsOut = getRoomCountByTypeOutOfOrder(startDate, endDate);
-        List<TotalRoomCountUnavailable> totalRoomsUnavailable = getRoomCountUnavailable(startDate, endDate);
+        List<TotalRoomOutOfOrderByType> totalRoomsOut = getRoomCountByTypeOutOfOrder(startDate);
+        List<TotalRoomCountUnavailable> totalRoomsUnavailable = getRoomCountUnavailable(startDate);
         Integer qteTotalRoomsOutNotAvailable = 0;
         Integer qteTotalRoomsBookedNotAvailable = 0;
         Integer qteTotalRoomsExisted = 0;
+        Integer qteTotalRoomsAvailable = 0;
         
         for (LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1)) {
             var roomsCountAvailable = new TotalRoomCountAvailable();           
             List<TotalRoomByType> totalRoomsAvailableByType = new ArrayList<>();
+            qteTotalRoomsAvailable = 0;
             
             for (TotalRoomByType totalRoom: totalRooms) { 
                 qteTotalRoomsOutNotAvailable = 0;
@@ -135,7 +142,7 @@ public class AvailabilityDao {
                 
                 qteTotalRoomsExisted = totalRoom.getQteTotalRoom() - qteTotalRoomsOutNotAvailable - qteTotalRoomsBookedNotAvailable;
                 
-                if(qteTotalRoomsExisted > 0){
+                if(qteTotalRoomsExisted > 0 || qteTotalRoomsExisted == 0){
                     var totalRoomByType = new TotalRoomByType();
                     
                     totalRoomByType.setQteTotalRoom(qteTotalRoomsExisted);
@@ -143,10 +150,12 @@ public class AvailabilityDao {
                     
                     totalRoomsAvailableByType.add(totalRoomByType);
                 }
+                qteTotalRoomsAvailable += qteTotalRoomsExisted;
             }
             
             roomsCountAvailable.setDateAvailable(date);
             roomsCountAvailable.setTotalRoomsByType(totalRoomsAvailableByType);
+            roomsCountAvailable.setQteTotalRoomsAvailable(qteTotalRoomsAvailable);
             
             result.add(roomsCountAvailable);
         }

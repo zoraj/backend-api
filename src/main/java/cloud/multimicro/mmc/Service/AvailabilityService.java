@@ -56,11 +56,11 @@ public class AvailabilityService {
     public Response getRoomCountByTypeOutOfOrder(@Context UriInfo info) {
         try {
             LocalDate dateStart = LocalDate.parse(info.getQueryParameters().getFirst("dateStart"));
-            LocalDate dateEnd = LocalDate.parse(info.getQueryParameters().getFirst("dateEnd"));
-            if (dateStart.isAfter(dateEnd) ){
+            //LocalDate dateEnd = LocalDate.parse(info.getQueryParameters().getFirst("dateEnd"));
+            /*if (dateStart.isAfter(dateEnd) ){
                 throw new DataException("Start date must be before end date");   
-            }
-            List<TotalRoomOutOfOrderByType> outOrder = availabilityDao.getRoomCountByTypeOutOfOrder(dateStart, dateEnd);
+            }*/
+            List<TotalRoomOutOfOrderByType> outOrder = availabilityDao.getRoomCountByTypeOutOfOrder(dateStart);
             if (outOrder.isEmpty()) {
                 throw new NotFoundException();
             }
@@ -76,11 +76,11 @@ public class AvailabilityService {
     public Response getRoomCountUnavailable(@Context UriInfo info) {
         try {
             LocalDate dateStart = LocalDate.parse(info.getQueryParameters().getFirst("dateStart"));
-            LocalDate dateEnd = LocalDate.parse(info.getQueryParameters().getFirst("dateEnd"));
-            if (dateStart.isAfter(dateEnd) ){
+            //LocalDate dateEnd = LocalDate.parse(info.getQueryParameters().getFirst("dateEnd"));
+            /*if (dateStart.isAfter(dateEnd) ){
                 throw new DataException("Start date must be before end date");   
-            }
-            List<TotalRoomCountUnavailable> outOrder = availabilityDao.getRoomCountUnavailable(dateStart, dateEnd);
+            }*/
+            List<TotalRoomCountUnavailable> outOrder = availabilityDao.getRoomCountUnavailable(dateStart);
             if (outOrder.isEmpty()) {
                 throw new NotFoundException();
             }
@@ -96,11 +96,11 @@ public class AvailabilityService {
     public Response getRoomCountAvailable(@Context UriInfo info) {
         try {
             LocalDate dateStart = LocalDate.parse(info.getQueryParameters().getFirst("dateStart"));
-            LocalDate dateEnd = LocalDate.parse(info.getQueryParameters().getFirst("dateEnd"));
-            if (dateStart.isAfter(dateEnd) ){
+            //LocalDate dateEnd = LocalDate.parse(info.getQueryParameters().getFirst("dateEnd"));
+            /*if (dateStart.isAfter(dateEnd) ){
                 throw new DataException("Start date must be before end date");   
-            }
-            List<TotalRoomCountAvailable> outOrder = availabilityDao.getRoomCountAvailables(dateStart, dateEnd);
+            }*/
+            List<TotalRoomCountAvailable> outOrder = availabilityDao.getRoomCountAvailables(dateStart);
             if (outOrder.isEmpty()) {
                 throw new NotFoundException();
             }
