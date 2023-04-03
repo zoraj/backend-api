@@ -17,4 +17,5 @@ import lombok.Data;
 public class TotalRoomCountAvailable {
     private LocalDate dateAvailable;
     List<TotalRoomByType> totalRoomsByType;
+    private Integer qteTotalRoomsAvailable;
 }
