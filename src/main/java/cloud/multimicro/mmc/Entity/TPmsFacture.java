@@ -8,8 +8,11 @@ package cloud.multimicro.mmc.Entity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -25,6 +28,11 @@ import lombok.Data;
 public class TPmsFacture implements Serializable {
     
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    private Integer id;
+    
     @NotNull
     @Column(name = "numero")
     private String numero;
@@ -77,5 +85,8 @@ public class TPmsFacture implements Serializable {
     @NotNull
     @Column(name = "utilisateur")
     private String utilisateur;
+            
+    @Column(name = "code_promo")
+    private String codePromo;
    
 }

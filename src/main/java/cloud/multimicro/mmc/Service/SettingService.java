@@ -63,7 +63,12 @@ public class SettingService {
             TMmcParametrage setting = new TMmcParametrage();
             setting.setCle(key);
             setting.setValeur(valeur);
-            return Response.status(Response.Status.CREATED).entity(setting).build();
+            return Response.status(Response.Status.CREATED)
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("Access-Control-Allow-Credentials", "true")
+                    .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
+                    .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
+                    .entity(setting).build();
         } catch (CustomConstraintViolationException ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
