@@ -8,6 +8,7 @@
 package cloud.multimicro.mmc.Dao;
 
 import cloud.multimicro.mmc.Entity.RoomByType;
+import cloud.multimicro.mmc.Entity.TMmcCodePromo;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Entity.TPmsReservation;
 import cloud.multimicro.mmc.Entity.TPmsSejour;
@@ -16,6 +17,8 @@ import cloud.multimicro.mmc.Entity.TarifApplicable;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -31,7 +34,6 @@ import javax.json.JsonObject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.validation.ConstraintViolationException;
-import javax.ws.rs.NotFoundException;
 
 /**
  * BookingDao
@@ -169,7 +171,7 @@ public class BookingDao {
                         validPax = ((1 <= room.getPersMin()) && (nbPersMax >= room.getPersMin())
                                 && (1 <= room.getPersMax()) && (room.getPersMax() <= nbPersMax));
                     }
-                    validChild = ((0 <= room.getNbChild()) && (room.getNbChild()) >= (request.getInt("nbEnfant")));
+                    validChild = ((0 <= room.getNbChild()) && room.getNbChild() >= request.getInt("nbEnfant"));
                     if (validPax == true && validChild == true && room.getQteDispo() >= qte) {
                         if (!pmsTypeChambreIdList.contains(pmsTypeChambreId)) {
                             availableRoom.add(room);
@@ -259,6 +261,114 @@ public class BookingDao {
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
-
     }
+    
+    public List<TMmcCodePromo> getCodePromos() {
+        List<TMmcCodePromo> list = entityManager
+                .createQuery("FROM TMmcCodePromo WHERE dateDeletion = null ORDER BY code")
+                .getResultList();
+        return list;
+    }
+    
+    public void insertCodePromo(String code, Integer limite_utilisation, String type_remise, BigDecimal valeur, 
+                                LocalDate date_expiration, String descr, String min_max) 
+             throws CustomConstraintViolationException 
+    {
+        try {
+            TMmcCodePromo codePromo = new TMmcCodePromo();
+            codePromo.setCode(code);
+            codePromo.setLimiteUtilisation(limite_utilisation);
+            if (!type_remise.equals("")) {
+                codePromo.setTypeRemise(type_remise);
+            }
+            codePromo.setValeur(valeur);
+            codePromo.setDateExpiration(date_expiration);
+            codePromo.setDescription(descr);
+            String[] minmax = min_max.split(";");
+            codePromo.setMinApplicable(new BigDecimal(minmax[0]));
+            codePromo.setMaxApplicable(new BigDecimal(minmax[1]));
+            entityManager.persist(codePromo);
+        }
+        catch (Exception ex) {
+            throw new CustomConstraintViolationException(ex.getMessage(), ex);
+        }
+    }
+    
+    public void updateCodePromo(Integer pk, Integer limite_utilisation, String type_remise, BigDecimal valeur, 
+                                LocalDate date_expiration, String descr, String min_max) 
+             throws CustomConstraintViolationException 
+    {
+        try {
+            TMmcCodePromo codePromo = getCodePromoById(pk);
+            codePromo.setLimiteUtilisation(limite_utilisation);
+            if (!type_remise.equals("")) {
+                codePromo.setTypeRemise(type_remise);
+            }
+            codePromo.setValeur(valeur);
+            codePromo.setDateExpiration(date_expiration);
+            codePromo.setDescription(descr);
+            String[] minmax = min_max.split(";");
+            codePromo.setMinApplicable(new BigDecimal(minmax[0]));
+            codePromo.setMaxApplicable(new BigDecimal(minmax[1]));
+            entityManager.merge(codePromo);
+        }
+        catch (Exception ex) {
+            throw new CustomConstraintViolationException(ex.getMessage(), ex);
+        }
+    }
+    
+    public void deleteCodePromo(int id) throws CustomConstraintViolationException {
+        TMmcCodePromo codePromo = getCodePromoById(id);
+        Date dateDel = new Date();
+        codePromo.setDateDeletion(new java.sql.Date(dateDel.getTime()).toLocalDate());
+        try {
+            entityManager.merge(codePromo);
+        } catch (ConstraintViolationException ex) {
+            throw new CustomConstraintViolationException(ex);
+        }
+    }
+    
+    public TMmcCodePromo getCodePromoById(int id) {
+        return entityManager.find(TMmcCodePromo.class, id);
+    }
+    
+    public boolean isCodePromoValid(String code) {
+        boolean ret = true;
+        try {
+            TMmcCodePromo codePromo = getCodePromoByCode(code);
+            Long nbUse = (Long) entityManager
+                .createQuery("SELECT COUNT(id) FROM TPmsFacture WHERE codePromo = :codePromo")
+                .setParameter("codePromo", code)
+                .getSingleResult();
+            if (codePromo.getLimiteUtilisation() != null && codePromo.getLimiteUtilisation() > nbUse.intValue()) {
+                java.sql.Date sqlDateExpiration = java.sql.Date.valueOf(codePromo.getDateExpiration());
+                String strDateExpiration = sqlDateExpiration + " " + Time.valueOf("23:59:59");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                try {
+                    Date dateExpiration = sdf.parse(strDateExpiration);
+                    Date maintenant = new Date();
+                    if (dateExpiration.compareTo(maintenant) < 0) {
+                        ret = false;
+                    }
+                } catch (ParseException pe){
+                    ret = false;
+                    pe.printStackTrace();
+                }
+            } else if (codePromo.getLimiteUtilisation() != null && codePromo.getLimiteUtilisation() <= nbUse.intValue()) {
+                ret = false;
+            }
+        } catch(Exception e) {
+            ret = false;
+        }
+        return ret;
+    }
+    
+    public TMmcCodePromo getCodePromoByCode(String code) throws Exception {
+        TMmcCodePromo ret = (TMmcCodePromo) entityManager
+                .createQuery("FROM TMmcCodePromo WHERE code = :code")
+                .setParameter("code", code)
+                .getSingleResult();
+        return ret;
+    }
+    
 }

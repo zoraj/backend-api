@@ -130,6 +130,27 @@ public class DeviseService {
         }
         return Response.ok(exchangeRate, MediaType.APPLICATION_JSON).build(); 
     }
+    
+    @Path("/principal")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDevisePrincipal() {
+        TMmcDevise devise = deviseDao.getDevisePrincipal();
+        if (devise == null) {
+            throw new NotFoundException();
+        }
+        return Response.ok(devise, MediaType.APPLICATION_JSON).build(); 
+    }
+    
+    @Path("/principal/symbole")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDevisePrincipalSymbole() {
+        TMmcDevise devise = deviseDao.getDevisePrincipal();
+        if (devise == null) {
+            throw new NotFoundException();
+        }
+        return Response.ok(devise.getSymbole(), MediaType.APPLICATION_JSON).build(); 
+    }
+    
 }
-
-

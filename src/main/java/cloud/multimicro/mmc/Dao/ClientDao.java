@@ -32,7 +32,7 @@ public class ClientDao {
     //Client
     
     public List<TMmcClient> getAll() {
-        List<TMmcClient> customer = entityManager.createQuery(" FROM TMmcClient  where dateDeletion is null ").getResultList();
+        List<TMmcClient> customer = entityManager.createQuery(" FROM TMmcClient  where dateDeletion is null order by nom, prenom ").getResultList();
         return customer;
     }
     

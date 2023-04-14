@@ -33,6 +33,10 @@ public class DeviseDao {
         return devise;
     }
     
+    public TMmcDevise getDevisePrincipal() {
+        return (TMmcDevise) entityManager.createQuery("FROM TMmcDevise where libelle = (select valeur from TMmcParametrage where cle = :cle)").setParameter("cle", "DEFAULT_CURRENCY").getSingleResult();
+    }
+    
     public void setDevise(TMmcDevise devise) throws CustomConstraintViolationException {
         try{
         entityManager.persist(devise);
