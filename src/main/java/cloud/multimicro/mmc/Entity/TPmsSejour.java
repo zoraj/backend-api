@@ -138,7 +138,7 @@ public class TPmsSejour implements Serializable {
 
     @Column(name = "observation")
     private String observation;
-
+/*
     @Column(name = "carte_paiement_type")
     private String cartePaiementType;
 
@@ -153,7 +153,7 @@ public class TPmsSejour implements Serializable {
 
     @Column(name = "carte_paiement_cvv")
     private String cartePaiementCVV;
-    
+*/    
     @Transient
     String contentReminder;
 

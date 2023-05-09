@@ -201,4 +201,48 @@ public class StayDao {
               .setParameter("id", id)               
               .executeUpdate();
     }
+    
+    public List<Long> getEnNotesByTypechambre(int id, String dateLogiciel) {
+        String sql = "select id from TPmsSejour " +
+                    "where dateArrivee <= :dateLogiciel and dateDepart >= :dateLogiciel " +
+                    "and statut = 'NOTE' and pmsTypeChambreId = :pmsTypeChambreId and dateDeletion is null";
+        List<Long> ret = entityManager.createQuery(sql)
+                                .setParameter("dateLogiciel", LocalDate.parse(dateLogiciel))
+                                .setParameter("pmsTypeChambreId", id)
+                                .getResultList();
+        return ret;
+    }
+    
+    public List<Long> getSoldeesByTypechambre(int id, String dateLogiciel) {
+        String sql = "select id from TPmsSejour " +
+                    "where dateArrivee <= :dateLogiciel and dateDepart >= :dateLogiciel " +
+                    "and statut = 'SOLDE' and pmsTypeChambreId = :pmsTypeChambreId and dateDeletion is null";
+        List<Long> ret = entityManager.createQuery(sql)
+                                .setParameter("dateLogiciel", LocalDate.parse(dateLogiciel))
+                                .setParameter("pmsTypeChambreId", id)
+                                .getResultList();
+        return ret;
+    }
+    
+    public List<Long> getEnAttentesByTypechambre(int id, String dateLogiciel) {
+        String sql = "select id from TPmsSejour " +
+                    "where dateArrivee <= :dateLogiciel and dateDepart >= :dateLogiciel " +
+                    "and statut = 'ATTENTE' and pmsTypeChambreId = :pmsTypeChambreId and dateDeletion is null";
+        List<Long> ret = entityManager.createQuery(sql)
+                                .setParameter("dateLogiciel", LocalDate.parse(dateLogiciel))
+                                .setParameter("pmsTypeChambreId", id)
+                                .getResultList();
+        return ret;
+    }
+    
+    public List<Long> getDepartsByTypechambre(int id, String dateLogiciel) {
+        String sql = "select id from TPmsSejour " +
+                    "where dateDepart = :dateDepart and pmsTypeChambreId = :pmsTypeChambreId and dateDeletion is null";
+        List<Long> ret = entityManager.createQuery(sql)
+                                .setParameter("dateDepart", LocalDate.parse(dateLogiciel))
+                                .setParameter("pmsTypeChambreId", id)
+                                .getResultList();
+        return ret;
+    }
+    
 }

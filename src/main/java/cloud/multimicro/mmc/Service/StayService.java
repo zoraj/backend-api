@@ -26,6 +26,7 @@ import org.jboss.logging.Logger;
 import cloud.multimicro.mmc.Entity.TPmsSejour;
 import cloud.multimicro.mmc.Entity.TPmsSejourTarif;
 import cloud.multimicro.mmc.Entity.TPmsSejourTarifDetail;
+import java.math.BigDecimal;
 
 /**
  * SettingService
@@ -220,4 +221,49 @@ public class StayService {
              return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
          }   
      }
+     
+     @GET
+     @Path("/en_note/byTypeChambre/{id}/{dateLogiciel}")
+     @Produces(MediaType.APPLICATION_JSON)
+     public Response getEnNotesByTypechambre(@PathParam("id") int id, @PathParam("dateLogiciel") String dateLogiciel) {
+        List<Long> ret = stayDao.getEnNotesByTypechambre(id, dateLogiciel);
+        if (ret == null) {
+            throw new NotFoundException();
+        }
+        return Response.ok(ret.size(), MediaType.APPLICATION_JSON).build();
+     }
+     
+     @GET
+     @Path("/soldee/byTypeChambre/{id}/{dateLogiciel}")
+     @Produces(MediaType.APPLICATION_JSON)
+     public Response getSoldeesByTypechambre(@PathParam("id") int id, @PathParam("dateLogiciel") String dateLogiciel) {
+        List<Long> ret = stayDao.getSoldeesByTypechambre(id, dateLogiciel);
+        if (ret == null) {
+            throw new NotFoundException();
+        }
+        return Response.ok(ret.size(), MediaType.APPLICATION_JSON).build();
+     }
+     
+     @GET
+     @Path("/en_attente/byTypeChambre/{id}/{dateLogiciel}")
+     @Produces(MediaType.APPLICATION_JSON)
+     public Response getEnAttentesByTypechambre(@PathParam("id") int id, @PathParam("dateLogiciel") String dateLogiciel) {
+        List<Long> ret = stayDao.getEnAttentesByTypechambre(id, dateLogiciel);
+        if (ret == null) {
+            throw new NotFoundException();
+        }
+        return Response.ok(ret.size(), MediaType.APPLICATION_JSON).build();
+     }
+     
+     @GET
+     @Path("/departs/byTypeChambre/{id}/{dateLogiciel}")
+     @Produces(MediaType.APPLICATION_JSON)
+     public Response getDepartsByTypechambre(@PathParam("id") int id, @PathParam("dateLogiciel") String dateLogiciel) {
+        List<Long> ret = stayDao.getDepartsByTypechambre(id, dateLogiciel);
+        if (ret == null) {
+            throw new NotFoundException();
+        }
+        return Response.ok(ret.size(), MediaType.APPLICATION_JSON).build();
+     }
+     
 }

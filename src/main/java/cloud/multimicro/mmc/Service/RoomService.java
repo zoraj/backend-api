@@ -171,6 +171,17 @@ public class RoomService {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
+    
+    @Path("/nbByType/{id}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRoomsByTypeId(@PathParam("id") int id) {
+        List<TPmsChambre> rooms = roomDao.getRoomsByType(id);
+        if (rooms.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(rooms.size(), MediaType.APPLICATION_JSON).build();
+    }
 
     // ********************************************************
     @Path("/type/image/{id}")
@@ -391,6 +402,17 @@ public class RoomService {
         }
     }
     
+    @Path("/out-of-order/byTypeChambre/{id}/{dateLogiciel}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getHSByTypechambre(@PathParam("id") int id, @PathParam("dateLogiciel") String dateLogiciel) {
+        List<Long> rooms = roomDao.getHSbyTypechambre(id, dateLogiciel);
+        if (rooms.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(rooms.size(), MediaType.APPLICATION_JSON).build();
+    }
+    
     //Etat remplissage annuel
     @GET
     @Path("/availabilities")
@@ -403,6 +425,17 @@ public class RoomService {
             throw new NotFoundException();
         }
         return Response.ok(remplissageAnnuel, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
+    @Path("/libre/byTypeChambre/{id}/{dateLogiciel}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getLibresByTypeChambre(@PathParam("id") int id, @PathParam("dateLogiciel") String dateLogiciel) {
+        List<Long> rooms = roomDao.getLibresByTypeChambre(id, dateLogiciel);
+        if (rooms.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(rooms.size(), MediaType.APPLICATION_JSON).build();
     }
     
     @Path("/applicable-room-by-rate-type/{pmsModelTarifId}")
