@@ -472,5 +472,17 @@ public class ReservationDao {
                 .createQuery("FROM TPmsReservation  WHERE dateDeletion IS not null").getResultList();
         return pmsReservationCanceled;
     }
+     
+    public List<Long> getPreaffectedByTypeChambre(int id, String dateLogiciel) {
+        String sql = "select v.id from TPmsReservationVentilation v " +
+                     "join TPmsReservation r ON v.pmsReservationId = r.id " +
+                     "where v.pmsChambreId is not null and v.pmsTypeChambreId = :id and " +
+                     "r.dateArrivee = :dateLogiciel";
+        List<Long> ret = entityManager.createQuery(sql)
+                .setParameter("id", id)
+                .setParameter("dateLogiciel", LocalDate.parse(dateLogiciel))
+                .getResultList();
+        return ret;
+    }
 
 }
