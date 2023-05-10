@@ -107,6 +107,38 @@ public class RoomDao {
         }
         return result;
     }
+    
+    public List<TPmsChambre> getRoomsByType(int id) {
+        List<TPmsChambre> products = entityManager.createQuery(
+                "select c FROM TPmsChambre c JOIN TPmsTypeChambre tc ON c.pmsTypeChambreId = tc.id where c.dateDeletion is null and tc.id = :id")
+                .setParameter("id", id)
+                .getResultList();
+        return products;
+    }
+    
+    public List<Long> getHSbyTypechambre(int id, String dateLogiciel) {
+        String sql = "select hs.id from TPmsChambreHorsService hs join TPmsChambre c ON hs.pmsChambreId = c.id " +
+                     "where hs.dateDebut <= :dateLogiciel and hs.dateFin >= :dateLogiciel " +
+                     "and c.pmsTypeChambreId = :id and hs.isSoustraireDispo = TRUE and hs.dateDeletion is null";
+        List<Long> ret = entityManager.createQuery(sql)
+                .setParameter("id", id)
+                .setParameter("dateLogiciel", LocalDate.parse(dateLogiciel))
+                .getResultList();
+        return ret;
+    }
+    
+    public List<Long> getLibresByTypeChambre(int id, String dateLogiciel) {
+        String sql = "select distinct idChambre from VPmsChambreDisponibiliteEtat " +
+                     "where idTypeChambre = :id and " +
+                     "( ( dateArrivee is null and dateDepart is null ) " +
+                     "or " +
+                     "( dateArrivee <= :dateLogiciel and dateDepart >= :dateLogiciel ) )";
+        List<Long> ret = entityManager.createQuery(sql)
+                .setParameter("id", id)
+                .setParameter("dateLogiciel", LocalDate.parse(dateLogiciel))
+                .getResultList();
+        return ret;
+    }
 
     public TPmsTypeChambre getRoomTypesById(int id) {
         TPmsTypeChambre roomTypes = entityManager.find(TPmsTypeChambre.class, id);

@@ -349,4 +349,16 @@ public class ReservationService {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }   
     }
+    
+    @GET
+    @Path("/preaffected/byTypeChambre/{id}/{dateLogiciel}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPreaffectedByTypeChambre(@PathParam("id") int id, @PathParam("dateLogiciel") String dateLogiciel) {
+        List<Long> ret = reservationDao.getPreaffectedByTypeChambre(id, dateLogiciel);
+        if (ret.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(ret.size(), MediaType.APPLICATION_JSON).build();
+    }
+    
 }

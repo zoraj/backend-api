@@ -152,7 +152,7 @@ public class TPmsReservation implements Serializable {
 
     @Column(name = "origine")
     private String origine;
-    
+/*    
     @Column(name = "cb_type")
     private String cbType;
 
@@ -167,7 +167,7 @@ public class TPmsReservation implements Serializable {
 
     @Column(name = "cb_cvv")
     private String cbCvv;
-
+*/
     @Column(name = "motif_annulation")
     private String motifAnnulation;
     

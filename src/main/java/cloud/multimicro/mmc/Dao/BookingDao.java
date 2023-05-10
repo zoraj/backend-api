@@ -230,11 +230,11 @@ public class BookingDao {
             stay.setDescription(description);
             stay.setAdresse(reservation.getAdresse1());
             stay.setAdresseComp(reservation.getAdresse2());
-            stay.setCartePaiementCVV(reservation.getCbCvv());
-            stay.setCartePaiementExpiration(reservation.getCbExp());
-            stay.setCartePaiementNumero(reservation.getCbNumero());
-            stay.setCartePaiementTitulaire(reservation.getCbTitulaire());
-            stay.setCartePaiementType(reservation.getCbType());
+            //stay.setCartePaiementCVV(reservation.getCbCvv());
+            //stay.setCartePaiementExpiration(reservation.getCbExp());
+            //stay.setCartePaiementNumero(reservation.getCbNumero());
+            //stay.setCartePaiementTitulaire(reservation.getCbTitulaire());
+            //stay.setCartePaiementType(reservation.getCbType());
             stay.setCivilite(reservation.getCivilite());
             stay.setCodePostal(reservation.getCp());
             stay.setDateArrivee(reservation.getDateArrivee());
