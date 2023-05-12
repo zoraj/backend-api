@@ -697,8 +697,9 @@ public class ReportingDao {
         return etatDebitChbr;
     }
 
-    public List<VPmsEditionEtatControl> getAllEtatControl() {
-        List<VPmsEditionEtatControl> etatControl = entityManager.createQuery("FROM VPmsEditionEtatControl")
+    public List<VPmsEditionEtatControl> getAllEtatControl(String dateRef) {
+        List<VPmsEditionEtatControl> etatControl = entityManager.createQuery("FROM VPmsEditionEtatControl where dateReference = :dateReference")
+                .setParameter("dateReference", LocalDate.parse(dateRef))
                 .getResultList();
         return etatControl;
     }
