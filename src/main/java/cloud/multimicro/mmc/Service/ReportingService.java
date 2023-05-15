@@ -306,11 +306,15 @@ public class ReportingService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllEtatControl(@Context UriInfo info) {
         String dateRef = info.getQueryParameters().getFirst("dateRef");
-        List<VPmsEditionEtatControl> etatControl = reportingDao.getAllEtatControl(dateRef);
-        if (etatControl.isEmpty()) {
-            throw new NotFoundException();
+        if (dateRef.equals("")) {
+            return Response.ok(null, MediaType.APPLICATION_JSON).build();
+        } else {
+            List<VPmsEditionEtatControl> etatControl = reportingDao.getAllEtatControl(dateRef);
+            if (etatControl.isEmpty()) {
+                throw new NotFoundException();
+            }
+            return Response.ok(etatControl, MediaType.APPLICATION_JSON).build();
         }
-        return Response.ok(etatControl, MediaType.APPLICATION_JSON).build();
     }
 
     @GET
