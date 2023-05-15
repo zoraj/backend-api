@@ -8,6 +8,7 @@
 package cloud.multimicro.mmc.Service;
 
 import cloud.multimicro.mmc.Dao.ReservationDao;
+import cloud.multimicro.mmc.Entity.TMmcNotification;
 import cloud.multimicro.mmc.Entity.TPmsReservation;
 import cloud.multimicro.mmc.Entity.TPmsReservationVentilation;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarif;
@@ -74,7 +75,7 @@ public class ReservationService {
         if (reservation.isEmpty()) {
             throw new NotFoundException();
         }
-        return Response.ok(reservation, MediaType.APPLICATION_JSON).build();       
+        return Response.ok(reservation, MediaType.APPLICATION_JSON).build();
     }
     
     @GET
@@ -121,6 +122,33 @@ public class ReservationService {
         catch (CustomConstraintViolationException ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
+    }
+    
+    @Path("/notif")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createNotif(JsonObject pmsReservation) throws ParseException, DataException {
+        TMmcNotification notif = reservationDao.createNotif(pmsReservation);
+        return Response.status(Response.Status.CREATED).entity(notif).build();
+    }
+    
+    @Path("/notif/nonlus")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getNotifNonLus() throws ParseException, DataException {
+        List<Long> ret = reservationDao.getAllIdNotifResaNonlu();
+        if (ret.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(ret, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @Path("/notif/modif")
+    @PATCH
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateNotif(TMmcNotification notif) {
+        TMmcNotification ret = reservationDao.updateNotif(notif);
+        return Response.status(Response.Status.OK).entity(ret).build();
     }
     
     @Path("/")

@@ -26,6 +26,7 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 import org.jboss.logging.Logger;
 
 import cloud.multimicro.mmc.Entity.TMmcClient;
+import cloud.multimicro.mmc.Entity.TMmcNotification;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Entity.TPmsReservation;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarif;
@@ -251,6 +252,21 @@ public class ReservationDao {
         }
         */
     }
+    
+    public TMmcNotification createNotif(JsonObject resa) {
+        String numResa = resa.getString("numeroReservation");
+        int id = resa.getInt("id");
+        TMmcNotification ret = new TMmcNotification();
+        ret.setNotification("Une nouvelle réservation sous le numéro "+numResa+" a été créée en ligne");
+        ret.setAction("/reservation?id="+id);
+        ret.setStatut("NONLU");
+        entityManager.persist(ret);
+        return ret;
+    }
+    
+    public List<Long> getAllIdNotifResaNonlu() {
+        return (List<Long>) entityManager.createNativeQuery("select id from t_mmc_notification where instr(action, '/reservation?id=') > 0 and statut = 'NONLU' and date_deletion is null").getResultList();
+    }
 
     public TPmsReservation update(TPmsReservation newReservationData) throws CustomConstraintViolationException {
         try {
@@ -261,6 +277,19 @@ public class ReservationDao {
         }
         catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    
+    public TMmcNotification updateNotif(TMmcNotification newNotif) {
+        try {
+            TMmcNotification oldNotif = entityManager.find(TMmcNotification.class, newNotif.getId());
+            BeanUtilsBean notif = new NullAwareBeanUtilsBean();
+            notif.copyProperties(oldNotif, newNotif);
+            return entityManager.merge(oldNotif);
         }
         catch (Exception ex) {
             ex.printStackTrace();
