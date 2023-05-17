@@ -8,7 +8,6 @@
 package cloud.multimicro.mmc.Service;
 
 import cloud.multimicro.mmc.Dao.ReservationDao;
-import cloud.multimicro.mmc.Entity.TMmcNotification;
 import cloud.multimicro.mmc.Entity.TPmsReservation;
 import cloud.multimicro.mmc.Entity.TPmsReservationVentilation;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarif;
@@ -19,12 +18,9 @@ import cloud.multimicro.mmc.Exception.DataException;
 import cloud.multimicro.mmc.Util.Payload;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,7 +51,9 @@ import javax.json.JsonObject;
 @Path("reservation")
 @Produces(MediaType.APPLICATION_JSON)
 public class ReservationService {
+    
     private static final Logger LOGGER = Logger.getLogger(ReservationService.class);
+    
     @Inject
     ReservationDao reservationDao;
     
@@ -122,33 +120,6 @@ public class ReservationService {
         catch (CustomConstraintViolationException ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
-    }
-    
-    @Path("/notif")
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createNotif(JsonObject pmsReservation) throws ParseException, DataException {
-        TMmcNotification notif = reservationDao.createNotif(pmsReservation);
-        return Response.status(Response.Status.CREATED).entity(notif).build();
-    }
-    
-    @Path("/notif/nonlus")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getNotifNonLus() throws ParseException, DataException {
-        List<Long> ret = reservationDao.getAllIdNotifResaNonlu();
-        if (ret.isEmpty()) {
-            throw new NotFoundException();
-        }
-        return Response.ok(ret, MediaType.APPLICATION_JSON).build();
-    }
-    
-    @Path("/notif/modif")
-    @PATCH
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response updateNotif(TMmcNotification notif) {
-        TMmcNotification ret = reservationDao.updateNotif(notif);
-        return Response.status(Response.Status.OK).entity(ret).build();
     }
     
     @Path("/")
