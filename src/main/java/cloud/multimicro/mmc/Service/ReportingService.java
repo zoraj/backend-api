@@ -172,12 +172,17 @@ public class ReportingService {
     @GET
     @Path("/pms/report-arrival-departure")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getEditionRaportArrivalDeparture() {
-        List<VPmsEditionRapportArriveeDepart> arrivalDeparture = reportingDao.getEditionRaportArrivalDeparture();
-        if (arrivalDeparture.isEmpty()) {
-            throw new NotFoundException();
+    public Response getEditionRaportArrivalDeparture(@Context UriInfo info) {
+        String dateRef = info.getQueryParameters().getFirst("dateRef");
+        if (dateRef.equals("")) {
+            return Response.ok(null, MediaType.APPLICATION_JSON).build();
+        } else {
+            List<VPmsEditionRapportArriveeDepart> arrivalDeparture = reportingDao.getEditionRaportArrivalDeparture(dateRef);
+            if (arrivalDeparture.isEmpty()) {
+                throw new NotFoundException();
+            }
+            return Response.ok(arrivalDeparture, MediaType.APPLICATION_JSON).build();
         }
-        return Response.ok(arrivalDeparture, MediaType.APPLICATION_JSON).build();
     }
 
     /*

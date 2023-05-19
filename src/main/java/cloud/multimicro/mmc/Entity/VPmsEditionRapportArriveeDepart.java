@@ -6,7 +6,6 @@
 package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -28,33 +27,31 @@ public class VPmsEditionRapportArriveeDepart implements Serializable {
     @Column(name = "numero_chambre")
     private String numeroChambre;
     
-    @Column(name = "type")
-    private String type;
+    @Column(name = "type_chambre")
+    private String typeChambre;
     
     @Column(name = "etat_chambre")
     private String etatChambre;
     
-    @Column(name = "nom_depart")
-    private String nomDepart;
+    @Column(name = "nom")
+    private String nom;
     
-    @Column(name = "adult_enfant_depart")
-    private Integer adultEnfantDepart;
+    @Column(name = "pax")
+    private Integer pax;
     
-    @Column(name = "enfant_depart")
-    private Integer enfantDepart;
+    @Column(name = "enfant")
+    private Integer enfant;
     
-    @Column(name = "nom_arriv")
-    private String nomArriv;
-    
-    @Column(name = "adult_enfant_arriv")
-    private Integer adultEnfantArriv;
-    
-    @Column(name = "enfant_arriv")
-    private Integer enfantArriv;
-    
-//    @Column(name = "heure")
-//    private Date heure;
+    @Column(name = "heure")
+    private String heure;
     
     @Column(name = "nb_nuit")
-    private Integer nbNuit; 
+    private Integer nbNuit;
+    
+    @Column(name = "date_arrivee")
+    private String dateArrivee;
+    
+    @Column(name = "date_depart")
+    private String dateDepart;
+    
 }

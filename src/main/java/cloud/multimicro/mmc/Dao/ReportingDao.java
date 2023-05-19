@@ -526,9 +526,11 @@ public class ReportingDao {
      * result; }
      */
 
-    public List<VPmsEditionRapportArriveeDepart> getEditionRaportArrivalDeparture() {
+    public List<VPmsEditionRapportArriveeDepart> getEditionRaportArrivalDeparture(String dateRef) {
         List<VPmsEditionRapportArriveeDepart> arrivalDeparture = entityManager
-                .createQuery("FROM VPmsEditionRapportArriveeDepart").getResultList();
+                .createQuery("FROM VPmsEditionRapportArriveeDepart where dateArrivee = :dateRef or dateDepart = :dateRef")
+                .setParameter("dateRef", dateRef)
+                .getResultList();
         return arrivalDeparture;
     }
 
