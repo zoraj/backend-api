@@ -271,12 +271,21 @@ public class ReportingService {
     @GET
     @Path("/pms/report-soldeNoteOuverte")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllSoldeNoteOuverte() {
-        List<VPmsEditionSoldeNoteOuverte> soldeNote = reportingDao.getAllSoldeNoteOuverte();
-        if (soldeNote.isEmpty()) {
-            throw new NotFoundException();
+    public Response getAllSoldeNoteOuverte(@Context UriInfo info) {
+        String dateRef = info.getQueryParameters().getFirst("dateRef");
+        if (dateRef.equals("")) {
+            return Response.ok(null, MediaType.APPLICATION_JSON).build();
+        } else {
+            try {
+                List<VPmsEditionSoldeNoteOuverte> soldeNote = reportingDao.getAllSoldeNoteOuverte(dateRef);
+                if (soldeNote.isEmpty()) {
+                    throw new NotFoundException();
+                }
+                return Response.ok(soldeNote, MediaType.APPLICATION_JSON).build();
+            } catch (Exception e) {
+                return Response.ok(null, MediaType.APPLICATION_JSON).build();
+            }
         }
-        return Response.ok(soldeNote, MediaType.APPLICATION_JSON).build();
     }
 
     @GET

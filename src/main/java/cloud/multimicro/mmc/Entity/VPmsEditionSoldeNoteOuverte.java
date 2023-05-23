@@ -6,12 +6,9 @@
 package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Data;
@@ -34,19 +31,16 @@ public class VPmsEditionSoldeNoteOuverte implements Serializable {
     @Column(name = "nom")
     private String nom;
     
+    @Column(name = "arrivee")
+    private Date arrivee;
+    
+    @Column(name = "depart")
+    private Date depart;
+    
     @Column(name = "adult_enfant")
-    private Integer adultEnfant;
-    
-    @Column(name = "date_arrivee")
-    private Date dateArrivee;
-    
-    @Column(name = "date_depart")
-    private Date dateDepart;
-    
-    @Column(name = "etat")
-    private String etat;
+    private String adultEnfant;
     
     @Column(name = "total")
-    private BigDecimal total;
+    private double total;
     
 }
