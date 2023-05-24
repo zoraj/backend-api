@@ -29,6 +29,7 @@ import cloud.multimicro.mmc.Entity.TPmsTypeChambreTarifApplicable;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import javax.json.JsonObject;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
@@ -293,6 +294,18 @@ public class RoomService {
             return Response.status(Response.Status.OK).entity(room).build();
         } catch (CustomConstraintViolationException ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+        }
+    }
+    
+    @Path("/")
+    @PATCH
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response update(TPmsChambre room) {
+        try {
+            TPmsChambre result = roomDao.updateRooms(room);
+            return Response.status(Response.Status.OK).entity(result).build();
+        } catch (CustomConstraintViolationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
