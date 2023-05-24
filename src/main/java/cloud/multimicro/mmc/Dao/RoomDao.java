@@ -277,6 +277,17 @@ public class RoomDao {
         entityManager.createNativeQuery("UPDATE t_pms_chambre SET date_deletion = CURRENT_TIMESTAMP WHERE id=:id")
                 .setParameter("id", id).executeUpdate();
     }
+    
+    public void updateRoomToCleanByEtage(int numEtage) {
+        entityManager.createNativeQuery("UPDATE t_pms_chambre SET etat_chambre = 'CLEAN' WHERE numero_etage=:numEtage")
+                .setParameter("numEtage", numEtage).executeUpdate();
+    }
+    
+    public JsonObject updateAllRoomToClean() {
+        entityManager.createNativeQuery("UPDATE t_pms_chambre SET etat_chambre = 'CLEAN' WHERE DATE_DELETION is null")
+                .executeUpdate();
+        return Json.createObjectBuilder().add("result", "OK").build(); 
+    }
 
     // model tarif et option de tarif
     public List<TPmsModelTarif> getModelTarifByTypeChambre(Integer pmsTypeChambreId) {

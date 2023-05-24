@@ -319,6 +319,30 @@ public class RoomService {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
+    
+    @Path("/housekeeping/{numEtage}")
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateRoomToCleanByEtage(@PathParam("numEtage") int numEtage) {
+        try {
+            roomDao.updateRoomToCleanByEtage(numEtage);
+            return Response.ok(numEtage, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+    
+    @Path("/housekeeping/all")
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateAllRoomToClean() {
+        try {
+            JsonObject housekeeping = roomDao.updateAllRoomToClean();
+            return Response.ok(housekeeping, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
 
     @Path("/pms/applicable-rate-by-room-type/{room-id}")
     @GET
