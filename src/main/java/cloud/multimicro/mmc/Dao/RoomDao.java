@@ -21,6 +21,7 @@ import cloud.multimicro.mmc.Entity.TPmsTypeChambre;
 import cloud.multimicro.mmc.Entity.TPmsTypeChambrePhoto;
 import cloud.multimicro.mmc.Entity.TPmsTypeChambreTarifApplicable;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
+import cloud.multimicro.mmc.Util.NullAwareBeanUtilsBean;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -41,6 +42,7 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.validation.ConstraintViolationException;
+import org.apache.commons.beanutils.BeanUtilsBean;
 
 /**
  * RoomDao
@@ -270,6 +272,21 @@ public class RoomDao {
             entityManager.persist(rooms);
         } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
+        }
+    }
+    
+    public TPmsChambre updateRooms(TPmsChambre pmsChambre) throws CustomConstraintViolationException {
+        try {
+            TPmsChambre oldRooms = entityManager.find(TPmsChambre.class, pmsChambre.getId());
+            BeanUtilsBean rooms = new NullAwareBeanUtilsBean();
+            rooms.copyProperties(oldRooms, pmsChambre);
+            return entityManager.merge(oldRooms);
+        } catch (ConstraintViolationException ex) {
+            throw new CustomConstraintViolationException(ex);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
         }
     }
 
