@@ -1581,13 +1581,13 @@ public class ReportingDao {
 
     public BigDecimal getRoomNbReservationClosed(LocalDate dateOccupation) {
         return (BigDecimal) entityManager.createNativeQuery(
-                "select sum(nb_chambre) from t_pms_reservation WHERE  date_arrivee<=:dateOccupation AND date_depart>:dateOccupation ")
+                "select sum(nb_chambre) from t_pms_reservation WHERE  date_arrivee <= :dateOccupation AND date_depart > :dateOccupation ")
                 .setParameter("dateOccupation", dateOccupation).getSingleResult();
     }
 
     public BigDecimal getRoomNbReservationOption(LocalDate dateOccupation) {
         return (BigDecimal) entityManager.createNativeQuery(
-                "select sum(nb_chambre) from t_pms_reservation WHERE  date_arrivee<=:dateOccupation AND date_depart>:dateOccupation AND date_option is not null ")
+                "select sum(nb_chambre) from t_pms_reservation WHERE  date_arrivee <= :dateOccupation AND date_depart > :dateOccupation AND date_option is not null ")
                 .setParameter("dateOccupation", dateOccupation).getSingleResult();
     }
 
@@ -1614,21 +1614,19 @@ public class ReportingDao {
         }
 
         while (dateEffective.compareTo(dateEndLocalDate) <= 0) {
-            BigDecimal nbOccupation = getNbrOccupation(dateEffective);
-            var nbOcc = (nbOccupation == null) ? 0 : nbOccupation.intValue();
+            BigInteger nbOccupation = getNbrOccupation(dateEffective);
+            int nbOcc = (nbOccupation == null) ? 0 : nbOccupation.intValue();
             int nbArrival = getNbrArrivee(dateEffective).intValue();
             int nbDepart = getNbrDepart(dateEffective).intValue();
-            Integer nbRecouche = getNbrRecouche();
-            var nbRec = (nbRecouche == null) ? 0 : nbRecouche;
+            // int nbRecouche = getNbrRecouche(dateEffective);
+            var nbRec = nbOcc - nbArrival;
             Integer nbPdj = getNbrPdj();
             var nbPetitDej = (nbPdj == null) ? 0 : nbPdj;
 
-            BigDecimal nbPax = getNbrePax(dateEffective);
-            var nbrPax = (nbPax == null) ? 0 : nbPax.intValue();
+            int nbrPax = getNbrePax(dateEffective);
             String nbAdultEnfant = getNbrAdultEnfant(dateEffective);
             var nbAdltEnf = (nbAdultEnfant == null) ? "" : nbAdultEnfant.toString();
-            BigDecimal nbEnfant = getNbrEnfant(dateEffective);
-            var nbrEnf = (nbEnfant == null) ? 0 : nbEnfant.intValue();
+            int nbrEnf = getNbrEnfant(dateEffective);
 
             JsonObject value = Json.createObjectBuilder().add("dateEffective", dateEffective.toString())
                     .add("nbOccupation", nbOcc).add("nbArrivee", nbArrival).add("nbDepart", nbDepart)
@@ -1643,50 +1641,57 @@ public class ReportingDao {
         return resultJson;
     }
 
-    public BigDecimal getNbrOccupation(LocalDate dateEffective) {
-        return (BigDecimal) entityManager.createNativeQuery("select SUM(s.nb_pax) from t_pms_sejour s "
-                + "LEFT JOIN t_pms_reservation resa ON s.pms_reservation_id = resa.id "
-                + "WHERE resa.date_arrivee<=:dateEffective AND resa.date_depart>:dateEffective AND s.pms_reservation_id = resa.id")
+    public BigInteger getNbrOccupation(LocalDate dateEffective) {
+        String sql = "select count(id) from t_pms_reservation "+
+                     "WHERE date_arrivee <= :dateEffective AND date_depart > :dateEffective";
+        return (BigInteger) entityManager.createNativeQuery(sql)
                 .setParameter("dateEffective", dateEffective).getSingleResult();
     }
 
     public BigInteger getNbrArrivee(LocalDate dateEffective) {
         return (BigInteger) entityManager
-                .createNativeQuery("select count(*) from t_pms_reservation WHERE  date_arrivee =:dateEffective ")
+                .createNativeQuery("select count(id) from t_pms_reservation WHERE date_arrivee = :dateEffective")
                 .setParameter("dateEffective", dateEffective).getSingleResult();
     }
 
     public BigInteger getNbrDepart(LocalDate dateEffective) {
         return (BigInteger) entityManager
-                .createNativeQuery("select count(*) from t_pms_reservation WHERE  date_depart =:dateEffective ")
+                .createNativeQuery("select count(id) from t_pms_reservation WHERE date_depart = :dateEffective ")
                 .setParameter("dateEffective", dateEffective).getSingleResult();
-    }
-
-    public Integer getNbrRecouche() {
-        return (Integer) entityManager.createNativeQuery("select is_recouche from t_pms_reservation_tarif_prestation")
-                .getSingleResult();
     }
 
     public Integer getNbrPdj() {
         return (Integer) entityManager.createNativeQuery("select is_qte_pdj from t_pms_prestation").getSingleResult();
     }
 
-    public BigDecimal getNbrePax(LocalDate dateEffective) {
-        return (BigDecimal) entityManager.createNativeQuery(
-                "select sum(nb_pax) from t_pms_reservation WHERE date_arrivee<=:dateEffective AND date_depart>:dateEffective")
+    public int getNbrePax(LocalDate dateEffective) {
+        try {
+            BigDecimal ret = (BigDecimal) entityManager.createNativeQuery(
+                "select sum(nb_pax) from t_pms_reservation WHERE date_arrivee <= :dateEffective and date_depart > :dateEffective")
                 .setParameter("dateEffective", dateEffective).getSingleResult();
+            return ret.intValue();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+    
+    private int getNbrAdult(LocalDate dateEffective) {
+        return getNbrePax(dateEffective) - getNbrEnfant(dateEffective);
     }
 
     public String getNbrAdultEnfant(LocalDate dateEffective) {
-        return (String) entityManager.createNativeQuery(
-                "select concat(sum(nb_pax), '/',sum(nb_enf)) from t_pms_reservation WHERE date_arrivee<=:dateEffective AND date_depart>:dateEffective")
-                .setParameter("dateEffective", dateEffective).getSingleResult();
+        return "" + getNbrAdult(dateEffective) + "/" + getNbrEnfant(dateEffective);
     }
 
-    public BigDecimal getNbrEnfant(LocalDate dateEffective) {
-        return (BigDecimal) entityManager.createNativeQuery(
-                "select sum(nb_enf) from t_pms_reservation WHERE date_arrivee<=:dateEffective AND date_depart>:dateEffective")
+    public int getNbrEnfant(LocalDate dateEffective) {
+        try {
+            BigDecimal ret = (BigDecimal) entityManager.createNativeQuery(
+                "select sum(nb_enf) from t_pms_reservation WHERE date_arrivee <= :dateEffective and date_depart > :dateEffective")
                 .setParameter("dateEffective", dateEffective).getSingleResult();
+            return ret.intValue();
+        } catch(Exception e) {
+            return 0;
+        }
     }
 
     public JsonObject getAllEffectifPrevFamTarif(String yearMonthStr) {
@@ -1708,21 +1713,19 @@ public class ReportingDao {
         }
 
         while (dateEffective.compareTo(dateEndLocalDate) <= 0) {
-            BigDecimal nbOccupation = getNbrOccupation(dateEffective);
-            var nbOcc = (nbOccupation == null) ? 0 : nbOccupation.intValue();
+            BigInteger nbOccupation = getNbrOccupation(dateEffective);
+            int nbOcc = (nbOccupation == null) ? 0 : nbOccupation.intValue();
             int nbArrival = getNbrArrivee(dateEffective).intValue();
             int nbDepart = getNbrDepart(dateEffective).intValue();
-            Integer nbRecouche = getNbrRecouche();
-            var nbRec = (nbRecouche == null) ? 0 : nbRecouche;
+            // int nbRecouche = getNbrRecouche(dateEffective);
+            int nbRec = nbOcc - nbArrival;
             Integer nbPdj = getNbrPdj();
-            var nbPetitDej = (nbPdj == null) ? 0 : nbPdj;
+            Integer nbPetitDej = (nbPdj == null) ? 0 : nbPdj;
 
-            BigDecimal nbPax = getNbrePax(dateEffective);
-            var nbrPax = (nbPax == null) ? 0 : nbPax.intValue();
+            int nbrPax = getNbrePax(dateEffective);
             String nbAdultEnfant = getNbrAdultEnfant(dateEffective);
-            var nbAdltEnf = (nbAdultEnfant == null) ? "" : nbAdultEnfant.toString();
-            BigDecimal nbEnfant = getNbrEnfant(dateEffective);
-            var nbrEnf = (nbEnfant == null) ? 0 : nbEnfant.intValue();
+            var nbAdltEnf = (nbAdultEnfant == null) ? "" : nbAdultEnfant;
+            int nbrEnf = getNbrEnfant(dateEffective);
 
             JsonObject value = Json.createObjectBuilder().add("dateEffective", dateEffective.toString())
                     .add("nbOccupation", nbOcc).add("nbArrivee", nbArrival).add("nbDepart", nbDepart)
