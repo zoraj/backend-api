@@ -506,8 +506,8 @@ public class ReportingDao {
      * result; }
      */
 
-    public List<VPmsEditionClientPresent> getAllClientPresent() {
-        List<VPmsEditionClientPresent> clientPresent = entityManager.createQuery("FROM VPmsEditionClientPresent")
+    public List<VPmsEditionClientPresent> getAllClientPresent(String dateReference) {
+        List<VPmsEditionClientPresent> clientPresent = entityManager.createQuery("FROM VPmsEditionClientPresent WHERE dateDepart >= '" + dateReference + "' ")
                 .getResultList();
         return clientPresent;
     }

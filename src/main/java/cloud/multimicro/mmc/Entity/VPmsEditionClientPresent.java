@@ -7,6 +7,7 @@ package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,17 +33,17 @@ public class VPmsEditionClientPresent implements Serializable {
     @Column(name = "type")
     private String type;
     
-    @Column(name = "etat_chambre")
-    private String etatChambre;        
+    @Column(name = "etat_note")
+    private String etatNote;        
 
     @Column(name = "nom")
     private String nom;
     
     @Column(name = "date_depart")
-    private Date dateDepart;
+    private LocalDate dateDepart;
     
-    @Column(name = "adult_enfant")
-    private Integer adultEnfant; 
+    @Column(name = "nb_pax")
+    private Integer nbPax; 
     
     @Column(name = "enfant")
     private Integer enfant; 

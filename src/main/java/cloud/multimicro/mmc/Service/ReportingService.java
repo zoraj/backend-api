@@ -197,8 +197,9 @@ public class ReportingService {
     @GET
     @Path("/pms/report-client")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllClientPresent() {
-        List<VPmsEditionClientPresent> clientPresent = reportingDao.getAllClientPresent();
+    public Response getAllClientPresent(@Context UriInfo info) {
+        String dateReference = info.getQueryParameters().getFirst("dateReference");
+        List<VPmsEditionClientPresent> clientPresent = reportingDao.getAllClientPresent(dateReference);
         if (clientPresent.isEmpty()) {
             throw new NotFoundException();
         }
