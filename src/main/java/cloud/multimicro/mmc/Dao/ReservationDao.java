@@ -69,8 +69,11 @@ public class ReservationDao {
     }
 
     // RESERVATION
-    public List<TPmsReservation> getAll(String arrival, String departure, String name, String numbooking) {
+    public List<TPmsReservation> getAll(String arrival, String departure, String name, String numbooking, Integer canceled) {
         List<TPmsReservation> reservationList = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
+        LocalDate dateLogicielle = LocalDate.parse(settingData.getValeur(), formatter);
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FROM TPmsReservation WHERE ");
@@ -105,11 +108,29 @@ public class ReservationDao {
                 isExist = true;
             }
         }
-
-        if (isExist == true) {
-            stringBuilder.append(" AND dateDeletion IS null ");
-        } else {
-            stringBuilder.append(" dateDeletion IS null ");
+        
+        if (!Objects.isNull(canceled)) {
+            if (canceled != 0) {
+                if (isExist == true) {
+                    stringBuilder.append(" AND (dateArrivee >= '" + dateLogicielle + "' OR dateArrivee < '" + dateLogicielle + "') AND dateDepart >= '" + dateLogicielle + "' AND (dateDeletion IS not null OR dateDeletion IS null) ");
+                } else {
+                    stringBuilder.append(" (dateArrivee >= '" + dateLogicielle + "' OR dateArrivee < '" + dateLogicielle + "') AND dateDepart >= '" + dateLogicielle + "' AND (dateDeletion IS not null OR dateDeletion IS null)");
+                    isExist = true;
+                }
+            }
+        }
+        
+        if(Objects.isNull(name) && Objects.isNull(arrival) && Objects.isNull(departure) && Objects.isNull(numbooking) && Objects.isNull(canceled)){
+            stringBuilder.append(" (dateArrivee >= '" + dateLogicielle + "' OR dateArrivee < '" + dateLogicielle + "') AND dateDepart >= '" + dateLogicielle + "' ");
+            isExist = true;
+        }
+        
+        if (Objects.isNull(canceled)) {
+            if (isExist == true) {
+                stringBuilder.append(" AND dateDeletion IS null ");
+            } else {
+                stringBuilder.append(" dateDeletion IS null ");
+            }
         }
 
         reservationList = entityManager.createQuery(stringBuilder.toString()).getResultList();
@@ -467,16 +488,9 @@ public class ReservationDao {
         }
     }
     
-     public List<TPmsReservation> getAllReservationCanceled(Integer canceled) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("FROM TPmsReservation  ");
-        if (canceled != 0) {
-            stringBuilder.append(" WHERE dateDeletion IS not null OR dateDeletion IS null");
-        }else{
-            stringBuilder.append(" WHERE dateDeletion IS null");
-        }
-        List<TPmsReservation> pmsReservationCanceled = entityManager.createQuery(stringBuilder.toString())
-                .getResultList();
+     public List<TPmsReservation> getAllReservationCanceled() {
+        List<TPmsReservation> pmsReservationCanceled = entityManager
+                .createQuery("FROM TPmsReservation  WHERE dateDeletion IS not null").getResultList();
         return pmsReservationCanceled;
     }
      
