@@ -69,8 +69,10 @@ public class ReservationService {
         String departure = parameters.getFirst("dateDepart");
         String name = parameters.getFirst("name");
         String numbooking = parameters.getFirst("numeroReservation");
+        String canceledValue = parameters.getFirst("canceled");
+        Integer canceled = (!Objects.isNull(canceledValue)) ? Integer.parseInt(canceledValue) : null;
 
-        List<TPmsReservation> reservation = reservationDao.getAll(arrival, departure, name, numbooking);
+        List<TPmsReservation> reservation = reservationDao.getAll(arrival, departure, name, numbooking, canceled);
         if (reservation.isEmpty()) {
             throw new NotFoundException();
         }
@@ -328,16 +330,14 @@ public class ReservationService {
     
     //reservation canceled
     @GET
-    @Path("")
+    @Path("/canceled")  
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllReservationCanceled(@Context UriInfo info) {
-        String canceledValue = info.getQueryParameters().getFirst("canceled");
-        Integer canceled = (!Objects.isNull(canceledValue)) ? Integer.parseInt(canceledValue) : 0;
-        List<TPmsReservation> reservation = reservationDao.getAllReservationCanceled(canceled);
+    public Response getAllReservationCanceled() {
+        List<TPmsReservation> reservation = reservationDao.getAllReservationCanceled();
         if (reservation.isEmpty()) {
             throw new NotFoundException();
         }
-        return Response.ok(reservation, MediaType.APPLICATION_JSON).build();            
+        return Response.ok(reservation, MediaType.APPLICATION_JSON).build();       
     }
     
     @Path("/{id}")
