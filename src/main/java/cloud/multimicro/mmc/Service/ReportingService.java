@@ -304,12 +304,17 @@ public class ReportingService {
     @GET
     @Path("/pms/report-etat-control")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllEtatControl() {
-        List<VPmsEditionEtatControl> etatControl = reportingDao.getAllEtatControl();
-        if (etatControl.isEmpty()) {
-            throw new NotFoundException();
+    public Response getAllEtatControl(@Context UriInfo info) {
+        String dateRef = info.getQueryParameters().getFirst("dateRef");
+        if (dateRef.equals("")) {
+            return Response.ok(null, MediaType.APPLICATION_JSON).build();
+        } else {
+            List<VPmsEditionEtatControl> etatControl = reportingDao.getAllEtatControl(dateRef);
+            if (etatControl.isEmpty()) {
+                throw new NotFoundException();
+            }
+            return Response.ok(etatControl, MediaType.APPLICATION_JSON).build();
         }
-        return Response.ok(etatControl, MediaType.APPLICATION_JSON).build();
     }
 
     @GET
