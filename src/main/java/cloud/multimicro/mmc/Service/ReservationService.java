@@ -18,12 +18,9 @@ import cloud.multimicro.mmc.Exception.DataException;
 import cloud.multimicro.mmc.Util.Payload;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,7 +51,9 @@ import javax.json.JsonObject;
 @Path("reservation")
 @Produces(MediaType.APPLICATION_JSON)
 public class ReservationService {
+    
     private static final Logger LOGGER = Logger.getLogger(ReservationService.class);
+    
     @Inject
     ReservationDao reservationDao;
     
@@ -76,7 +75,7 @@ public class ReservationService {
         if (reservation.isEmpty()) {
             throw new NotFoundException();
         }
-        return Response.ok(reservation, MediaType.APPLICATION_JSON).build();       
+        return Response.ok(reservation, MediaType.APPLICATION_JSON).build();
     }
     
     @GET

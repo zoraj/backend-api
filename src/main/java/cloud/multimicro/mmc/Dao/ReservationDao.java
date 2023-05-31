@@ -5,12 +5,9 @@
  */
 package cloud.multimicro.mmc.Dao;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import javax.json.JsonArray;
 import javax.ejb.Stateless;
@@ -21,7 +18,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.validation.ConstraintViolationException;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.jboss.logging.Logger;
 
@@ -31,7 +27,6 @@ import cloud.multimicro.mmc.Entity.TPmsReservation;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarif;
 import cloud.multimicro.mmc.Entity.TPmsReservationTarifPrestation;
 import cloud.multimicro.mmc.Entity.TPmsReservationVentilation;
-import cloud.multimicro.mmc.Entity.TPmsTarifGrilleDetail;
 import cloud.multimicro.mmc.Entity.VPmsReservationVentilation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Util.NullAwareBeanUtilsBean;
