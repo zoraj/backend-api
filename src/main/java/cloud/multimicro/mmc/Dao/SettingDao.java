@@ -75,7 +75,7 @@ public class SettingDao {
 
             TMmcParametrage settingDefaultCurrency = new TMmcParametrage();
             settingDefaultCurrency.setCle("DEFAULT_CURRENCY");
-            settingDefaultCurrency.setValeur("EUR");
+            settingDefaultCurrency.setValeur("EURO");
             entityManager.persist(settingDefaultCurrency);
 
             TMmcParametrage settingLanguage = new TMmcParametrage();
