@@ -64,6 +64,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.YearMonth;
@@ -680,8 +681,9 @@ public class ReportingDao {
         return listeOccupation;
     }
 
-    public List<VPmsEditionSoldeNoteOuverte> getAllSoldeNoteOuverte() {
-        List<VPmsEditionSoldeNoteOuverte> soldeNote = entityManager.createQuery("FROM VPmsEditionSoldeNoteOuverte")
+    public List<VPmsEditionSoldeNoteOuverte> getAllSoldeNoteOuverte(String dateRef) throws Exception {
+        List<VPmsEditionSoldeNoteOuverte> soldeNote = entityManager.createQuery("FROM VPmsEditionSoldeNoteOuverte where arrivee <= :dateRef and depart >= :dateRef")
+                .setParameter("dateRef", new SimpleDateFormat("yyyy-MM-dd").parse(dateRef))
                 .getResultList();
         return soldeNote;
     }
