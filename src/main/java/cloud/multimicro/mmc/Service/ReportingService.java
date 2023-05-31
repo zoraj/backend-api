@@ -57,15 +57,24 @@ import cloud.multimicro.mmc.Entity.VPosEditionJournalOffert;
 import cloud.multimicro.mmc.Entity.VPosEditionNoteSoldeJour;
 import cloud.multimicro.mmc.Entity.VPosEditionPrestationVendue;
 import cloud.multimicro.mmc.Entity.VPosEditionVisualisationModeEncaissement;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -531,6 +540,97 @@ public class ReportingService {
             throw new NotFoundException();
         }
         return Response.ok(etatPrevRealMonth, MediaType.APPLICATION_JSON).build();
+    }
+
+    @POST
+    @Path("/pms/report-etat-prev-real-month-table")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllEtatPrevRealMonthTable(JsonObject request) {
+        
+        DateTimeFormatter formatterYearM= new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("yyyy-MM").toFormatter(Locale.ENGLISH);
+        JsonArray reportEtatPrevReal = request.getJsonArray("reportEtatPrevReal");
+        BigDecimal totalGeneralTauxOccTotal = new BigDecimal(request.get("totalGeneralTauxOccTotal").toString());
+        BigDecimal totalGeneralTauxOccConf = new BigDecimal(request.get("totalGeneralTauxOccConf").toString());
+        BigDecimal totalGeneralCa = new BigDecimal(request.get("totalGeneralCa").toString());
+        BigDecimal totalGeneralCaPM = new BigDecimal(request.get("totalGeneralCaPM").toString());
+        BigDecimal totalGeneralCaPar = new BigDecimal(request.get("totalGeneralCaPar").toString());
+        BigDecimal totalGeneralCaTot = new BigDecimal(request.get("totalGeneralCaTot").toString());
+        BigDecimal totalGeneralNbPax = new BigDecimal(request.get("totalGeneralNbPax").toString());
+        BigDecimal totalGeneralNbChambre = new BigDecimal(request.get("totalGeneralNbChambre").toString());
+        BigDecimal totalGeneralNbChambreOpt = new BigDecimal(request.get("totalGeneralNbChambreOpt").toString());
+        BigDecimal totalGeneralNbChambreConf = new BigDecimal(request.get("totalGeneralNbChambreConf").toString());
+
+        String rowValue = "<tbody>";
+
+        for (int i = 0; i < reportEtatPrevReal.size(); i++) {
+            
+            JsonObject jsonLine = reportEtatPrevReal.getJsonObject(i);
+
+            YearMonth yearMonth = YearMonth.parse(jsonLine.getString("moisEffective"), formatterYearM);
+            LocalDate moisEffective = yearMonth.atDay(1);
+            DateTimeFormatter formatterYearMonth = new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("MMMM yyyy")
+            .toFormatter(Locale.FRENCH);
+            moisEffective.format(formatterYearMonth);
+
+            rowValue += "<tr><td style='font-weight: bold'>"+moisEffective.format(formatterYearMonth)+"</td><td></td><td></td> <td></td><td></td><td></td> <td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+            JsonArray listeByDateMonth = jsonLine.getJsonArray("listeByDateMonth");
+
+            for (int j = 0; j < listeByDateMonth.size(); j++) {
+                
+                JsonObject jsonlisteByDate = listeByDateMonth.getJsonObject(j);
+
+                String typeClient = jsonlisteByDate.getString("typeClient");
+                BigDecimal totalTauxOccTotal =  new BigDecimal(jsonlisteByDate.get("totalTauxOccTotal").toString());
+                BigDecimal totalTauxOccConf =  new BigDecimal(jsonlisteByDate.get("totalTauxOccConf").toString());
+                BigDecimal totalCa =  new BigDecimal(jsonlisteByDate.get("totalCa").toString());
+                BigDecimal totalCaPM =  new BigDecimal(jsonlisteByDate.get("totalCaPM").toString());
+                BigDecimal totalCaPar =  new BigDecimal(jsonlisteByDate.get("totalCaPar").toString());
+                BigDecimal totalCaTot =  new BigDecimal(jsonlisteByDate.get("totalCaTot").toString());
+                Integer totalNbPax = jsonlisteByDate.getInt("totalNbPax");
+                Integer totalNbChambre = jsonlisteByDate.getInt("totalNbChambre");
+                Integer totalNbChambreOpt = jsonlisteByDate.getInt("totalNbChambreOpt");
+                Integer totalNbChambreConf = jsonlisteByDate.getInt("totalNbChambreConf");
+
+                rowValue += "<tr role='row'><td class='text-center'>" + typeClient + "</td><td class='text-center'>"
+                        + totalTauxOccTotal + "</td><td class='text-center'>" + totalTauxOccConf + "</td><td class='text-center'>" + totalCa + "</td><td class='text-center'>" + totalCaPM
+                        + "</td><td class='text-center'>" + totalCaPar + "</td><td class='text-center'>" + totalCaTot
+                        + "</td><td class='text-center'>" + totalNbPax + "</td><td class='text-center'>"
+                        + totalNbChambre + "</td><td class='text-center'>" + totalNbChambreOpt + "</td><td class='text-center'>"
+                        + totalNbChambreConf + "</td><td class='text-center'></td></tr>";
+
+            }
+
+            BigDecimal totalMoisTauxOccTotal = new BigDecimal(jsonLine.get("totalMoisTauxOccTotal").toString());
+            BigDecimal totalMoisTauxOccConf = new BigDecimal(jsonLine.get("totalMoisTauxOccConf").toString());
+            BigDecimal totalMoisCa = new BigDecimal(jsonLine.get("totalMoisCa").toString());
+            BigDecimal totalMoisCaPM = new BigDecimal(jsonLine.get("totalMoisCaPM").toString());
+            BigDecimal totalMoisCaPar = new BigDecimal(jsonLine.get("totalMoisCaPar").toString());
+            BigDecimal totalMoisCaTot = new BigDecimal(jsonLine.get("totalMoisCaTot").toString());
+            Integer totalMoisNbPax = jsonLine.getInt("totalMoisNbPax");
+            Integer totalMoisNbChambre = jsonLine.getInt("totalMoisNbChambre");
+            Integer totalMoisNbChambreOpt = jsonLine.getInt("totalMoisNbChambreOpt");
+            Integer totalMoisNbChambreConf = jsonLine.getInt("totalMoisNbChambreConf");
+
+            rowValue += "<tr role='row'><td class='text-center'> TOTAL MOIS </td><td class='text-center'>"
+                    + totalMoisTauxOccTotal + "</td><td class='text-center'>" + totalMoisTauxOccConf + "</td><td class='text-center'>" + totalMoisCa
+                    + "</td><td class='text-center'>" + totalMoisCaPM + "</td><td class='text-center'>" + totalMoisCaPar
+                    + "</td><td class='text-center'>" + totalMoisCaTot + "</td><td class='text-center'>" + totalMoisNbPax + "</td><td class='text-center'>"
+                    + totalMoisNbChambre + "</td><td class='text-center'>" + totalMoisNbChambreOpt + "</td><td class='text-center'>"
+                    + totalMoisNbChambreConf + "</td><td class='text-center'></td></tr>";
+
+        }
+
+        rowValue += "</tbody><tfoot><tr role='row'><td class='text-center' style='font-weight: bold'> TOTAL GENERAL </td><td class='text-center'>" + totalGeneralTauxOccTotal + "</td><td class='text-center'>" + totalGeneralTauxOccConf
+        + "</td><td class='text-center'>" + totalGeneralCa + "</td><td class='text-center'>" + totalGeneralCaPM
+        + "</td><td class='text-center'>" + totalGeneralCaPar + "</td><td class='text-center'>" + totalGeneralCaTot
+        + "</td><td class='text-center'>" + totalGeneralNbPax + "</td><td class='text-center'>"
+        + totalGeneralNbChambre + "</td><td class='text-center'>" + totalGeneralNbChambreOpt + "</td><td class='text-center'>"
+        + totalGeneralNbChambreConf + "</td><td class='text-center'></td></tr></tfoot>";
+        
+        JsonObject jsonObj = Json.createObjectBuilder()
+                        .add("etatPrevRealMois", rowValue)
+                        .build();
+        return Response.ok(jsonObj, MediaType.APPLICATION_JSON).build();
     }
 
     @GET
