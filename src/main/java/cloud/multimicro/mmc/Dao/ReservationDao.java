@@ -467,9 +467,16 @@ public class ReservationDao {
         }
     }
     
-     public List<TPmsReservation> getAllReservationCanceled() {
-        List<TPmsReservation> pmsReservationCanceled = entityManager
-                .createQuery("FROM TPmsReservation  WHERE dateDeletion IS not null").getResultList();
+     public List<TPmsReservation> getAllReservationCanceled(Integer canceled) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("FROM TPmsReservation  ");
+        if (canceled != 0) {
+            stringBuilder.append(" WHERE dateDeletion IS not null OR dateDeletion IS null");
+        }else{
+            stringBuilder.append(" WHERE dateDeletion IS null");
+        }
+        List<TPmsReservation> pmsReservationCanceled = entityManager.createQuery(stringBuilder.toString())
+                .getResultList();
         return pmsReservationCanceled;
     }
      

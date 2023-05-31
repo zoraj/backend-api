@@ -328,14 +328,16 @@ public class ReservationService {
     
     //reservation canceled
     @GET
-    @Path("/canceled")  
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllReservationCanceled() {
-        List<TPmsReservation> reservation = reservationDao.getAllReservationCanceled();
+    public Response getAllReservationCanceled(@Context UriInfo info) {
+        String canceledValue = info.getQueryParameters().getFirst("canceled");
+        Integer canceled = (!Objects.isNull(canceledValue)) ? Integer.parseInt(canceledValue) : 0;
+        List<TPmsReservation> reservation = reservationDao.getAllReservationCanceled(canceled);
         if (reservation.isEmpty()) {
             throw new NotFoundException();
         }
-        return Response.ok(reservation, MediaType.APPLICATION_JSON).build();       
+        return Response.ok(reservation, MediaType.APPLICATION_JSON).build();            
     }
     
     @Path("/{id}")
