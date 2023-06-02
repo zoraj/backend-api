@@ -831,4 +831,18 @@ public class ReportingService {
         }
         return Response.ok(listeAdmSubv, MediaType.APPLICATION_JSON).build();
     }
+    
+    @GET
+    @Path("/pms/ca_par_chbr")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEditionStatistiqueCAparChambre(@Context UriInfo info) {
+        String dateStart = info.getQueryParameters().getFirst("dateStart");
+        String dateEnd = info.getQueryParameters().getFirst("dateEnd");
+        JsonArray ret = reportingDao.getEditionPrestationVendue(dateStart, dateEnd);
+        if (ret.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(ret, MediaType.APPLICATION_JSON).build();
+    }
+    
 }
