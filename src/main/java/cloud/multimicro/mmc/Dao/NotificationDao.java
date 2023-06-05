@@ -27,8 +27,8 @@ public class NotificationDao {
         return ret;
     }
     
-    public List<Long> getAllIdNotifResaNonlu() {
-        return (List<Long>) entityManager.createNativeQuery("select id from t_mmc_notification where instr(action, '/reservation?id=') > 0 and statut = 'NONLU' and date_deletion is null").getResultList();
+    public List<TMmcNotification> getAllNotifResaNonlu() {
+        return (List<TMmcNotification>) entityManager.createQuery("from TMmcNotification where substring(action, 1, 16) = '/reservation?id=' and statut = 'NONLU' and dateDeletion is null").getResultList();
     }
     
     public TMmcNotification updateNotif(TMmcNotification newNotif) {

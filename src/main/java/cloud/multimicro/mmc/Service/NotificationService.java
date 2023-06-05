@@ -33,11 +33,11 @@ public class NotificationService {
         return Response.status(Response.Status.CREATED).entity(notif).build();
     }
     
-    @Path("/nonlus")
+    @Path("/resanonlus")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getNotifNonLus() throws ParseException, DataException {
-        List<Long> ret = notificationDao.getAllIdNotifResaNonlu();
+    public Response getNotifResaNonLus() throws ParseException, DataException {
+        List<TMmcNotification> ret = notificationDao.getAllNotifResaNonlu();
         if (ret.isEmpty()) {
             throw new NotFoundException();
         }
