@@ -6,6 +6,7 @@ package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,12 +42,15 @@ public class TMmcNotification implements Serializable {
     @Column(name = "action")
     private String action;
     
+    @JsonbTransient
     @Column(name = "DATE_CREATION", insertable = false, updatable = false)
     private LocalDate dateCreation;
 
+    @JsonbTransient
     @Column(name = "DATE_MODIFICATION", insertable = false, updatable = false)
     private LocalDate dateModification;
 
+    @JsonbTransient
     @Column(name = "DATE_DELETION")
     private LocalDate dateDeletion;
     
