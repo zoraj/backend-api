@@ -5,9 +5,6 @@
  */
 package cloud.multimicro.mmc.Dao;
 
-import cloud.multimicro.mmc.Entity.EditionEffectifPrevDebours;
-import cloud.multimicro.mmc.Entity.EditionEffectifPrevFamTarif;
-import cloud.multimicro.mmc.Entity.EditionListePrestationArrivee;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import cloud.multimicro.mmc.Entity.TPmsNoteEntete;
 import cloud.multimicro.mmc.Entity.VCollectiviteLectureFamille;
@@ -23,15 +20,13 @@ import cloud.multimicro.mmc.Entity.VComEditionFacture;
 import cloud.multimicro.mmc.Entity.VComEditionReleveDetaileFacture;
 import cloud.multimicro.mmc.Entity.VComEditionReleveSimpleFacture;
 import cloud.multimicro.mmc.Entity.VComEditionSituationDebiteur;
-import cloud.multimicro.mmc.Entity.VComEditionSoldeCompte;
+import cloud.multimicro.mmc.Entity.VPmsCa;
 import cloud.multimicro.mmc.Entity.VPmsEditionArriveePrevue;
 import cloud.multimicro.mmc.Entity.VPmsEditionBalanceAppartement;
 import cloud.multimicro.mmc.Entity.VPmsEditionClientPresent;
 import cloud.multimicro.mmc.Entity.VPmsEditionClotureDefinitive;
 import cloud.multimicro.mmc.Entity.VPmsEditionClotureProvisoire;
 import cloud.multimicro.mmc.Entity.VPmsEditionDepartPrevu;
-import cloud.multimicro.mmc.Entity.VPmsEditionEffectifPrevDebours;
-import cloud.multimicro.mmc.Entity.VPmsEditionEffectifPrevFamTarif;
 import cloud.multimicro.mmc.Entity.VPmsEditionEtatControl;
 import cloud.multimicro.mmc.Entity.VPmsEditionEtatDebit;
 import cloud.multimicro.mmc.Entity.VPmsEditionEtatDebitChambre;
@@ -54,22 +49,27 @@ import cloud.multimicro.mmc.Entity.VPmsEditionPlanningMensuelChambre;
 import cloud.multimicro.mmc.Entity.VPmsEditionSoldeNoteOuverte;
 import cloud.multimicro.mmc.Entity.VPosCa;
 import cloud.multimicro.mmc.Entity.VPosEditionCaActivite;
-import cloud.multimicro.mmc.Entity.VPosEditionConsolidation;
-import cloud.multimicro.mmc.Entity.VPosEditionConsolidationResto;
 import cloud.multimicro.mmc.Entity.VPosEditionJournalOffert;
 import cloud.multimicro.mmc.Entity.VPosEditionNoteSoldeJour;
 import cloud.multimicro.mmc.Entity.VPosEditionPrestationVendue;
 import cloud.multimicro.mmc.Entity.VPosEditionVisualisationModeEncaissement;
+import cloud.multimicro.mmc.Util.Util;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -97,16 +97,16 @@ public class ReportingDao {
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FROM VPmsEditionPrestationVendue  ");
-        if (!Objects.isNull(dateStart)) { 
-            stringBuilder.append(" WHERE dateNote >= '"+ dateStart + "'"); 
-            isExist = true; 
+        if (!Objects.isNull(dateStart)) {
+            stringBuilder.append(" WHERE dateNote >= '" + dateStart + "'");
+            isExist = true;
         }
-        if (!Objects.isNull(dateEnd)) { 
+        if (!Objects.isNull(dateEnd)) {
             if (isExist == true) {
-                stringBuilder.append(" AND dateNote <= '" + dateEnd + "'"); 
-            }else {
-                stringBuilder.append(" WHERE dateNote <= '" + dateEnd + "'"); 
-            } 
+                stringBuilder.append(" AND dateNote <= '" + dateEnd + "'");
+            } else {
+                stringBuilder.append(" WHERE dateNote <= '" + dateEnd + "'");
+            }
         }
 
         List<VPmsEditionPrestationVendue> products = entityManager.createQuery(stringBuilder.toString())
@@ -155,12 +155,12 @@ public class ReportingDao {
                 }
             }
             var object = Json.createObjectBuilder()
-                            .add("code", code)
-                            .add("libelle", libProduct)
-                            .add("totalQte", totalQte)
-                            .add("totalCa", totalCa).build();
+                    .add("code", code)
+                    .add("libelle", libProduct)
+                    .add("totalQte", totalQte)
+                    .add("totalCa", totalCa).build();
 
-                productSoldResults.add(object);
+            productSoldResults.add(object);
         }
         return productSoldResults.build();
     }
@@ -181,7 +181,6 @@ public class ReportingDao {
      * entityManager.createQuery(stringBuilder.toString()).getResultList(); return
      * result; }
      */
-
     public JsonArray getAllEditionDepartPrevu(String dateStart, String dateEnd) {
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
@@ -199,16 +198,16 @@ public class ReportingDao {
         }
         List<VPmsEditionDepartPrevu> listeDepartPrevu = entityManager.createQuery(stringBuilder.toString())
                 .getResultList();
-        
+
         var departPrevuResults = Json.createArrayBuilder();
         var departResults = Json.createArrayBuilder();
         if (listeDepartPrevu.size() > 0) {
             VPmsEditionDepartPrevu valueListDepartPrevu = listeDepartPrevu.get(0);
             LocalDate dateDepInitial = valueListDepartPrevu.getDateDepart();
-            
+
             var numReservation = "";
             var master = "";
-            var numChambre = "";          
+            var numChambre = "";
             var typeChambre = "";
             var nomReservation = "";
             var adultEnfant = "";
@@ -228,26 +227,26 @@ public class ReportingDao {
 
             for (VPmsEditionDepartPrevu listeDepart : listeDepartPrevu) {
                 if (dateDepInitial.equals(listeDepart.getDateDepart())) {
-                    dateDepInitial  = listeDepart.getDateDepart();
-                    numReservation  = listeDepart.getNumeroReservation();
-                    master          = listeDepart.getMaster();
-                    numChambre      = listeDepart.getNumChambre();
-                    typeChambre     = listeDepart.getTypeChambre();
-                    nomReservation  = listeDepart.getNom();
-                    adultEnfant     = listeDepart.getAdultEnfant();
-                    sejour          = listeDepart.getSejour();
-                    qte             = listeDepart.getQuantite();
-                    nationalite     = listeDepart.getNationalite();
-                    segment         = listeDepart.getSegment();
-                    idSejour        = listeDepart.getIdSejour() == null ? 0 : listeDepart.getIdSejour();
-                    totalNote       = listeDepart.getTotal();
-                    adult           += listeDepart.getAdult();
-                    enfant          += listeDepart.getEnfant();
-                    totalNbPax      = adult + enfant;
-                    nbHorsChambre   = listeDepart.getIdChambreSejour()== 0 ? 1 : 0;
+                    dateDepInitial = listeDepart.getDateDepart();
+                    numReservation = listeDepart.getNumeroReservation();
+                    master = listeDepart.getMaster();
+                    numChambre = listeDepart.getNumChambre();
+                    typeChambre = listeDepart.getTypeChambre();
+                    nomReservation = listeDepart.getNom();
+                    adultEnfant = listeDepart.getAdultEnfant();
+                    sejour = listeDepart.getSejour();
+                    qte = listeDepart.getQuantite();
+                    nationalite = listeDepart.getNationalite();
+                    segment = listeDepart.getSegment();
+                    idSejour = listeDepart.getIdSejour() == null ? 0 : listeDepart.getIdSejour();
+                    totalNote = listeDepart.getTotal();
+                    adult += listeDepart.getAdult();
+                    enfant += listeDepart.getEnfant();
+                    totalNbPax = adult + enfant;
+                    nbHorsChambre = listeDepart.getIdChambreSejour() == 0 ? 1 : 0;
                     totalNbHorsChambre += nbHorsChambre;
-                    nbChambre       = listeDepart.getIdChambreSejour()> 0 ? 1 : 0;
-                    totalNbChambre  += nbChambre;
+                    nbChambre = listeDepart.getIdChambreSejour() > 0 ? 1 : 0;
+                    totalNbChambre += nbChambre;
 
                     var departList = Json.createObjectBuilder()
                             .add("dateDepart", dateDepInitial.toString())
@@ -279,27 +278,27 @@ public class ReportingDao {
                     totalNbHorsChambre = 0;
                     totalNbChambre = 0;
 
-                    dateDepInitial  = listeDepart.getDateDepart();
-                    numReservation  = listeDepart.getNumeroReservation();
-                    master          = listeDepart.getMaster();
-                    numChambre      = listeDepart.getNumChambre();
-                    typeChambre     = listeDepart.getTypeChambre();
-                    nomReservation  = listeDepart.getNom();
-                    adultEnfant     = listeDepart.getAdultEnfant();
-                    sejour          = listeDepart.getSejour();
-                    qte             = listeDepart.getQuantite();
-                    nationalite     = listeDepart.getNationalite();
-                    segment         = listeDepart.getSegment();
-                    idSejour        = listeDepart.getIdSejour() == null ? 0 : listeDepart.getIdSejour();
-                    totalNote       = listeDepart.getTotal();
-                    adult           += listeDepart.getAdult();
-                    enfant          += listeDepart.getEnfant();
-                    totalNbPax      = adult + enfant;
-                    nbHorsChambre   = listeDepart.getIdChambreSejour()== 0 ? 1 : 0;
+                    dateDepInitial = listeDepart.getDateDepart();
+                    numReservation = listeDepart.getNumeroReservation();
+                    master = listeDepart.getMaster();
+                    numChambre = listeDepart.getNumChambre();
+                    typeChambre = listeDepart.getTypeChambre();
+                    nomReservation = listeDepart.getNom();
+                    adultEnfant = listeDepart.getAdultEnfant();
+                    sejour = listeDepart.getSejour();
+                    qte = listeDepart.getQuantite();
+                    nationalite = listeDepart.getNationalite();
+                    segment = listeDepart.getSegment();
+                    idSejour = listeDepart.getIdSejour() == null ? 0 : listeDepart.getIdSejour();
+                    totalNote = listeDepart.getTotal();
+                    adult += listeDepart.getAdult();
+                    enfant += listeDepart.getEnfant();
+                    totalNbPax = adult + enfant;
+                    nbHorsChambre = listeDepart.getIdChambreSejour() == 0 ? 1 : 0;
                     totalNbHorsChambre += nbHorsChambre;
-                    nbChambre       = listeDepart.getIdChambreSejour()> 0 ? 1 : 0;
-                    totalNbChambre  += nbChambre;
-                    
+                    nbChambre = listeDepart.getIdChambreSejour() > 0 ? 1 : 0;
+                    totalNbChambre += nbChambre;
+
                     var departList = Json.createObjectBuilder()
                             .add("dateDepart", dateDepInitial.toString())
                             .add("numReservation", numReservation)
@@ -321,17 +320,17 @@ public class ReportingDao {
                 }
             }
             var object = Json.createObjectBuilder()
-                            .add("dateDepartPrevu", dateDepInitial.toString())
-                            .add("totalNbPax", totalNbPax)
-                            .add("totalNbChambre", totalNbChambre)
-                            .add("totalNbHorsChambre", totalNbHorsChambre)
-                            .add("listDepartPrevu", departResults).build();
+                    .add("dateDepartPrevu", dateDepInitial.toString())
+                    .add("totalNbPax", totalNbPax)
+                    .add("totalNbChambre", totalNbChambre)
+                    .add("totalNbHorsChambre", totalNbHorsChambre)
+                    .add("listDepartPrevu", departResults).build();
 
             departPrevuResults.add(object);
         }
         return departPrevuResults.build();
     }
-    
+
     public JsonArray getAllEditionArrivalPrevu(String dateStart, String dateEnd, Integer notArrival) {
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
@@ -352,16 +351,16 @@ public class ReportingDao {
         }
         List<VPmsEditionArriveePrevue> listeArriveePrevu = entityManager.createQuery(stringBuilder.toString())
                 .getResultList();
-        
+
         var arriveePrevuResults = Json.createArrayBuilder();
         var arriveeResults = Json.createArrayBuilder();
         if (listeArriveePrevu.size() > 0) {
             VPmsEditionArriveePrevue valueListArriveePrevu = listeArriveePrevu.get(0);
             LocalDate dateArrInitial = valueListArriveePrevu.getDateArrivee();
-            
+
             var numReservation = "";
             var master = "";
-            var numChambre = "";          
+            var numChambre = "";
             var typeChambre = "";
             var nomReservation = "";
             var adultEnfant = "";
@@ -381,26 +380,26 @@ public class ReportingDao {
 
             for (VPmsEditionArriveePrevue listeArrivee : listeArriveePrevu) {
                 if (dateArrInitial.equals(listeArrivee.getDateArrivee())) {
-                    dateArrInitial  = listeArrivee.getDateArrivee();
-                    numReservation  = listeArrivee.getNumeroReservation();
-                    master          = listeArrivee.getMaster();
-                    numChambre      = listeArrivee.getNumChambre();
-                    typeChambre     = listeArrivee.getTypeChambre();
-                    nomReservation  = listeArrivee.getNom();
-                    adultEnfant     = listeArrivee.getAdultEnfant();
-                    sejour          = listeArrivee.getSejour();
-                    qte             = listeArrivee.getQuantite();
-                    nationalite     = listeArrivee.getNationalite();
-                    segment         = listeArrivee.getSegment();
-                    idSejour        = listeArrivee.getIdSejour() == null ? 0 : listeArrivee.getIdSejour();
-                    totalNote       = listeArrivee.getTotal();
-                    adult           += listeArrivee.getAdult();
-                    enfant          += listeArrivee.getEnfant();
-                    totalNbPax      = adult + enfant;
-                    nbHorsChambre   = listeArrivee.getIdChambreSejour()== 0 ? 1 : 0;
+                    dateArrInitial = listeArrivee.getDateArrivee();
+                    numReservation = listeArrivee.getNumeroReservation();
+                    master = listeArrivee.getMaster();
+                    numChambre = listeArrivee.getNumChambre();
+                    typeChambre = listeArrivee.getTypeChambre();
+                    nomReservation = listeArrivee.getNom();
+                    adultEnfant = listeArrivee.getAdultEnfant();
+                    sejour = listeArrivee.getSejour();
+                    qte = listeArrivee.getQuantite();
+                    nationalite = listeArrivee.getNationalite();
+                    segment = listeArrivee.getSegment();
+                    idSejour = listeArrivee.getIdSejour() == null ? 0 : listeArrivee.getIdSejour();
+                    totalNote = listeArrivee.getTotal();
+                    adult += listeArrivee.getAdult();
+                    enfant += listeArrivee.getEnfant();
+                    totalNbPax = adult + enfant;
+                    nbHorsChambre = listeArrivee.getIdChambreSejour() == 0 ? 1 : 0;
                     totalNbHorsChambre += nbHorsChambre;
-                    nbChambre       = listeArrivee.getIdChambreSejour()> 0 ? 1 : 0;
-                    totalNbChambre  += nbChambre;
+                    nbChambre = listeArrivee.getIdChambreSejour() > 0 ? 1 : 0;
+                    totalNbChambre += nbChambre;
 
                     var arriveeList = Json.createObjectBuilder()
                             .add("dateArrivee", dateArrInitial.toString())
@@ -432,27 +431,27 @@ public class ReportingDao {
                     totalNbHorsChambre = 0;
                     totalNbChambre = 0;
 
-                    dateArrInitial  = listeArrivee.getDateArrivee();
-                    numReservation  = listeArrivee.getNumeroReservation();
-                    master          = listeArrivee.getMaster();
-                    numChambre      = listeArrivee.getNumChambre();
-                    typeChambre     = listeArrivee.getTypeChambre();
-                    nomReservation  = listeArrivee.getNom();
-                    adultEnfant     = listeArrivee.getAdultEnfant();
-                    sejour          = listeArrivee.getSejour();
-                    qte             = listeArrivee.getQuantite();
-                    nationalite     = listeArrivee.getNationalite();
-                    segment         = listeArrivee.getSegment();
-                    idSejour        = listeArrivee.getIdSejour() == null ? 0 : listeArrivee.getIdSejour();
-                    totalNote       = listeArrivee.getTotal();
-                    adult           += listeArrivee.getAdult();
-                    enfant          += listeArrivee.getEnfant();
-                    totalNbPax      = adult + enfant;
-                    nbHorsChambre   = listeArrivee.getIdChambreSejour()== 0 ? 1 : 0;
+                    dateArrInitial = listeArrivee.getDateArrivee();
+                    numReservation = listeArrivee.getNumeroReservation();
+                    master = listeArrivee.getMaster();
+                    numChambre = listeArrivee.getNumChambre();
+                    typeChambre = listeArrivee.getTypeChambre();
+                    nomReservation = listeArrivee.getNom();
+                    adultEnfant = listeArrivee.getAdultEnfant();
+                    sejour = listeArrivee.getSejour();
+                    qte = listeArrivee.getQuantite();
+                    nationalite = listeArrivee.getNationalite();
+                    segment = listeArrivee.getSegment();
+                    idSejour = listeArrivee.getIdSejour() == null ? 0 : listeArrivee.getIdSejour();
+                    totalNote = listeArrivee.getTotal();
+                    adult += listeArrivee.getAdult();
+                    enfant += listeArrivee.getEnfant();
+                    totalNbPax = adult + enfant;
+                    nbHorsChambre = listeArrivee.getIdChambreSejour() == 0 ? 1 : 0;
                     totalNbHorsChambre += nbHorsChambre;
-                    nbChambre       = listeArrivee.getIdChambreSejour()> 0 ? 1 : 0;
-                    totalNbChambre  += nbChambre;
-                    
+                    nbChambre = listeArrivee.getIdChambreSejour() > 0 ? 1 : 0;
+                    totalNbChambre += nbChambre;
+
                     var arriveeList = Json.createObjectBuilder()
                             .add("dateArrivee", dateArrInitial.toString())
                             .add("numReservation", numReservation)
@@ -474,11 +473,11 @@ public class ReportingDao {
                 }
             }
             var object = Json.createObjectBuilder()
-                            .add("dateArriveePrevu", dateArrInitial.toString())
-                            .add("totalNbPax", totalNbPax)
-                            .add("totalNbChambre", totalNbChambre)
-                            .add("totalNbHorsChambre", totalNbHorsChambre)
-                            .add("listArriveePrevu", arriveeResults).build();
+                    .add("dateArriveePrevu", dateArrInitial.toString())
+                    .add("totalNbPax", totalNbPax)
+                    .add("totalNbChambre", totalNbChambre)
+                    .add("totalNbHorsChambre", totalNbHorsChambre)
+                    .add("listArriveePrevu", arriveeResults).build();
 
             arriveePrevuResults.add(object);
         }
@@ -505,7 +504,6 @@ public class ReportingDao {
      * entityManager.createQuery(stringBuilder.toString()).getResultList(); return
      * result; }
      */
-
     public List<VPmsEditionClientPresent> getAllClientPresent() {
         List<VPmsEditionClientPresent> clientPresent = entityManager.createQuery("FROM VPmsEditionClientPresent")
                 .getResultList();
@@ -525,7 +523,6 @@ public class ReportingDao {
      * entityManager.createQuery(stringBuilder.toString()).getResultList(); return
      * result; }
      */
-
     public List<VPmsEditionRapportArriveeDepart> getEditionRaportArrivalDeparture() {
         List<VPmsEditionRapportArriveeDepart> arrivalDeparture = entityManager
                 .createQuery("FROM VPmsEditionRapportArriveeDepart").getResultList();
@@ -550,7 +547,6 @@ public class ReportingDao {
      * entityManager.createQuery(stringBuilder.toString()).getResultList(); return
      * result; }
      */
-
     public JsonArray getAllRapportEtage(String dateReference) {
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
@@ -561,14 +557,14 @@ public class ReportingDao {
         }
         List<VPmsEditionRapportEtage> listeRapportEtage = entityManager.createQuery(stringBuilder.toString())
                 .getResultList();
-        System.out.println("listeRapportEtage** :"+listeRapportEtage);
-        System.out.println("listeRapportEtage size** :"+listeRapportEtage.size());
+        System.out.println("listeRapportEtage** :" + listeRapportEtage);
+        System.out.println("listeRapportEtage size** :" + listeRapportEtage.size());
         var rapportEtageResults = Json.createArrayBuilder();
         var rapportResults = Json.createArrayBuilder();
         if (listeRapportEtage.size() > 0) {
             VPmsEditionRapportEtage valueListRapportEtage = listeRapportEtage.get(0);
             String numEtageInitial = valueListRapportEtage.getNumEtage();
-                      
+
             var typeChambre = "";
             var numChambre = "";
             var nomReservation = "";
@@ -582,15 +578,15 @@ public class ReportingDao {
             for (VPmsEditionRapportEtage listeEtage : listeRapportEtage) {
                 if (numEtageInitial.equals(listeEtage.getNumEtage())) {
                     numEtageInitial = listeEtage.getNumEtage();
-                    typeChambre     = listeEtage.getType();
-                    numChambre      = listeEtage.getNumeroChambre();
-                    nomReservation  = listeEtage.getNom();
-                    situation       = listeEtage.getSituation();
-                    etat            = listeEtage.getEtat();
-                    pax             = listeEtage.getPax();
-                    sejour          = listeEtage.getSejour();
-                    paxArrivee      = listeEtage.getPaxArrivee();
-                    remarque        = listeEtage.getRemarque();
+                    typeChambre = listeEtage.getType();
+                    numChambre = listeEtage.getNumeroChambre();
+                    nomReservation = listeEtage.getNom();
+                    situation = listeEtage.getSituation();
+                    etat = listeEtage.getEtat();
+                    pax = listeEtage.getPax();
+                    sejour = listeEtage.getSejour();
+                    paxArrivee = listeEtage.getPaxArrivee();
+                    remarque = listeEtage.getRemarque();
 
                     var rapportList = Json.createObjectBuilder()
                             .add("numEtage", numEtageInitial)
@@ -610,18 +606,18 @@ public class ReportingDao {
                             .add("listRapportEtage", rapportResults).build();
 
                     rapportEtageResults.add(object);
-                    
+
                     numEtageInitial = listeEtage.getNumEtage();
-                    typeChambre     = listeEtage.getType();
-                    numChambre      = listeEtage.getNumeroChambre();
-                    nomReservation  = listeEtage.getNom();
-                    situation       = listeEtage.getSituation();
-                    etat            = listeEtage.getEtat();
-                    pax             = listeEtage.getPax();
-                    sejour          = listeEtage.getSejour();
-                    paxArrivee      = listeEtage.getPaxArrivee();
-                    remarque        = listeEtage.getRemarque();
-                    
+                    typeChambre = listeEtage.getType();
+                    numChambre = listeEtage.getNumeroChambre();
+                    nomReservation = listeEtage.getNom();
+                    situation = listeEtage.getSituation();
+                    etat = listeEtage.getEtat();
+                    pax = listeEtage.getPax();
+                    sejour = listeEtage.getSejour();
+                    paxArrivee = listeEtage.getPaxArrivee();
+                    remarque = listeEtage.getRemarque();
+
                     var rapportList = Json.createObjectBuilder()
                             .add("numEtage", numEtageInitial)
                             .add("typeChambre", typeChambre)
@@ -640,8 +636,8 @@ public class ReportingDao {
                 }
             }
             var object = Json.createObjectBuilder()
-                            .add("numeroEtage", numEtageInitial)
-                            .add("listRapportEtage", rapportResults).build();
+                    .add("numeroEtage", numEtageInitial)
+                    .add("listRapportEtage", rapportResults).build();
 
             rapportEtageResults.add(object);
         }
@@ -673,7 +669,6 @@ public class ReportingDao {
      * entityManager.createQuery(stringBuilder.toString()).getResultList(); return
      * result; }
      */
-
     public List<VPmsEditionListeOccupation> getAllListeOccupation() {
         List<VPmsEditionListeOccupation> listeOccupation = entityManager.createQuery("FROM VPmsEditionListeOccupation")
                 .getResultList();
@@ -709,7 +704,6 @@ public class ReportingDao {
      * @param dateEnd
      * @return
      */
-
     public List<VPmsEditionListeArrivee> getAllListArrival(String dateStart, String dateEnd) {
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
@@ -1749,89 +1743,89 @@ public class ReportingDao {
         return planningMonth;
     }
 
-    public JsonObject createObjectForTypeList(String typeClientInitial,Integer tauxOccTotal,Integer tauxOccConf ,Integer nbPax,Integer nbChambre,Integer nbChambreOpt,Integer nbChambreConf,String dateArrivee,String dateDepart ){
+    public JsonObject createObjectForTypeList(String typeClientInitial, Integer tauxOccTotal, Integer tauxOccConf, Integer nbPax, Integer nbChambre, Integer nbChambreOpt, Integer nbChambreConf, String dateArrivee, String dateDepart) {
         return Json.createObjectBuilder()
-        .add("typeClient", typeClientInitial)
-        .add("tauxOccTotal", tauxOccTotal)
-        .add("tauxOccConf", tauxOccConf)
-        .add("ca#", 0)
-        .add("caPM", 0)
-        .add("caPar#", 0)
-        .add("caTot", 0)
-        .add("nbPax", nbPax)
-        .add("nbChambre", nbChambre)
-        .add("nbChambreOpt", nbChambreOpt)
-        .add("nbChambreConf", nbChambreConf)
-        .add("dateArrivee", dateArrivee)
-        .add("dateDepart", dateDepart)
-        .build();   
-
-    }
-    
-    public JsonObject createTotalObjectForType(String typeClient,JsonArray arrivalResults,BigDecimal totalTauxOccTotal ,BigDecimal totalTauxOccConf,BigDecimal totalCa,BigDecimal totalCaPM,BigDecimal totalCaPar,BigDecimal totalCaTot,Integer totalNbPax ,Integer totalNbChambre,Integer totalNbChambreOpt,Integer totalNbChambreConf ){
-        return  Json.createObjectBuilder()
-        .add("typeClient", typeClient)
-        .add("listByTypeClient", arrivalResults)
-        .add("totalTauxOccTotal", totalTauxOccTotal)
-        .add("totalTauxOccConf", totalTauxOccConf)
-        .add("totalCa", totalCa)
-        .add("totalCaPM", totalCaPM)
-        .add("totalCaPar", totalCaPar)
-        .add("totalCaTot", totalCaTot)
-        .add("totalNbPax", totalNbPax)
-        .add("totalNbChambre", totalNbChambre)
-        .add("totalNbChambreOpt", totalNbChambreOpt)
-        .add("totalNbChambreConf", totalNbChambreConf)
-        .build();
+                .add("typeClient", typeClientInitial)
+                .add("tauxOccTotal", tauxOccTotal)
+                .add("tauxOccConf", tauxOccConf)
+                .add("ca#", 0)
+                .add("caPM", 0)
+                .add("caPar#", 0)
+                .add("caTot", 0)
+                .add("nbPax", nbPax)
+                .add("nbChambre", nbChambre)
+                .add("nbChambreOpt", nbChambreOpt)
+                .add("nbChambreConf", nbChambreConf)
+                .add("dateArrivee", dateArrivee)
+                .add("dateDepart", dateDepart)
+                .build();
 
     }
 
-    public JsonObject createObjectForMonthList(LocalDate dateInitial, JsonArray typeClientResults,BigDecimal totalMoisTauxOccTotal,BigDecimal totalMoisTauxOccConf ,BigDecimal totalMoisCa,BigDecimal totalMoisCaPM,BigDecimal totalMoisCaPar, BigDecimal totalMoisCaTot,Integer totalMoisNbPax, Integer totalMoisNbChambre, Integer totalMoisNbChambreOpt,Integer totalMoisNbChambreConf){
+    public JsonObject createTotalObjectForType(String typeClient, JsonArray arrivalResults, BigDecimal totalTauxOccTotal, BigDecimal totalTauxOccConf, BigDecimal totalCa, BigDecimal totalCaPM, BigDecimal totalCaPar, BigDecimal totalCaTot, Integer totalNbPax, Integer totalNbChambre, Integer totalNbChambreOpt, Integer totalNbChambreConf) {
+        return Json.createObjectBuilder()
+                .add("typeClient", typeClient)
+                .add("listByTypeClient", arrivalResults)
+                .add("totalTauxOccTotal", totalTauxOccTotal)
+                .add("totalTauxOccConf", totalTauxOccConf)
+                .add("totalCa", totalCa)
+                .add("totalCaPM", totalCaPM)
+                .add("totalCaPar", totalCaPar)
+                .add("totalCaTot", totalCaTot)
+                .add("totalNbPax", totalNbPax)
+                .add("totalNbChambre", totalNbChambre)
+                .add("totalNbChambreOpt", totalNbChambreOpt)
+                .add("totalNbChambreConf", totalNbChambreConf)
+                .build();
+
+    }
+
+    public JsonObject createObjectForMonthList(LocalDate dateInitial, JsonArray typeClientResults, BigDecimal totalMoisTauxOccTotal, BigDecimal totalMoisTauxOccConf, BigDecimal totalMoisCa, BigDecimal totalMoisCaPM, BigDecimal totalMoisCaPar, BigDecimal totalMoisCaTot, Integer totalMoisNbPax, Integer totalMoisNbChambre, Integer totalMoisNbChambreOpt, Integer totalMoisNbChambreConf) {
         DateTimeFormatter formatterYearMonth = new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("yyyy-MM")
-        .toFormatter(Locale.ENGLISH);
-        
+                .toFormatter(Locale.ENGLISH);
+
         return Json.createObjectBuilder()
-        .add("moisEffective", dateInitial.format(formatterYearMonth))
-        .add("listeByDateMonth", typeClientResults)
-        .add("totalMoisTauxOccTotal", totalMoisTauxOccTotal)
-        .add("totalMoisTauxOccConf", totalMoisTauxOccConf)
-        .add("totalMoisCa", totalMoisCa)
-        .add("totalMoisCaPM", totalMoisCaPM)
-        .add("totalMoisCaPar", totalMoisCaPar)
-        .add("totalMoisCaTot", totalMoisCaTot)
-        .add("totalMoisNbPax", totalMoisNbPax) 
-        .add("totalMoisNbChambre", totalMoisNbChambre)
-        .add("totalMoisNbChambreOpt", totalMoisNbChambreOpt)
-        .add("totalMoisNbChambreConf", totalMoisNbChambreConf)
-        .build(); 
+                .add("moisEffective", dateInitial.format(formatterYearMonth))
+                .add("listeByDateMonth", typeClientResults)
+                .add("totalMoisTauxOccTotal", totalMoisTauxOccTotal)
+                .add("totalMoisTauxOccConf", totalMoisTauxOccConf)
+                .add("totalMoisCa", totalMoisCa)
+                .add("totalMoisCaPM", totalMoisCaPM)
+                .add("totalMoisCaPar", totalMoisCaPar)
+                .add("totalMoisCaTot", totalMoisCaTot)
+                .add("totalMoisNbPax", totalMoisNbPax)
+                .add("totalMoisNbChambre", totalMoisNbChambre)
+                .add("totalMoisNbChambreOpt", totalMoisNbChambreOpt)
+                .add("totalMoisNbChambreConf", totalMoisNbChambreConf)
+                .build();
 
     }
 
-    public JsonObject createTotalGeneralObject(JsonArray listeByDateMonth, BigDecimal totalGeneralTauxOccTotal,BigDecimal totalGeneralTauxOccConf,BigDecimal totalGeneralCa,BigDecimal totalGeneralCaPM,BigDecimal totalGeneralCaPar,BigDecimal totalGeneralCaTot, Integer totalGeneralNbPax,Integer totalGeneralNbChambre, Integer totalGeneralNbChambreOpt, Integer totalGeneralNbChambreConf){
+    public JsonObject createTotalGeneralObject(JsonArray listeByDateMonth, BigDecimal totalGeneralTauxOccTotal, BigDecimal totalGeneralTauxOccConf, BigDecimal totalGeneralCa, BigDecimal totalGeneralCaPM, BigDecimal totalGeneralCaPar, BigDecimal totalGeneralCaTot, Integer totalGeneralNbPax, Integer totalGeneralNbChambre, Integer totalGeneralNbChambreOpt, Integer totalGeneralNbChambreConf) {
         return Json.createObjectBuilder()
-                        .add("reportEtatPrevReal", listeByDateMonth)
-                        .add("totalGeneralTauxOccTotal", totalGeneralTauxOccTotal)
-                        .add("totalGeneralTauxOccConf", totalGeneralTauxOccConf)
-                        .add("totalGeneralCa", totalGeneralCa)
-                        .add("totalGeneralCaPM", totalGeneralCaPM)
-                        .add("totalGeneralCaPar", totalGeneralCaPar)
-                        .add("totalGeneralCaTot", totalGeneralCaTot)
-                        .add("totalGeneralNbPax", totalGeneralNbPax)
-                        .add("totalGeneralNbChambre", totalGeneralNbChambre)
-                        .add("totalGeneralNbChambreOpt", totalGeneralNbChambreOpt)
-                        .add("totalGeneralNbChambreConf", totalGeneralNbChambreConf)
-                        .build();
+                .add("reportEtatPrevReal", listeByDateMonth)
+                .add("totalGeneralTauxOccTotal", totalGeneralTauxOccTotal)
+                .add("totalGeneralTauxOccConf", totalGeneralTauxOccConf)
+                .add("totalGeneralCa", totalGeneralCa)
+                .add("totalGeneralCaPM", totalGeneralCaPM)
+                .add("totalGeneralCaPar", totalGeneralCaPar)
+                .add("totalGeneralCaTot", totalGeneralCaTot)
+                .add("totalGeneralNbPax", totalGeneralNbPax)
+                .add("totalGeneralNbChambre", totalGeneralNbChambre)
+                .add("totalGeneralNbChambreOpt", totalGeneralNbChambreOpt)
+                .add("totalGeneralNbChambreConf", totalGeneralNbChambreConf)
+                .build();
 
     }
 
-    public List<VPmsEditionEtatPrevRealMois>  getVPmsEditionEtatPrevRealMoisByDate(String dateStart, String dateEnd){
+    public List<VPmsEditionEtatPrevRealMois> getVPmsEditionEtatPrevRealMoisByDate(String dateStart, String dateEnd) {
         DateTimeFormatter formatterYearMonth = new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("yyyy-MM")
-        .toFormatter(Locale.ENGLISH);
+                .toFormatter(Locale.ENGLISH);
         YearMonth yearMonthStart = YearMonth.parse(dateStart, formatterYearMonth);
-        LocalDate  dateStr = yearMonthStart.atDay(1);
+        LocalDate dateStr = yearMonthStart.atDay(1);
 
         YearMonth yearMonthEnd = YearMonth.parse(dateEnd, formatterYearMonth);
-        LocalDate  dateEn = yearMonthEnd.atEndOfMonth();
+        LocalDate dateEn = yearMonthEnd.atEndOfMonth();
 
         DateTimeFormatter formatDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -1844,9 +1838,9 @@ public class ReportingDao {
         }
         if (!Objects.isNull(dateEnd)) {
             if (isExist == true) {
-                stringBuilder.append(" AND dateDepart <= '" + dateEn.format(formatDate)  + "' ");
+                stringBuilder.append(" AND dateDepart <= '" + dateEn.format(formatDate) + "' ");
             } else {
-                stringBuilder.append(" WHERE dateDepart <= '" +  dateEn.format(formatDate)  + "'");
+                stringBuilder.append(" WHERE dateDepart <= '" + dateEn.format(formatDate) + "'");
             }
         }
 
@@ -1859,190 +1853,185 @@ public class ReportingDao {
     }
 
     public JsonObject getAllEtatPrevRealMonth(String dateStart, String dateEnd) {
-        List<VPmsEditionEtatPrevRealMois>  etatPrevRealMonth =  getVPmsEditionEtatPrevRealMoisByDate(dateStart,dateEnd);
-            var typeClientResults = Json.createArrayBuilder();
-            var arrivalResults = Json.createArrayBuilder();
-            var listeByDateMonth = Json.createArrayBuilder();
+        List<VPmsEditionEtatPrevRealMois> etatPrevRealMonth = getVPmsEditionEtatPrevRealMoisByDate(dateStart, dateEnd);
+        var typeClientResults = Json.createArrayBuilder();
+        var arrivalResults = Json.createArrayBuilder();
+        var listeByDateMonth = Json.createArrayBuilder();
 
-               var object = Json.createObjectBuilder().build();
-                // Liste des totals  par type
-                var totalTauxOccTotal = new BigDecimal(0);
-                var totalTauxOccConf = new BigDecimal(0);
-                var totalCa = new BigDecimal(0);
-                var totalCaPM = new BigDecimal(0);
-                var totalCaPar= new BigDecimal(0);
-                var totalCaTot= new BigDecimal(0);
-                var totalNbPax = 0;
-                var totalNbChambre = 0;
-                var totalNbChambreOpt = 0;
-                var totalNbChambreConf = 0;
- 
-                // Liste des totals  mois
-                var totalMoisTauxOccTotal = new BigDecimal(0);
-                var totalMoisTauxOccConf = new BigDecimal(0);
-                var totalMoisCa = new BigDecimal(0);
-                var totalMoisCaPM = new BigDecimal(0);
-                var totalMoisCaPar= new BigDecimal(0);
-                var totalMoisCaTot= new BigDecimal(0);
-                var totalMoisNbPax = 0;
-                var totalMoisNbChambre = 0;
-                var totalMoisNbChambreOpt = 0;
-                var totalMoisNbChambreConf = 0;
- 
-                // Liste des totals  générals
-                var totalGeneralTauxOccTotal = new BigDecimal(0);
-                var totalGeneralTauxOccConf = new BigDecimal(0);
-                var totalGeneralCa = new BigDecimal(0);
-                var totalGeneralCaPM = new BigDecimal(0);
-                var totalGeneralCaPar= new BigDecimal(0);
-                var totalGeneralCaTot= new BigDecimal(0);
-                var totalGeneralNbPax = 0;
-                var totalGeneralNbChambre = 0;
-                var totalGeneralNbChambreOpt = 0;
-                var totalGeneralNbChambreConf = 0;
-                var tauxOccTotal = 0;
-                var tauxOccConf = 0;
+        var object = Json.createObjectBuilder().build();
+        // Liste des totals  par type
+        var totalTauxOccTotal = new BigDecimal(0);
+        var totalTauxOccConf = new BigDecimal(0);
+        var totalCa = new BigDecimal(0);
+        var totalCaPM = new BigDecimal(0);
+        var totalCaPar = new BigDecimal(0);
+        var totalCaTot = new BigDecimal(0);
+        var totalNbPax = 0;
+        var totalNbChambre = 0;
+        var totalNbChambreOpt = 0;
+        var totalNbChambreConf = 0;
 
+        // Liste des totals  mois
+        var totalMoisTauxOccTotal = new BigDecimal(0);
+        var totalMoisTauxOccConf = new BigDecimal(0);
+        var totalMoisCa = new BigDecimal(0);
+        var totalMoisCaPM = new BigDecimal(0);
+        var totalMoisCaPar = new BigDecimal(0);
+        var totalMoisCaTot = new BigDecimal(0);
+        var totalMoisNbPax = 0;
+        var totalMoisNbChambre = 0;
+        var totalMoisNbChambreOpt = 0;
+        var totalMoisNbChambreConf = 0;
 
-            if (etatPrevRealMonth.size() > 0) {
-                VPmsEditionEtatPrevRealMois valueListArrival = etatPrevRealMonth.get(0);
-                String typeClientInitial = valueListArrival.getTypeClient();
-                LocalDate dateInitial = valueListArrival.getDateArrivee();   
-                
-                var typeClient = "";
-                var nbChambre = 0;
-                var nbChambreConf = 0;
-                var nbChambreOpt = 0;
-                var nbPax = 0;
-                LocalDate dateArrivee = null;
-                LocalDate dateDepart = null;
-                int nbrRoom = getNbrRoom().intValue();
-         
+        // Liste des totals  générals
+        var totalGeneralTauxOccTotal = new BigDecimal(0);
+        var totalGeneralTauxOccConf = new BigDecimal(0);
+        var totalGeneralCa = new BigDecimal(0);
+        var totalGeneralCaPM = new BigDecimal(0);
+        var totalGeneralCaPar = new BigDecimal(0);
+        var totalGeneralCaTot = new BigDecimal(0);
+        var totalGeneralNbPax = 0;
+        var totalGeneralNbChambre = 0;
+        var totalGeneralNbChambreOpt = 0;
+        var totalGeneralNbChambreConf = 0;
+        var tauxOccTotal = 0;
+        var tauxOccConf = 0;
 
-                for (VPmsEditionEtatPrevRealMois listeArrival : etatPrevRealMonth) {
-                    if(dateInitial.getMonth() == listeArrival.getDateArrivee().getMonth()){
-                        //pour  les objets de même mois
-                        if (typeClientInitial.equals(listeArrival.getTypeClient())) {
-                            //pour  les objets de même types
-                            typeClient = listeArrival.getTypeClient();
-                            nbChambre = listeArrival.getNbChambre();
-                            nbChambreConf = listeArrival.getNbChambreConf();
-                            nbChambreOpt = listeArrival.getNbChambreOpt();
-                            nbPax = listeArrival.getNbPax();
-                            dateArrivee = listeArrival.getDateArrivee();
-                            dateDepart = listeArrival.getDateDepart();
+        if (etatPrevRealMonth.size() > 0) {
+            VPmsEditionEtatPrevRealMois valueListArrival = etatPrevRealMonth.get(0);
+            String typeClientInitial = valueListArrival.getTypeClient();
+            LocalDate dateInitial = valueListArrival.getDateArrivee();
 
-                            tauxOccTotal = (nbChambre*100)/(nbrRoom);
-                            tauxOccConf = (nbChambreConf*100)/(nbrRoom);
-                            totalTauxOccTotal = totalTauxOccTotal.add(new BigDecimal(tauxOccTotal));
-                            totalTauxOccConf = totalTauxOccConf.add(new BigDecimal(tauxOccConf));
+            var typeClient = "";
+            var nbChambre = 0;
+            var nbChambreConf = 0;
+            var nbChambreOpt = 0;
+            var nbPax = 0;
+            LocalDate dateArrivee = null;
+            LocalDate dateDepart = null;
+            int nbrRoom = getNbrRoom().intValue();
 
-                            totalCa = new BigDecimal(0);
-                            totalCaPM = new BigDecimal(0);
-                            totalCaPar=new BigDecimal(0);
-                            totalCaTot= new BigDecimal(0);
-                            totalNbPax += nbPax;
-                            totalNbChambre += nbChambre;
-                            totalNbChambreOpt += nbChambreOpt;
-                            totalNbChambreConf += nbChambreConf;
-                            
-                         
-                    
-                            var resaList = createObjectForTypeList(typeClient, tauxOccTotal,tauxOccConf, nbPax, nbChambre, nbChambreOpt,nbChambreConf,dateArrivee.toString(),  dateDepart.toString());
-                            //ajout dans la liste par type client
-                            arrivalResults.add(resaList);
-                        } else {
-                            object = createTotalObjectForType( typeClient, arrivalResults.build(), totalTauxOccTotal , totalTauxOccConf, totalCa, totalCaPM, totalCaPar, totalCaTot, totalNbPax , totalNbChambre, totalNbChambreOpt, totalNbChambreConf );
-                            //ajout dans la liste des total par type client
-                            typeClientResults.add(object);
-                            
-                            //reinitialisation  des donnée dans la liste des type clients
-                            typeClient = listeArrival.getTypeClient();
-                            nbChambre = listeArrival.getNbChambre();
-                            nbChambreConf = listeArrival.getNbChambreConf();
-                            nbChambreOpt = listeArrival.getNbChambreOpt();
-                            nbPax = listeArrival.getNbPax();
-                            dateArrivee = listeArrival.getDateArrivee();
-                            dateDepart = listeArrival.getDateDepart();
-                            tauxOccTotal = (nbChambre*100)/(nbrRoom);
-                            tauxOccConf = (nbChambreConf*100)/(nbrRoom);
-                            totalTauxOccTotal = new BigDecimal(tauxOccTotal);
-                            totalTauxOccConf = new BigDecimal(tauxOccConf);
+            for (VPmsEditionEtatPrevRealMois listeArrival : etatPrevRealMonth) {
+                if (dateInitial.getMonth() == listeArrival.getDateArrivee().getMonth()) {
+                    //pour  les objets de même mois
+                    if (typeClientInitial.equals(listeArrival.getTypeClient())) {
+                        //pour  les objets de même types
+                        typeClient = listeArrival.getTypeClient();
+                        nbChambre = listeArrival.getNbChambre();
+                        nbChambreConf = listeArrival.getNbChambreConf();
+                        nbChambreOpt = listeArrival.getNbChambreOpt();
+                        nbPax = listeArrival.getNbPax();
+                        dateArrivee = listeArrival.getDateArrivee();
+                        dateDepart = listeArrival.getDateDepart();
 
-                            totalMoisTauxOccTotal = totalMoisTauxOccTotal.add(totalTauxOccTotal);
-                            totalMoisTauxOccConf = totalMoisTauxOccConf.add(totalTauxOccConf);
-                            totalMoisCa = totalMoisCa.add(totalCa);
-                            totalMoisCaPM = totalMoisCaPM.add(totalCaPM);
-                            totalMoisCaPar= totalMoisCaPar.add(totalCaPar);
-                            totalMoisCaTot= totalMoisCaTot.add(totalCaTot);
-                            totalMoisNbPax += totalNbPax;
-                            totalMoisNbChambre += totalNbChambre;
-                            totalMoisNbChambreOpt += totalNbChambreOpt;
-                            totalMoisNbChambreConf += totalNbChambreConf;
-                            
-                             //reinitialisation des totals par type client
-                            totalCa = new BigDecimal(0);
-                            totalCaPM = new BigDecimal(0);
-                            totalCaPar=new BigDecimal(0);
-                            totalCaTot= new BigDecimal(0);
-                            totalNbPax = nbPax;
-                            totalNbChambre = nbChambre;
-                            totalNbChambreOpt = nbChambreOpt;
-                            totalNbChambreConf = nbChambreConf;
+                        tauxOccTotal = (nbChambre * 100) / (nbrRoom);
+                        tauxOccConf = (nbChambreConf * 100) / (nbrRoom);
+                        totalTauxOccTotal = totalTauxOccTotal.add(new BigDecimal(tauxOccTotal));
+                        totalTauxOccConf = totalTauxOccConf.add(new BigDecimal(tauxOccConf));
 
-                            //creation objet pour la liste par type client
-                            var resaList = createObjectForTypeList(listeArrival.getTypeClient(), tauxOccTotal,tauxOccConf, nbPax, nbChambre, nbChambreOpt,nbChambreConf,dateArrivee.toString(),  dateDepart.toString());
-                            
-                            arrivalResults = Json.createArrayBuilder().add(resaList);
-                            typeClientInitial = typeClient;
-                        }
-                    }else{
+                        totalCa = new BigDecimal(0);
+                        totalCaPM = new BigDecimal(0);
+                        totalCaPar = new BigDecimal(0);
+                        totalCaTot = new BigDecimal(0);
+                        totalNbPax += nbPax;
+                        totalNbChambre += nbChambre;
+                        totalNbChambreOpt += nbChambreOpt;
+                        totalNbChambreConf += nbChambreConf;
+
+                        var resaList = createObjectForTypeList(typeClient, tauxOccTotal, tauxOccConf, nbPax, nbChambre, nbChambreOpt, nbChambreConf, dateArrivee.toString(), dateDepart.toString());
+                        //ajout dans la liste par type client
+                        arrivalResults.add(resaList);
+                    } else {
+                        object = createTotalObjectForType(typeClient, arrivalResults.build(), totalTauxOccTotal, totalTauxOccConf, totalCa, totalCaPM, totalCaPar, totalCaTot, totalNbPax, totalNbChambre, totalNbChambreOpt, totalNbChambreConf);
+                        //ajout dans la liste des total par type client
+                        typeClientResults.add(object);
+
+                        //reinitialisation  des donnée dans la liste des type clients
+                        typeClient = listeArrival.getTypeClient();
+                        nbChambre = listeArrival.getNbChambre();
+                        nbChambreConf = listeArrival.getNbChambreConf();
+                        nbChambreOpt = listeArrival.getNbChambreOpt();
+                        nbPax = listeArrival.getNbPax();
+                        dateArrivee = listeArrival.getDateArrivee();
+                        dateDepart = listeArrival.getDateDepart();
+                        tauxOccTotal = (nbChambre * 100) / (nbrRoom);
+                        tauxOccConf = (nbChambreConf * 100) / (nbrRoom);
+                        totalTauxOccTotal = new BigDecimal(tauxOccTotal);
+                        totalTauxOccConf = new BigDecimal(tauxOccConf);
+
                         totalMoisTauxOccTotal = totalMoisTauxOccTotal.add(totalTauxOccTotal);
                         totalMoisTauxOccConf = totalMoisTauxOccConf.add(totalTauxOccConf);
                         totalMoisCa = totalMoisCa.add(totalCa);
                         totalMoisCaPM = totalMoisCaPM.add(totalCaPM);
-                        totalMoisCaPar= totalMoisCaPar.add(totalCaPar);
-                        totalMoisCaTot= totalMoisCaTot.add(totalCaTot);
+                        totalMoisCaPar = totalMoisCaPar.add(totalCaPar);
+                        totalMoisCaTot = totalMoisCaTot.add(totalCaTot);
                         totalMoisNbPax += totalNbPax;
                         totalMoisNbChambre += totalNbChambre;
                         totalMoisNbChambreOpt += totalNbChambreOpt;
                         totalMoisNbChambreConf += totalNbChambreConf;
-                        
-                        object = createTotalObjectForType( typeClient, arrivalResults.build(), totalTauxOccTotal , totalTauxOccConf, totalCa, totalCaPM, totalCaPar, totalCaTot, totalNbPax , totalNbChambre, totalNbChambreOpt, totalNbChambreConf );
-                          
-                        typeClientResults.add(object);
 
-                        object  = createObjectForMonthList(dateInitial, typeClientResults.build(), totalMoisTauxOccTotal, totalMoisTauxOccConf, totalMoisCa,totalMoisCaPM, totalMoisCaPar, totalMoisCaTot, totalMoisNbPax, totalMoisNbChambre, totalMoisNbChambreOpt,totalMoisNbChambreConf);
-                        
-                        listeByDateMonth.add(object);
+                        //reinitialisation des totals par type client
+                        totalCa = new BigDecimal(0);
+                        totalCaPM = new BigDecimal(0);
+                        totalCaPar = new BigDecimal(0);
+                        totalCaTot = new BigDecimal(0);
+                        totalNbPax = nbPax;
+                        totalNbChambre = nbChambre;
+                        totalNbChambreOpt = nbChambreOpt;
+                        totalNbChambreConf = nbChambreConf;
 
-                        totalGeneralTauxOccTotal = totalGeneralTauxOccTotal.add(totalMoisTauxOccTotal);
-                        totalGeneralTauxOccConf = totalGeneralTauxOccConf.add(totalMoisTauxOccConf);
-                        totalGeneralCa = totalGeneralCa.add(totalMoisCa);
-                        totalGeneralCaPM = totalGeneralCaPM.add(totalMoisCaPM);
-                        totalGeneralCaPar= totalGeneralCaPar.add(totalMoisCaPar);
-                        totalGeneralCaTot= totalGeneralCaTot.add(totalMoisCaTot);
-                        totalGeneralNbPax += totalMoisNbPax;
-                        totalGeneralNbChambre += totalMoisNbChambre;
-                        totalGeneralNbChambreOpt += totalMoisNbChambreOpt;
-                        totalGeneralNbChambreConf += totalMoisNbChambreConf;
+                        //creation objet pour la liste par type client
+                        var resaList = createObjectForTypeList(listeArrival.getTypeClient(), tauxOccTotal, tauxOccConf, nbPax, nbChambre, nbChambreOpt, nbChambreConf, dateArrivee.toString(), dateDepart.toString());
 
-                        totalMoisTauxOccTotal = new BigDecimal(0);
-                        totalMoisTauxOccConf = new BigDecimal(0);
-                        totalMoisCa = new BigDecimal(0);
-                        totalMoisCaPM = new BigDecimal(0);
-                        totalMoisCaPar= new BigDecimal(0);
-                        totalMoisCaTot= new BigDecimal(0);
-                        totalMoisNbPax = 0;
-                        totalMoisNbChambre = 0;
-                        totalMoisNbChambreOpt = 0;
-                        totalMoisNbChambreConf = 0;
+                        arrivalResults = Json.createArrayBuilder().add(resaList);
+                        typeClientInitial = typeClient;
+                    }
+                } else {
+                    totalMoisTauxOccTotal = totalMoisTauxOccTotal.add(totalTauxOccTotal);
+                    totalMoisTauxOccConf = totalMoisTauxOccConf.add(totalTauxOccConf);
+                    totalMoisCa = totalMoisCa.add(totalCa);
+                    totalMoisCaPM = totalMoisCaPM.add(totalCaPM);
+                    totalMoisCaPar = totalMoisCaPar.add(totalCaPar);
+                    totalMoisCaTot = totalMoisCaTot.add(totalCaTot);
+                    totalMoisNbPax += totalNbPax;
+                    totalMoisNbChambre += totalNbChambre;
+                    totalMoisNbChambreOpt += totalNbChambreOpt;
+                    totalMoisNbChambreConf += totalNbChambreConf;
 
-                        arrivalResults = Json.createArrayBuilder();
-                        typeClientResults = Json.createArrayBuilder();
-                        dateInitial = listeArrival.getDateArrivee();
-                        typeClientInitial = listeArrival.getTypeClient();
-                            
+                    object = createTotalObjectForType(typeClient, arrivalResults.build(), totalTauxOccTotal, totalTauxOccConf, totalCa, totalCaPM, totalCaPar, totalCaTot, totalNbPax, totalNbChambre, totalNbChambreOpt, totalNbChambreConf);
+
+                    typeClientResults.add(object);
+
+                    object = createObjectForMonthList(dateInitial, typeClientResults.build(), totalMoisTauxOccTotal, totalMoisTauxOccConf, totalMoisCa, totalMoisCaPM, totalMoisCaPar, totalMoisCaTot, totalMoisNbPax, totalMoisNbChambre, totalMoisNbChambreOpt, totalMoisNbChambreConf);
+
+                    listeByDateMonth.add(object);
+
+                    totalGeneralTauxOccTotal = totalGeneralTauxOccTotal.add(totalMoisTauxOccTotal);
+                    totalGeneralTauxOccConf = totalGeneralTauxOccConf.add(totalMoisTauxOccConf);
+                    totalGeneralCa = totalGeneralCa.add(totalMoisCa);
+                    totalGeneralCaPM = totalGeneralCaPM.add(totalMoisCaPM);
+                    totalGeneralCaPar = totalGeneralCaPar.add(totalMoisCaPar);
+                    totalGeneralCaTot = totalGeneralCaTot.add(totalMoisCaTot);
+                    totalGeneralNbPax += totalMoisNbPax;
+                    totalGeneralNbChambre += totalMoisNbChambre;
+                    totalGeneralNbChambreOpt += totalMoisNbChambreOpt;
+                    totalGeneralNbChambreConf += totalMoisNbChambreConf;
+
+                    totalMoisTauxOccTotal = new BigDecimal(0);
+                    totalMoisTauxOccConf = new BigDecimal(0);
+                    totalMoisCa = new BigDecimal(0);
+                    totalMoisCaPM = new BigDecimal(0);
+                    totalMoisCaPar = new BigDecimal(0);
+                    totalMoisCaTot = new BigDecimal(0);
+                    totalMoisNbPax = 0;
+                    totalMoisNbChambre = 0;
+                    totalMoisNbChambreOpt = 0;
+                    totalMoisNbChambreConf = 0;
+
+                    arrivalResults = Json.createArrayBuilder();
+                    typeClientResults = Json.createArrayBuilder();
+                    dateInitial = listeArrival.getDateArrivee();
+                    typeClientInitial = listeArrival.getTypeClient();
 
                     if (typeClientInitial.equals(listeArrival.getTypeClient())) {
                         typeClient = listeArrival.getTypeClient();
@@ -2052,25 +2041,25 @@ public class ReportingDao {
                         nbPax = listeArrival.getNbPax();
                         dateArrivee = listeArrival.getDateArrivee();
                         dateDepart = listeArrival.getDateDepart();
-                         tauxOccTotal = (nbChambre*100)/(nbrRoom);
-                         tauxOccConf = (nbChambreConf*100)/(nbrRoom);
+                        tauxOccTotal = (nbChambre * 100) / (nbrRoom);
+                        tauxOccConf = (nbChambreConf * 100) / (nbrRoom);
                         totalTauxOccTotal = new BigDecimal(tauxOccTotal);
                         totalTauxOccConf = new BigDecimal(tauxOccConf);
                         totalCa = new BigDecimal(0);
                         totalCaPM = new BigDecimal(0);
-                        totalCaPar=new BigDecimal(0);
-                        totalCaTot= new BigDecimal(0);
+                        totalCaPar = new BigDecimal(0);
+                        totalCaTot = new BigDecimal(0);
                         totalNbPax = nbPax;
                         totalNbChambre = nbChambre;
                         totalNbChambreOpt = nbChambreOpt;
                         totalNbChambreConf = nbChambreConf;
 
-                        var resaList = createObjectForTypeList(typeClient, tauxOccTotal,tauxOccConf, nbPax, nbChambre, nbChambreOpt,nbChambreConf,dateArrivee.toString(),  dateDepart.toString());
+                        var resaList = createObjectForTypeList(typeClient, tauxOccTotal, tauxOccConf, nbPax, nbChambre, nbChambreOpt, nbChambreConf, dateArrivee.toString(), dateDepart.toString());
                         arrivalResults.add(resaList);
                     } else {
-                        object = createTotalObjectForType( typeClient, arrivalResults.build(), totalTauxOccTotal , totalTauxOccConf, totalCa, totalCaPM, totalCaPar, totalCaTot, totalNbPax , totalNbChambre, totalNbChambreOpt, totalNbChambreConf );
+                        object = createTotalObjectForType(typeClient, arrivalResults.build(), totalTauxOccTotal, totalTauxOccConf, totalCa, totalCaPM, totalCaPar, totalCaTot, totalNbPax, totalNbChambre, totalNbChambreOpt, totalNbChambreConf);
                         typeClientResults.add(object);
-                    
+
                         typeClient = listeArrival.getTypeClient();
                         nbChambre = listeArrival.getNbChambre();
                         nbChambreConf = listeArrival.getNbChambreConf();
@@ -2078,8 +2067,8 @@ public class ReportingDao {
                         nbPax = listeArrival.getNbPax();
                         dateArrivee = listeArrival.getDateArrivee();
                         dateDepart = listeArrival.getDateDepart();
-                         tauxOccTotal = (nbChambre*100)/(nbrRoom);
-                         tauxOccConf = (nbChambreConf*100)/(nbrRoom);
+                        tauxOccTotal = (nbChambre * 100) / (nbrRoom);
+                        tauxOccConf = (nbChambreConf * 100) / (nbrRoom);
                         totalTauxOccTotal = new BigDecimal(tauxOccTotal);
                         totalTauxOccConf = new BigDecimal(tauxOccConf);
 
@@ -2087,8 +2076,8 @@ public class ReportingDao {
                         totalMoisTauxOccConf = totalMoisTauxOccConf.add(totalTauxOccConf);
                         totalMoisCa = totalMoisCa.add(totalCa);
                         totalMoisCaPM = totalMoisCaPM.add(totalCaPM);
-                        totalMoisCaPar= totalMoisCaPar.add(totalCaPar);
-                        totalMoisCaTot= totalMoisCaTot.add(totalCaTot);
+                        totalMoisCaPar = totalMoisCaPar.add(totalCaPar);
+                        totalMoisCaTot = totalMoisCaTot.add(totalCaTot);
                         totalMoisNbPax += totalNbPax;
                         totalMoisNbChambre += totalNbChambre;
                         totalMoisNbChambreOpt += totalNbChambreOpt;
@@ -2096,52 +2085,52 @@ public class ReportingDao {
 
                         totalCa = new BigDecimal(0);
                         totalCaPM = new BigDecimal(0);
-                        totalCaPar=new BigDecimal(0);
-                        totalCaTot= new BigDecimal(0);
+                        totalCaPar = new BigDecimal(0);
+                        totalCaTot = new BigDecimal(0);
                         totalNbPax = nbPax;
                         totalNbChambre = nbChambre;
                         totalNbChambreOpt = nbChambreOpt;
                         totalNbChambreConf = nbChambreConf;
 
-                        var resaList = createObjectForTypeList(listeArrival.getTypeClient(), tauxOccTotal,tauxOccConf, nbPax, nbChambre, nbChambreOpt,nbChambreConf,dateArrivee.toString(),  dateDepart.toString());
-                        
+                        var resaList = createObjectForTypeList(listeArrival.getTypeClient(), tauxOccTotal, tauxOccConf, nbPax, nbChambre, nbChambreOpt, nbChambreConf, dateArrivee.toString(), dateDepart.toString());
+
                         arrivalResults = Json.createArrayBuilder().add(resaList);
                         typeClientInitial = typeClient;
                     }
                 }
             }
 
-            object = createTotalObjectForType( typeClient, arrivalResults.build(), totalTauxOccTotal , totalTauxOccConf, totalCa, totalCaPM, totalCaPar, totalCaTot, totalNbPax , totalNbChambre, totalNbChambreOpt, totalNbChambreConf );
-                    totalMoisTauxOccTotal = totalMoisTauxOccTotal.add(totalTauxOccTotal);
-                    totalMoisTauxOccConf = totalMoisTauxOccConf.add(totalTauxOccConf);
-                    totalMoisCa = totalMoisCa.add(totalCa);
-                    totalMoisCaPM = totalMoisCaPM.add(totalCaPM);
-                    totalMoisCaPar= totalMoisCaPar.add(totalCaPar);
-                    totalMoisCaTot= totalMoisCaTot.add(totalCaTot);
-                    totalMoisNbPax += totalNbPax;
-                    totalMoisNbChambre += totalNbChambre;
-                    totalMoisNbChambreOpt += totalNbChambreOpt;
-                    totalMoisNbChambreConf += totalNbChambreConf;
+            object = createTotalObjectForType(typeClient, arrivalResults.build(), totalTauxOccTotal, totalTauxOccConf, totalCa, totalCaPM, totalCaPar, totalCaTot, totalNbPax, totalNbChambre, totalNbChambreOpt, totalNbChambreConf);
+            totalMoisTauxOccTotal = totalMoisTauxOccTotal.add(totalTauxOccTotal);
+            totalMoisTauxOccConf = totalMoisTauxOccConf.add(totalTauxOccConf);
+            totalMoisCa = totalMoisCa.add(totalCa);
+            totalMoisCaPM = totalMoisCaPM.add(totalCaPM);
+            totalMoisCaPar = totalMoisCaPar.add(totalCaPar);
+            totalMoisCaTot = totalMoisCaTot.add(totalCaTot);
+            totalMoisNbPax += totalNbPax;
+            totalMoisNbChambre += totalNbChambre;
+            totalMoisNbChambreOpt += totalNbChambreOpt;
+            totalMoisNbChambreConf += totalNbChambreConf;
 
             typeClientResults.add(object);
-            object  = createObjectForMonthList(dateInitial, typeClientResults.build(), totalMoisTauxOccTotal, totalMoisTauxOccConf, totalMoisCa,totalMoisCaPM, totalMoisCaPar, totalMoisCaTot, totalMoisNbPax, totalMoisNbChambre, totalMoisNbChambreOpt,totalMoisNbChambreConf);
+            object = createObjectForMonthList(dateInitial, typeClientResults.build(), totalMoisTauxOccTotal, totalMoisTauxOccConf, totalMoisCa, totalMoisCaPM, totalMoisCaPar, totalMoisCaTot, totalMoisNbPax, totalMoisNbChambre, totalMoisNbChambreOpt, totalMoisNbChambreConf);
             listeByDateMonth.add(object);
-          
+
         }
 
         totalGeneralTauxOccTotal = totalGeneralTauxOccTotal.add(totalMoisTauxOccTotal);
         totalGeneralTauxOccConf = totalGeneralTauxOccConf.add(totalMoisTauxOccConf);
         totalGeneralCa = totalGeneralCa.add(totalMoisCa);
         totalGeneralCaPM = totalGeneralCaPM.add(totalMoisCaPM);
-        totalGeneralCaPar= totalGeneralCaPar.add(totalMoisCaPar);
-        totalGeneralCaTot= totalGeneralCaTot.add(totalMoisCaTot);
+        totalGeneralCaPar = totalGeneralCaPar.add(totalMoisCaPar);
+        totalGeneralCaTot = totalGeneralCaTot.add(totalMoisCaTot);
         totalGeneralNbPax += totalMoisNbPax;
         totalGeneralNbChambre += totalMoisNbChambre;
         totalGeneralNbChambreOpt += totalMoisNbChambreOpt;
         totalGeneralNbChambreConf += totalMoisNbChambreConf;
 
-        object =  createTotalGeneralObject(listeByDateMonth.build(), totalGeneralTauxOccTotal,totalGeneralTauxOccConf,totalGeneralCa,totalGeneralCaPM,totalGeneralCaPar,totalGeneralCaTot, totalGeneralNbPax,totalGeneralNbChambre, totalGeneralNbChambreOpt, totalGeneralNbChambreConf);
-        
+        object = createTotalGeneralObject(listeByDateMonth.build(), totalGeneralTauxOccTotal, totalGeneralTauxOccConf, totalGeneralCa, totalGeneralCaPM, totalGeneralCaPar, totalGeneralCaTot, totalGeneralNbPax, totalGeneralNbChambre, totalGeneralNbChambreOpt, totalGeneralNbChambreConf);
+
         return object;
     }
 
@@ -2503,13 +2492,13 @@ public class ReportingDao {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FROM VPosEditionVisualisationModeEncaissement  ");
         TMmcParametrage settingData = entityManager.find(TMmcParametrage.class, "DATE_LOGICIELLE");
-        
+
         if (!Objects.isNull(dateEncaissement)) {
             stringBuilder.append(" WHERE Date(dateEncaissement) = '" + dateEncaissement + "'");
         } else {
             stringBuilder.append(" WHERE Date(dateEncaissement) = '" + settingData.getValeur() + "'");
         }
-        
+
         if (activity != 0) {
             if (isExist == true) {
                 stringBuilder.append(" AND activiteId = " + activity + "");
@@ -2517,74 +2506,74 @@ public class ReportingDao {
                 stringBuilder.append(" AND activiteId = " + activity + "");
             }
         }
-        
+
         List<VPosEditionVisualisationModeEncaissement> visualisationModeEncaissement = entityManager
                 .createQuery(stringBuilder.toString()).getResultList();
-        
-        var visualisationResults    = Json.createArrayBuilder();
-        var totalGeneralDebitJour   = new BigDecimal("0");
-        var totalGeneralCreditJour  = new BigDecimal("0");
-        var totalGeneralSoldeJour   = new BigDecimal("0");
-        
+
+        var visualisationResults = Json.createArrayBuilder();
+        var totalGeneralDebitJour = new BigDecimal("0");
+        var totalGeneralCreditJour = new BigDecimal("0");
+        var totalGeneralSoldeJour = new BigDecimal("0");
+
         if (visualisationModeEncaissement.size() > 0) {
             VPosEditionVisualisationModeEncaissement valueListeVisualisationModeEnc = visualisationModeEncaissement.get(0);
             String libModeEncInitial = valueListeVisualisationModeEnc.getLibelleModeEncaissement();
-            var libelleModeEnc  = "";
-            var debitJour       = new BigDecimal("0");
-            var creditJour      = new BigDecimal("0");
-            var soldeJour       = new BigDecimal("0");
-            var totalDebitJour  = new BigDecimal("0");
+            var libelleModeEnc = "";
+            var debitJour = new BigDecimal("0");
+            var creditJour = new BigDecimal("0");
+            var soldeJour = new BigDecimal("0");
+            var totalDebitJour = new BigDecimal("0");
             var totalCreditJour = new BigDecimal("0");
-            var totalSoldeJour  = new BigDecimal("0");
-            
-            for(VPosEditionVisualisationModeEncaissement visualModeEnc : visualisationModeEncaissement){
-                if(libModeEncInitial.equals(visualModeEnc.getLibelleModeEncaissement())){
-                    libelleModeEnc  = visualModeEnc.getLibelleModeEncaissement();
-                    debitJour       = visualModeEnc.getDebitJour();
-                    creditJour      = visualModeEnc.getCreditJour();
-                    soldeJour       = visualModeEnc.getSoldeJour();
-                    totalDebitJour  = totalDebitJour.add(visualModeEnc.getDebitJour());
+            var totalSoldeJour = new BigDecimal("0");
+
+            for (VPosEditionVisualisationModeEncaissement visualModeEnc : visualisationModeEncaissement) {
+                if (libModeEncInitial.equals(visualModeEnc.getLibelleModeEncaissement())) {
+                    libelleModeEnc = visualModeEnc.getLibelleModeEncaissement();
+                    debitJour = visualModeEnc.getDebitJour();
+                    creditJour = visualModeEnc.getCreditJour();
+                    soldeJour = visualModeEnc.getSoldeJour();
+                    totalDebitJour = totalDebitJour.add(visualModeEnc.getDebitJour());
                     totalCreditJour = totalCreditJour.add(visualModeEnc.getCreditJour());
-                    totalSoldeJour  = totalDebitJour.add(totalCreditJour);
-                }else{
+                    totalSoldeJour = totalDebitJour.add(totalCreditJour);
+                } else {
                     var object = Json.createObjectBuilder()
                             .add("libelleModeEncaissement", libelleModeEnc)
                             .add("totalDebitJour", totalDebitJour)
                             .add("totalCreditJour", totalCreditJour)
                             .add("totalSoldeJour", totalSoldeJour).build();
-                    
-                    totalGeneralDebitJour   = totalGeneralDebitJour.add(totalDebitJour);
-                    totalGeneralCreditJour  = totalGeneralCreditJour.add(totalCreditJour);
-                    totalGeneralSoldeJour   = totalGeneralSoldeJour.add(totalSoldeJour);
+
+                    totalGeneralDebitJour = totalGeneralDebitJour.add(totalDebitJour);
+                    totalGeneralCreditJour = totalGeneralCreditJour.add(totalCreditJour);
+                    totalGeneralSoldeJour = totalGeneralSoldeJour.add(totalSoldeJour);
                     visualisationResults.add(object);
-                    
-                    totalDebitJour  = new BigDecimal("0");
+
+                    totalDebitJour = new BigDecimal("0");
                     totalCreditJour = new BigDecimal("0");
-                    totalSoldeJour  = new BigDecimal("0");
-                    
-                    libelleModeEnc  = visualModeEnc.getLibelleModeEncaissement();
-                    debitJour       = visualModeEnc.getDebitJour();
-                    creditJour      = visualModeEnc.getCreditJour();
-                    soldeJour       = visualModeEnc.getSoldeJour();
-                    totalDebitJour  = totalDebitJour.add(visualModeEnc.getDebitJour());
+                    totalSoldeJour = new BigDecimal("0");
+
+                    libelleModeEnc = visualModeEnc.getLibelleModeEncaissement();
+                    debitJour = visualModeEnc.getDebitJour();
+                    creditJour = visualModeEnc.getCreditJour();
+                    soldeJour = visualModeEnc.getSoldeJour();
+                    totalDebitJour = totalDebitJour.add(visualModeEnc.getDebitJour());
                     totalCreditJour = totalCreditJour.add(visualModeEnc.getCreditJour());
-                    totalSoldeJour  = totalDebitJour.add(totalCreditJour);
-                    
+                    totalSoldeJour = totalDebitJour.add(totalCreditJour);
+
                     libModeEncInitial = libelleModeEnc;
                 }
             }
-            
+
             var object = Json.createObjectBuilder()
-                            .add("libelleModeEncaissement", libelleModeEnc)
-                            .add("totalDebitJour", totalDebitJour)
-                            .add("totalCreditJour", totalCreditJour)
-                            .add("totalSoldeJour", totalSoldeJour).build();
-            
-                    totalGeneralDebitJour   = totalGeneralDebitJour.add(totalDebitJour);
-                    totalGeneralCreditJour  = totalGeneralCreditJour.add(totalCreditJour);
-                    totalGeneralSoldeJour   = totalGeneralSoldeJour.add(totalSoldeJour);
-                    
-                    visualisationResults.add(object);
+                    .add("libelleModeEncaissement", libelleModeEnc)
+                    .add("totalDebitJour", totalDebitJour)
+                    .add("totalCreditJour", totalCreditJour)
+                    .add("totalSoldeJour", totalSoldeJour).build();
+
+            totalGeneralDebitJour = totalGeneralDebitJour.add(totalDebitJour);
+            totalGeneralCreditJour = totalGeneralCreditJour.add(totalCreditJour);
+            totalGeneralSoldeJour = totalGeneralSoldeJour.add(totalSoldeJour);
+
+            visualisationResults.add(object);
         }
         var resultsVisualisationModeEnc = Json.createObjectBuilder()
                 .add("visualisation", visualisationResults.build())
@@ -2594,24 +2583,24 @@ public class ReportingDao {
 
         return resultsVisualisationModeEnc;
     }
-    
+
     public JsonObject getAllCaByActivity(String dateStart, String dateEnd, Integer activity) {
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FROM VPosCa  ");
-        
-        if (!Objects.isNull(dateStart)) { 
-            stringBuilder.append(" WHERE dateCa >= '"+ dateStart + "'"); 
-            isExist = true; 
+
+        if (!Objects.isNull(dateStart)) {
+            stringBuilder.append(" WHERE dateCa >= '" + dateStart + "'");
+            isExist = true;
         }
-        if (!Objects.isNull(dateEnd)) { 
+        if (!Objects.isNull(dateEnd)) {
             if (isExist == true) {
-                stringBuilder.append(" AND dateCa <= '" + dateEnd + "'"); 
-            }else {
-                stringBuilder.append(" WHERE dateCa <= '" + dateEnd + "'"); 
-            } 
+                stringBuilder.append(" AND dateCa <= '" + dateEnd + "'");
+            } else {
+                stringBuilder.append(" WHERE dateCa <= '" + dateEnd + "'");
+            }
         }
-        
+
         if (activity != 0) {
             if (isExist == true) {
                 stringBuilder.append(" AND posActiviteId = " + activity + "");
@@ -2619,49 +2608,49 @@ public class ReportingDao {
                 stringBuilder.append(" AND posActiviteId = " + activity + "");
             }
         }
-        
+
         List<VPosCa> caActivity = entityManager.createQuery(stringBuilder.toString()).getResultList();
-        
-        var caActivityResults    = Json.createArrayBuilder();
-        var totalGeneralMontantCa   = new BigDecimal("0");
-        
+
+        var caActivityResults = Json.createArrayBuilder();
+        var totalGeneralMontantCa = new BigDecimal("0");
+
         if (caActivity.size() > 0) {
             VPosCa valueCaActivity = caActivity.get(0);
             String libActivityInit = valueCaActivity.getLibelleActivite();
-            var libelleAcitivite  = "";
-            var montantCa       = new BigDecimal("0");
-            var totalMontantCa  = new BigDecimal("0");
-            
-            for(VPosCa activiteCa : caActivity){
-                if(libActivityInit.equals(activiteCa.getLibelleActivite())){
-                    libelleAcitivite  = activiteCa.getLibelleActivite();
-                    montantCa       = activiteCa.getMontantCa();
-                    totalMontantCa  = totalMontantCa.add(montantCa);
-                }else{
+            var libelleAcitivite = "";
+            var montantCa = new BigDecimal("0");
+            var totalMontantCa = new BigDecimal("0");
+
+            for (VPosCa activiteCa : caActivity) {
+                if (libActivityInit.equals(activiteCa.getLibelleActivite())) {
+                    libelleAcitivite = activiteCa.getLibelleActivite();
+                    montantCa = activiteCa.getMontantCa();
+                    totalMontantCa = totalMontantCa.add(montantCa);
+                } else {
                     var object = Json.createObjectBuilder()
                             .add("libelleActivite", libelleAcitivite)
                             .add("totalMontantCa", totalMontantCa).build();
-                    
-                    totalGeneralMontantCa   = totalGeneralMontantCa.add(totalMontantCa);
+
+                    totalGeneralMontantCa = totalGeneralMontantCa.add(totalMontantCa);
                     caActivityResults.add(object);
-                    
-                    totalMontantCa  = new BigDecimal("0");
-                    
-                    libelleAcitivite    = activiteCa.getLibelleActivite();
-                    montantCa           = activiteCa.getMontantCa();
-                    totalMontantCa  = totalMontantCa.add(montantCa);
-                    
+
+                    totalMontantCa = new BigDecimal("0");
+
+                    libelleAcitivite = activiteCa.getLibelleActivite();
+                    montantCa = activiteCa.getMontantCa();
+                    totalMontantCa = totalMontantCa.add(montantCa);
+
                     libActivityInit = libelleAcitivite;
                 }
             }
-            
+
             var object = Json.createObjectBuilder()
-                            .add("libelleActivite", libelleAcitivite)
-                            .add("totalMontantCa", totalMontantCa).build();
-            
-                    totalGeneralMontantCa   = totalGeneralMontantCa.add(totalMontantCa);
-                    
-                    caActivityResults.add(object);
+                    .add("libelleActivite", libelleAcitivite)
+                    .add("totalMontantCa", totalMontantCa).build();
+
+            totalGeneralMontantCa = totalGeneralMontantCa.add(totalMontantCa);
+
+            caActivityResults.add(object);
         }
         var resultsCaActivity = Json.createObjectBuilder()
                 .add("caActivity", caActivityResults.build())
@@ -2676,23 +2665,23 @@ public class ReportingDao {
         return caActivite;
     }
 
-    public JsonArray getAllPrestationVendue(String dateStart, String dateEnd, Integer activity) {      
+    public JsonArray getAllPrestationVendue(String dateStart, String dateEnd, Integer activity) {
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FROM VPosEditionPrestationVendue  ");
-        
-        if (!Objects.isNull(dateStart)) { 
-            stringBuilder.append(" WHERE datePresta >= '"+ dateStart + "'"); 
-            isExist = true; 
+
+        if (!Objects.isNull(dateStart)) {
+            stringBuilder.append(" WHERE datePresta >= '" + dateStart + "'");
+            isExist = true;
         }
-        if (!Objects.isNull(dateEnd)) { 
+        if (!Objects.isNull(dateEnd)) {
             if (isExist == true) {
-                stringBuilder.append(" AND datePresta <= '" + dateEnd + "'"); 
-            }else {
-                stringBuilder.append(" WHERE datePresta <= '" + dateEnd + "'"); 
-            } 
+                stringBuilder.append(" AND datePresta <= '" + dateEnd + "'");
+            } else {
+                stringBuilder.append(" WHERE datePresta <= '" + dateEnd + "'");
+            }
         }
-        
+
         if (activity != 0) {
             if (isExist == true) {
                 stringBuilder.append(" AND idActivite = " + activity + "");
@@ -2700,36 +2689,36 @@ public class ReportingDao {
                 stringBuilder.append(" AND idActivite = " + activity + "");
             }
         }
-        
+
         stringBuilder.append(" ORDER BY idPrestation ");
-        
+
         List<VPosEditionPrestationVendue> prestaVendue = entityManager.createQuery(stringBuilder.toString()).getResultList();
-        
-        var prestaVendueResults    = Json.createArrayBuilder();
-        
+
+        var prestaVendueResults = Json.createArrayBuilder();
+
         if (prestaVendue.size() > 0) {
             VPosEditionPrestationVendue valueListePrestaVendue = prestaVendue.get(0);
-            Integer idProductInit   = valueListePrestaVendue.getIdPrestation();
-            LocalDate datePresta    = null;
-            var libelleProduct      = "";
-            var libelleFamille      = "";
-            var libelleSousFamille  = "";
-            var totalQte            = 0;
-            var totalMontantBrut    = new BigDecimal("0");
-            var remise              = new BigDecimal("0");
-            var qteOffert           = 0;
-            
-            for(VPosEditionPrestationVendue productSolde : prestaVendue){
-                if(idProductInit.equals(productSolde.getIdPrestation())){
-                    datePresta          = productSolde.getDatePresta();
-                    libelleProduct      = productSolde.getLibelle();
-                    libelleFamille      = productSolde.getFamille();
-                    libelleSousFamille  = productSolde.getSousFamille();
-                    totalQte            += productSolde.getQte();
-                    totalMontantBrut    = totalMontantBrut.add(productSolde.getCaTtcBrut());
-                    remise              = productSolde.getRemise();
-                    qteOffert           = productSolde.getQteOffert();
-                }else{
+            Integer idProductInit = valueListePrestaVendue.getIdPrestation();
+            LocalDate datePresta = null;
+            var libelleProduct = "";
+            var libelleFamille = "";
+            var libelleSousFamille = "";
+            var totalQte = 0;
+            var totalMontantBrut = new BigDecimal("0");
+            var remise = new BigDecimal("0");
+            var qteOffert = 0;
+
+            for (VPosEditionPrestationVendue productSolde : prestaVendue) {
+                if (idProductInit.equals(productSolde.getIdPrestation())) {
+                    datePresta = productSolde.getDatePresta();
+                    libelleProduct = productSolde.getLibelle();
+                    libelleFamille = productSolde.getFamille();
+                    libelleSousFamille = productSolde.getSousFamille();
+                    totalQte += productSolde.getQte();
+                    totalMontantBrut = totalMontantBrut.add(productSolde.getCaTtcBrut());
+                    remise = productSolde.getRemise();
+                    qteOffert = productSolde.getQteOffert();
+                } else {
                     var object = Json.createObjectBuilder()
                             .add("datePresta", datePresta.toString())
                             .add("famille", libelleFamille)
@@ -2739,38 +2728,38 @@ public class ReportingDao {
                             .add("caTtcBrut", totalMontantBrut)
                             .add("remise", remise)
                             .add("qteOffert", qteOffert).build();
-                    
+
                     prestaVendueResults.add(object);
-                    
-                    totalQte            = 0;
-                    totalMontantBrut    = new BigDecimal("0");
-                    remise              = new BigDecimal("0");
-                    qteOffert           = 0;
-                    
-                    datePresta          = productSolde.getDatePresta();
-                    libelleProduct      = productSolde.getLibelle();
-                    libelleFamille      = productSolde.getFamille();
-                    libelleSousFamille  = productSolde.getSousFamille();
-                    totalQte            += productSolde.getQte();
-                    totalMontantBrut    = totalMontantBrut.add(productSolde.getCaTtcBrut());
-                    remise              = productSolde.getRemise();
-                    qteOffert           = productSolde.getQteOffert();
-                    
-                    idProductInit  = productSolde.getIdPrestation();
+
+                    totalQte = 0;
+                    totalMontantBrut = new BigDecimal("0");
+                    remise = new BigDecimal("0");
+                    qteOffert = 0;
+
+                    datePresta = productSolde.getDatePresta();
+                    libelleProduct = productSolde.getLibelle();
+                    libelleFamille = productSolde.getFamille();
+                    libelleSousFamille = productSolde.getSousFamille();
+                    totalQte += productSolde.getQte();
+                    totalMontantBrut = totalMontantBrut.add(productSolde.getCaTtcBrut());
+                    remise = productSolde.getRemise();
+                    qteOffert = productSolde.getQteOffert();
+
+                    idProductInit = productSolde.getIdPrestation();
                 }
             }
-            
+
             var object = Json.createObjectBuilder()
-                            .add("datePresta", datePresta.toString())
-                            .add("famille", libelleFamille)
-                            .add("sousFamille", libelleSousFamille)
-                            .add("libelle", libelleProduct)
-                            .add("qte", totalQte)
-                            .add("caTtcBrut", totalMontantBrut)
-                            .add("remise", remise)
-                            .add("qteOffert", qteOffert).build();
-                    
-                    prestaVendueResults.add(object);
+                    .add("datePresta", datePresta.toString())
+                    .add("famille", libelleFamille)
+                    .add("sousFamille", libelleSousFamille)
+                    .add("libelle", libelleProduct)
+                    .add("qte", totalQte)
+                    .add("caTtcBrut", totalMontantBrut)
+                    .add("remise", remise)
+                    .add("qteOffert", qteOffert).build();
+
+            prestaVendueResults.add(object);
         }
 
         return prestaVendueResults.build();
@@ -2781,16 +2770,16 @@ public class ReportingDao {
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FROM VCollectiviteLectureFamille  ");
-        if (!Objects.isNull(dateStart)) { 
-            stringBuilder.append(" WHERE dateNote >= '"+ dateStart + "'"); 
-            isExist = true; 
+        if (!Objects.isNull(dateStart)) {
+            stringBuilder.append(" WHERE dateNote >= '" + dateStart + "'");
+            isExist = true;
         }
-        if (!Objects.isNull(dateEnd)) { 
+        if (!Objects.isNull(dateEnd)) {
             if (isExist == true) {
-                stringBuilder.append(" AND dateNote <= '" + dateEnd + "'"); 
-            }else {
-                stringBuilder.append(" WHERE dateNote <= '" + dateEnd + "'"); 
-            } 
+                stringBuilder.append(" AND dateNote <= '" + dateEnd + "'");
+            } else {
+                stringBuilder.append(" WHERE dateNote <= '" + dateEnd + "'");
+            }
         }
 
         List<VCollectiviteLectureFamille> familyRead = entityManager.createQuery(stringBuilder.toString())
@@ -2843,7 +2832,7 @@ public class ReportingDao {
                             .add("totalMontantHtTen", totalMontantHtTen)
                             .add("totalMontantHtTwenty", totalMontantHtTwenty).build();
 
-                        familyReadingResults.add(object);
+                    familyReadingResults.add(object);
 
                     totalQte = 0;
                     totalMontantTtc = new BigDecimal("0");
@@ -2866,16 +2855,16 @@ public class ReportingDao {
             totalMontantHtTwenty = totalMontantTtc.divide(tauxTwenty.divide(cent).add(one), 2, RoundingMode.HALF_EVEN);
 
             var object = Json.createObjectBuilder()
-                            .add("code", code)
-                            .add("libelle", libFam)
-                            .add("totalQte", totalQte)
-                            .add("totalMontantTtc", totalMontantTtc)
-                            .add("totalMontantHt", totalMontantHt)
-                            .add("totalMontantHtFive", totalMontantHtFive)
-                            .add("totalMontantHtTen", totalMontantHtTen)
-                            .add("totalMontantHtTwenty", totalMontantHtTwenty).build();
+                    .add("code", code)
+                    .add("libelle", libFam)
+                    .add("totalQte", totalQte)
+                    .add("totalMontantTtc", totalMontantTtc)
+                    .add("totalMontantHt", totalMontantHt)
+                    .add("totalMontantHtFive", totalMontantHtFive)
+                    .add("totalMontantHtTen", totalMontantHtTen)
+                    .add("totalMontantHtTwenty", totalMontantHtTwenty).build();
 
-                    familyReadingResults.add(object);
+            familyReadingResults.add(object);
         }
         return familyReadingResults.build();
     }
@@ -2884,16 +2873,16 @@ public class ReportingDao {
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FROM VCollectiviteLectureSousFamille  ");
-        if (!Objects.isNull(dateStart)) { 
-            stringBuilder.append(" WHERE dateNote >= '"+ dateStart + "'"); 
-            isExist = true; 
+        if (!Objects.isNull(dateStart)) {
+            stringBuilder.append(" WHERE dateNote >= '" + dateStart + "'");
+            isExist = true;
         }
-        if (!Objects.isNull(dateEnd)) { 
+        if (!Objects.isNull(dateEnd)) {
             if (isExist == true) {
-                stringBuilder.append(" AND dateNote <= '" + dateEnd + "'"); 
-            }else {
-                stringBuilder.append(" WHERE dateNote <= '" + dateEnd + "'"); 
-            } 
+                stringBuilder.append(" AND dateNote <= '" + dateEnd + "'");
+            } else {
+                stringBuilder.append(" WHERE dateNote <= '" + dateEnd + "'");
+            }
         }
 
         List<VCollectiviteLectureSousFamille> sousFamilyRead = entityManager.createQuery(stringBuilder.toString())
@@ -2935,7 +2924,7 @@ public class ReportingDao {
                     totalMontantHtFive = totalMontantTtc.divide(tauxFive.divide(cent).add(one), 2, RoundingMode.HALF_EVEN);
                     totalMontantHtTen = totalMontantTtc.divide(tauxTen.divide(cent).add(one), 2, RoundingMode.HALF_EVEN);
                     totalMontantHtTwenty = totalMontantTtc.divide(tauxTwenty.divide(cent).add(one), 2, RoundingMode.HALF_EVEN);
-                    
+
                     var object = Json.createObjectBuilder()
                             .add("code", code)
                             .add("libelle", libSousFam)
@@ -2946,7 +2935,7 @@ public class ReportingDao {
                             .add("totalMontantHtTen", totalMontantHtTen)
                             .add("totalMontantHtTwenty", totalMontantHtTwenty).build();
 
-                            sousFamilyReadingResults.add(object);
+                    sousFamilyReadingResults.add(object);
 
                     totalQte = 0;
                     totalMontantTtc = new BigDecimal("0");
@@ -2969,16 +2958,16 @@ public class ReportingDao {
             totalMontantHtTwenty = totalMontantTtc.divide(tauxTwenty.divide(cent).add(one), 2, RoundingMode.HALF_EVEN);
 
             var object = Json.createObjectBuilder()
-                            .add("code", code)
-                            .add("libelle", libSousFam)
-                            .add("totalQte", totalQte)
-                            .add("totalMontantTtc", totalMontantTtc)
-                            .add("totalMontantHt", totalMontantHt)
-                            .add("totalMontantHtFive", totalMontantHtFive)
-                            .add("totalMontantHtTen", totalMontantHtTen)
-                            .add("totalMontantHtTwenty", totalMontantHtTwenty).build();
+                    .add("code", code)
+                    .add("libelle", libSousFam)
+                    .add("totalQte", totalQte)
+                    .add("totalMontantTtc", totalMontantTtc)
+                    .add("totalMontantHt", totalMontantHt)
+                    .add("totalMontantHtFive", totalMontantHtFive)
+                    .add("totalMontantHtTen", totalMontantHtTen)
+                    .add("totalMontantHtTwenty", totalMontantHtTwenty).build();
 
-                            sousFamilyReadingResults.add(object);
+            sousFamilyReadingResults.add(object);
         }
         return sousFamilyReadingResults.build();
     }
@@ -2987,16 +2976,16 @@ public class ReportingDao {
         Boolean isExist = false;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("FROM VCollectiviteLecturePrestation  ");
-        if (!Objects.isNull(dateStart)) { 
-            stringBuilder.append(" WHERE dateNote >= '"+ dateStart + "'"); 
-            isExist = true; 
+        if (!Objects.isNull(dateStart)) {
+            stringBuilder.append(" WHERE dateNote >= '" + dateStart + "'");
+            isExist = true;
         }
-        if (!Objects.isNull(dateEnd)) { 
+        if (!Objects.isNull(dateEnd)) {
             if (isExist == true) {
-                stringBuilder.append(" AND dateNote <= '" + dateEnd + "'"); 
-            }else {
-                stringBuilder.append(" WHERE dateNote <= '" + dateEnd + "'"); 
-            } 
+                stringBuilder.append(" AND dateNote <= '" + dateEnd + "'");
+            } else {
+                stringBuilder.append(" WHERE dateNote <= '" + dateEnd + "'");
+            }
         }
         List<VCollectiviteLecturePrestation> listeProduct = entityManager.createQuery(stringBuilder.toString())
                 .getResultList();
@@ -3037,7 +3026,7 @@ public class ReportingDao {
                     totalMontantHtFive = totalMontantTtc.divide(tauxFive.divide(cent).add(one), 2, RoundingMode.HALF_EVEN);
                     totalMontantHtTen = totalMontantTtc.divide(tauxTen.divide(cent).add(one), 2, RoundingMode.HALF_EVEN);
                     totalMontantHtTwenty = totalMontantTtc.divide(tauxTwenty.divide(cent).add(one), 2, RoundingMode.HALF_EVEN);
-                    
+
                     var object = Json.createObjectBuilder()
                             .add("code", code)
                             .add("libellePrestation", libProduct)
@@ -3048,7 +3037,7 @@ public class ReportingDao {
                             .add("totalMontantHtTen", totalMontantHtTen)
                             .add("totalMontantHtTwenty", totalMontantHtTwenty).build();
 
-                            productResults.add(object);
+                    productResults.add(object);
 
                     totalQte = 0;
                     totalMontantTtc = new BigDecimal("0");
@@ -3071,16 +3060,16 @@ public class ReportingDao {
             totalMontantHtTwenty = totalMontantTtc.divide(tauxTwenty.divide(cent).add(one), 2, RoundingMode.HALF_EVEN);
 
             var object = Json.createObjectBuilder()
-                            .add("code", code)
-                            .add("libellePrestation", libProduct)
-                            .add("totalQte", totalQte)
-                            .add("totalMontantTtc", totalMontantTtc)
-                            .add("totalMontantHt", totalMontantHt)
-                            .add("totalMontantHtFive", totalMontantHtFive)
-                            .add("totalMontantHtTen", totalMontantHtTen)
-                            .add("totalMontantHtTwenty", totalMontantHtTwenty).build();
+                    .add("code", code)
+                    .add("libellePrestation", libProduct)
+                    .add("totalQte", totalQte)
+                    .add("totalMontantTtc", totalMontantTtc)
+                    .add("totalMontantHt", totalMontantHt)
+                    .add("totalMontantHtFive", totalMontantHtFive)
+                    .add("totalMontantHtTen", totalMontantHtTen)
+                    .add("totalMontantHtTwenty", totalMontantHtTwenty).build();
 
-                            productResults.add(object);
+            productResults.add(object);
         }
         return productResults.build();
     }
@@ -3119,18 +3108,18 @@ public class ReportingDao {
                             .add("nom", nom)
                             .add("prenom", prenom)
                             .add("societe", societe).build();
-                            clientResults.add(customerList);
+                    clientResults.add(customerList);
                 } else {
                     var object = Json.createObjectBuilder().add("societe", societe)
                             .add("listBySociete", clientResults).build();
 
-                            societeResults.add(object);
+                    societeResults.add(object);
 
-                        idSocieteInitial = listeClient.getIdSociete();
-                        reference = listeClient.getReference();
-                        nom = listeClient.getNom();
-                        prenom = listeClient.getPrenom();
-                        societe = listeClient.getNomSociete();
+                    idSocieteInitial = listeClient.getIdSociete();
+                    reference = listeClient.getReference();
+                    nom = listeClient.getNom();
+                    prenom = listeClient.getPrenom();
+                    societe = listeClient.getNomSociete();
 
                     var customerList = Json.createObjectBuilder()
                             .add("idSociete", idSocieteInitial)
@@ -3139,16 +3128,167 @@ public class ReportingDao {
                             .add("prenom", prenom)
                             .add("societe", societe).build();
 
-                            clientResults = Json.createArrayBuilder();
-                            clientResults.add(customerList);
-                        idSocieteInitial = idSocieteInitial;
+                    clientResults = Json.createArrayBuilder();
+                    clientResults.add(customerList);
+                    idSocieteInitial = idSocieteInitial;
                 }
             }
             var object = Json.createObjectBuilder().add("societe", societe)
                     .add("listBySociete", clientResults).build();
 
-                    societeResults.add(object);
+            societeResults.add(object);
         }
         return societeResults.build();
     }
+
+    public JsonObject getEditionStatistiqueCAparChambre(String dateBegin, String dateEnd, Locale locale) throws ParseException {
+
+        // construction entête tableau
+        String entete = "<thead><tr role=\"row\">";
+        int nbMois = 0;
+        if (!dateBegin.equals("") && !dateEnd.equals("")) {
+            entete += "<th class=\"text-center\">Chambre</th>";
+            DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd", locale);
+            Date dateFrom = df1.parse(dateBegin);
+            Date dateTo = df1.parse(dateEnd);
+            DateFormat df2 = new SimpleDateFormat("MMM yyyy", locale);
+            Calendar calendar = Calendar.getInstance(locale);
+            calendar.setTime(dateFrom);
+            String previousMonthYear = df1.format(calendar.getTime());
+            String[] tab = previousMonthYear.split("-");
+            previousMonthYear = tab[1].concat(tab[0]); // MMyyyy
+            String enteteMois = df2.format(calendar.getTime());
+            enteteMois = enteteMois.substring(0, 1).toUpperCase() + enteteMois.substring(1).toLowerCase();
+            entete = entete.concat("<th class=\"text-center\">" + enteteMois + "</th>");
+            nbMois++;
+            while ((calendar.getTime()).compareTo(dateTo) < 0) {
+                calendar.add(Calendar.DATE, 1);
+                String encoursMonthYear = df1.format(calendar.getTime());
+                String[] tabs = encoursMonthYear.split("-");
+                encoursMonthYear = tabs[1].concat(tabs[0]); // MMyyyy
+                if (!previousMonthYear.equals(encoursMonthYear)) {
+                    enteteMois = df2.format(calendar.getTime());
+                    enteteMois = enteteMois.substring(0, 1).toUpperCase() + enteteMois.substring(1).toLowerCase();
+                    entete = entete.concat("<th class=\"text-center\">" + enteteMois + "</th>");
+                    previousMonthYear = encoursMonthYear;
+                    nbMois++;
+                }
+            }
+        }
+        if (nbMois > 1) {
+            entete = entete.concat("<th class=\"text-center\">Total</th></tr></thead>");
+        } else {
+            entete = entete.concat("</tr></thead>");
+        }
+        
+
+        // construction liste enregistrements
+        String body = "<tbody>";
+        StringBuilder hql = new StringBuilder();
+        hql.append("from VPmsCa where 1 = 1");
+        if (!dateBegin.equals("") && !dateEnd.equals("")) {
+            hql.append(" and dateCa >= '" + dateBegin + "' and dateCa <= '" + dateEnd + "'");
+            hql.append(" order by dateCa, numeroChambre");
+            List<VPmsCa> listVPmsCa = entityManager.createQuery(hql.toString()).getResultList();
+            if (!listVPmsCa.isEmpty()) {
+                HashMap<String, List> resultat = new HashMap<String, List>(); // groupement par chambre
+                BigDecimal totalCAchbr = BigDecimal.ZERO;
+                
+                HashMap<String, HashMap> result = new HashMap<String, HashMap>(); // groupement par mois
+                HashMap<String, BigDecimal> caChambres = new HashMap<String, BigDecimal>(); // groupement par chambres
+                
+                LocalDate previousDateCA = null;
+                String previousChbr = null;
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy");
+                
+                int moisIndex = 0;
+
+                for (int i = 0; i < listVPmsCa.size(); i++) {
+
+                    VPmsCa pmsCa = listVPmsCa.get(i);
+                    LocalDate dateCA = pmsCa.getDateCa();
+                    String chbr = pmsCa.getNumeroChambre();
+
+                    if (i == 0) {
+                        previousDateCA = dateCA;
+                        previousChbr = chbr;
+                    }
+
+                    String previousDateCAformatted = previousDateCA.format(dateTimeFormatter);
+                    String dateCAformatted = dateCA.format(dateTimeFormatter);
+                    boolean sameMonth = previousDateCAformatted.equals(dateCAformatted);
+                    boolean sameChbr = previousChbr.equals(chbr);
+                    
+                    if (!resultat.containsKey(previousChbr)) {
+                        resultat.put(previousChbr, new ArrayList<BigDecimal>());
+                    }
+                    
+                    if (sameMonth) {
+                        if (sameChbr) {
+                            totalCAchbr = totalCAchbr.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+                        } else {
+                            List<BigDecimal> listeCAchbr = resultat.get(previousChbr);
+                            if (listeCAchbr.isEmpty()) {
+                                listeCAchbr.add(totalCAchbr);
+                            } else {
+                                BigDecimal lastCAchbr = listeCAchbr.get(moisIndex);
+                                listeCAchbr.set(moisIndex, lastCAchbr.add(totalCAchbr));
+                            }
+                            resultat.replace(previousChbr, listeCAchbr);
+                            previousChbr = chbr;
+                            totalCAchbr = BigDecimal.ZERO;
+                            totalCAchbr = totalCAchbr.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+                            if (!resultat.containsKey(previousChbr)) {
+                                resultat.put(previousChbr, new ArrayList<BigDecimal>());
+                            }
+                        }
+                    }
+                    else {
+                        List<BigDecimal> listeCAchbr = resultat.get(previousChbr);
+                        BigDecimal lastCAchbr = listeCAchbr.get(moisIndex);
+                        listeCAchbr.set(moisIndex, lastCAchbr.add(totalCAchbr));
+                        resultat.replace(previousChbr, listeCAchbr);
+                        totalCAchbr = BigDecimal.ZERO;
+                        totalCAchbr = totalCAchbr.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+                        previousChbr = chbr;
+                        previousDateCA = dateCA;
+                        moisIndex++;
+                        listeCAchbr.set(moisIndex, totalCAchbr);
+                    }
+                    
+                }/*
+                if (moisIndex == nbMois - 1) {
+                    List<BigDecimal> listeCAchbr = resultat.get(previousChbr);
+                    if (listeCAchbr.isEmpty()) {
+                        listeCAchbr.add(totalCAchbr);
+                    } else {
+                        BigDecimal lastCAchbr = listeCAchbr.get(moisIndex);
+                        listeCAchbr.set(moisIndex, lastCAchbr.add(totalCAchbr));
+                    }
+                    resultat.replace(previousChbr, listeCAchbr);
+                }
+                */
+                for (String chbr : resultat.keySet()) {
+                    String ligne = "<tr><td>" + chbr + "</td>";
+                    List<BigDecimal> listCAchbr = resultat.get(chbr);
+                    for(int c = 0; c < listCAchbr.size(); c++) {
+                        ligne += "<td>" + listCAchbr.get(c).toString() + "</td>";
+                        if (nbMois > 1) {
+                            ligne += "<td>" + Util.sumValuesListOfBigDecimals(listCAchbr).toString() + "</td>";
+                        }
+                        ligne += "</tr>";
+                    }
+                    body += ligne;
+                }
+            }
+        }
+        body += "</tbody>";
+
+        JsonObject results = Json.createObjectBuilder()
+                .add("header", entete)
+                .add("body", body)
+                .build();
+        return results;
+    }
+
 }
