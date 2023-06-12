@@ -72,7 +72,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import javax.ejb.Stateless;
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -3181,21 +3183,27 @@ public class ReportingDao {
             entete = entete.concat("</tr></thead>");
         }
         
-
         // construction liste enregistrements
+        BigDecimal totals = BigDecimal.ZERO;
         String body = "<tbody>";
+        String footer = "";
         StringBuilder hql = new StringBuilder();
         hql.append("from VPmsCa where 1 = 1");
+        
         if (!dateBegin.equals("") && !dateEnd.equals("")) {
+            
             hql.append(" and dateCa >= '" + dateBegin + "' and dateCa <= '" + dateEnd + "'");
             hql.append(" order by dateCa, numeroChambre");
             List<VPmsCa> listVPmsCa = entityManager.createQuery(hql.toString()).getResultList();
+            
             if (!listVPmsCa.isEmpty()) {
-                HashMap<String, List> resultat = new HashMap<String, List>(); // groupement par chambre
-                BigDecimal totalCAchbr = BigDecimal.ZERO;
                 
-                HashMap<String, HashMap> result = new HashMap<String, HashMap>(); // groupement par mois
-                HashMap<String, BigDecimal> caChambres = new HashMap<String, BigDecimal>(); // groupement par chambres
+                footer = "<tfoot><tr><td  style=\"font-weight: bold; text-align: right;\">Total :</td>";
+                
+                HashMap<String, List> resultat = new HashMap<String, List>(); // groupement par chambre
+                TreeMap<String, List> resultatSorted = new TreeMap<>(); // groupement par chambre trié
+                
+                BigDecimal totalCAchbr = BigDecimal.ZERO;
                 
                 LocalDate previousDateCA = null;
                 String previousChbr = null;
@@ -3210,8 +3218,8 @@ public class ReportingDao {
                     String chbr = pmsCa.getNumeroChambre();
 
                     if (i == 0) {
-                        previousDateCA = dateCA;
                         previousChbr = chbr;
+                        previousDateCA = dateCA;
                     }
 
                     String previousDateCAformatted = previousDateCA.format(dateTimeFormatter);
@@ -3256,30 +3264,57 @@ public class ReportingDao {
                         listeCAchbr.set(moisIndex, totalCAchbr);
                     }
                     
-                }/*
-                if (moisIndex == nbMois - 1) {
-                    List<BigDecimal> listeCAchbr = resultat.get(previousChbr);
-                    if (listeCAchbr.isEmpty()) {
-                        listeCAchbr.add(totalCAchbr);
-                    } else {
-                        BigDecimal lastCAchbr = listeCAchbr.get(moisIndex);
-                        listeCAchbr.set(moisIndex, lastCAchbr.add(totalCAchbr));
-                    }
-                    resultat.replace(previousChbr, listeCAchbr);
                 }
-                */
-                for (String chbr : resultat.keySet()) {
-                    String ligne = "<tr><td>" + chbr + "</td>";
-                    List<BigDecimal> listCAchbr = resultat.get(chbr);
+                List<BigDecimal> listeCAchbr = resultat.get(previousChbr);
+                if (listeCAchbr.isEmpty()) {
+                    listeCAchbr.add(totalCAchbr);
+                } else {
+                    BigDecimal lastCAchbr = listeCAchbr.get(moisIndex);
+                    listeCAchbr.set(moisIndex, lastCAchbr.add(totalCAchbr));
+                }
+                resultat.replace(previousChbr, listeCAchbr);
+                resultatSorted.putAll(resultat);
+                
+                for (Map.Entry<String, List> entry : resultatSorted.entrySet()) {
+                    String ligne = "<tr><td>" + entry.getKey() + "</td>";
+                    List<BigDecimal> listCAchbr = entry.getValue();
                     for(int c = 0; c < listCAchbr.size(); c++) {
                         ligne += "<td>" + listCAchbr.get(c).toString() + "</td>";
-                        if (nbMois > 1) {
-                            ligne += "<td>" + Util.sumValuesListOfBigDecimals(listCAchbr).toString() + "</td>";
-                        }
-                        ligne += "</tr>";
                     }
+                    if (listCAchbr.size() < nbMois) {
+                        int colonnesManquants = nbMois - listCAchbr.size();
+                        for(int cm = 1; cm <= colonnesManquants; cm++) {
+                            ligne += "<td></td>";
+                        }
+                    }
+                    if (nbMois > 1) {
+                        BigDecimal totalLigne = Util.sumValuesListOfBigDecimals(listCAchbr);
+                        ligne += "<td>" + totalLigne.toString() + "</td>";
+                        totals = totals.add(totalLigne);
+                    }
+                    ligne += "</tr>";
                     body += ligne;
                 }
+                
+                for(int m = 0; m <= moisIndex; m++) {
+                    BigDecimal total = BigDecimal.ZERO;
+                    for (Map.Entry<String, List> entry : resultatSorted.entrySet()) {
+                        List<BigDecimal> CAs = entry.getValue();
+                        total = total.add(CAs.get(m));
+                    }
+                    footer += "<td style=\"padding-top: 8px;padding-right: 8px;padding-bottom: 8px;padding-left: 8px;\">"+total.toString()+"</td>";
+                }
+                if (moisIndex < nbMois && nbMois > 1) {
+                    int colonnesManquants = nbMois - moisIndex;
+                    for(int cm = 1; cm <= colonnesManquants; cm++) {
+                        if (cm == colonnesManquants) {
+                            footer += "<td style=\"padding-top: 8px;padding-right: 8px;padding-bottom: 8px;padding-left: 8px;\">" + totals.toString() + "</td>";
+                        } else {
+                            footer += "<td></td>";
+                        }
+                    }
+                }
+                footer += "</tr></tfoot>";
             }
         }
         body += "</tbody>";
@@ -3287,6 +3322,7 @@ public class ReportingDao {
         JsonObject results = Json.createObjectBuilder()
                 .add("header", entete)
                 .add("body", body)
+                .add("footer", footer)
                 .build();
         return results;
     }
