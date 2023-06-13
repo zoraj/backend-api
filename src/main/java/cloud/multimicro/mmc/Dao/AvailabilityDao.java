@@ -142,14 +142,14 @@ public class AvailabilityDao {
                 
                 qteTotalRoomsExisted = totalRoom.getQteTotalRoom() - qteTotalRoomsOutNotAvailable - qteTotalRoomsBookedNotAvailable;
                 
-                if(qteTotalRoomsExisted > 0 || qteTotalRoomsExisted == 0){
+                //if(qteTotalRoomsExisted > 0 || qteTotalRoomsExisted == 0){
                     var totalRoomByType = new TotalRoomByType();
                     
                     totalRoomByType.setQteTotalRoom(qteTotalRoomsExisted);
                     totalRoomByType.setTypeChambreId(totalRoom.getTypeChambreId());
                     
                     totalRoomsAvailableByType.add(totalRoomByType);
-                }
+                //}
                 qteTotalRoomsAvailable += qteTotalRoomsExisted;
             }
             
