@@ -57,8 +57,11 @@ import cloud.multimicro.mmc.Entity.VPosEditionJournalOffert;
 import cloud.multimicro.mmc.Entity.VPosEditionNoteSoldeJour;
 import cloud.multimicro.mmc.Entity.VPosEditionPrestationVendue;
 import cloud.multimicro.mmc.Entity.VPosEditionVisualisationModeEncaissement;
+import java.text.ParseException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.logging.Level;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -831,4 +834,23 @@ public class ReportingService {
         }
         return Response.ok(listeAdmSubv, MediaType.APPLICATION_JSON).build();
     }
+    
+    @GET
+    @Path("/pms/ca_par_chbr")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEditionStatistiqueCAparChambre(@Context UriInfo info) {
+        try {
+            String dateStart = info.getQueryParameters().getFirst("dateStart");
+            String dateEnd = info.getQueryParameters().getFirst("dateEnd");
+            String locale = info.getQueryParameters().getFirst("locale");
+            JsonObject ret = reportingDao.getEditionStatistiqueCAparChambre(dateStart, dateEnd, Locale.forLanguageTag(locale));
+            if (ret.isEmpty()) {
+                throw new NotFoundException();
+            }
+            return Response.ok(ret, MediaType.APPLICATION_JSON).build();
+        } catch (ParseException ex) {
+            throw new NotFoundException();
+        }
+    }
+    
 }

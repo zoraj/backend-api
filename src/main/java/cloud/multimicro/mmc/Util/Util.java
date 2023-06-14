@@ -1,8 +1,10 @@
 package cloud.multimicro.mmc.Util;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -85,5 +87,14 @@ public class Util {
             //todo: handle exception
         }
         return result;
-   }    
+   }
+    
+    public static BigDecimal sumValuesListOfBigDecimals(List<BigDecimal> liste) {
+        BigDecimal ret = BigDecimal.ZERO;
+        for(int i=0; i<liste.size(); i++) {
+            ret = ret.add(liste.get(i));
+        }
+        return ret;
+    }
+    
 }
