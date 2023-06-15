@@ -561,8 +561,9 @@ public class ReportingService {
     @GET
     @Path("/pms/report-balance-appartement")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllBalanceAppartement() {
-        List<VPmsEditionBalanceAppartement> balanceAppartement = reportingDao.getAllBalanceAppartement();
+    public Response getAllBalanceAppartement(@Context UriInfo info) {
+        String dateReference = info.getQueryParameters().getFirst("dateReference");
+        JsonArray balanceAppartement = reportingDao.getAllBalanceAppartement(dateReference);
         if (balanceAppartement.isEmpty()) {
             throw new NotFoundException();
         }

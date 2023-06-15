@@ -1733,10 +1733,112 @@ public class ReportingDao {
         return resultFinal;
     }
 
-    public List<VPmsEditionBalanceAppartement> getAllBalanceAppartement() {
-        List<VPmsEditionBalanceAppartement> balanceAppartement = entityManager
-                .createQuery("FROM VPmsEditionBalanceAppartement").getResultList();
-        return balanceAppartement;
+    public JsonArray getAllBalanceAppartement(String dateReference) {
+        List<VPmsEditionBalanceAppartement> listeBalanceAppartement = entityManager
+                .createQuery("FROM VPmsEditionBalanceAppartement WHERE datePrestation = '" + dateReference + "'").getResultList();
+        
+        var balanceAppartementResults = Json.createArrayBuilder();
+        var balanceResults = Json.createArrayBuilder();
+        if (listeBalanceAppartement.size() > 0) {
+            VPmsEditionBalanceAppartement valueListBalanceAppartement = listeBalanceAppartement.get(0);
+            Integer idSejourInitial = valueListBalanceAppartement.getIdSejour();
+
+            var numChambre = "";
+            var nom = "";
+            LocalDate dateArrivee = null;
+            LocalDate dateDepart = null;
+            var nbPax = 0;
+            var enfant = 0;
+            var tarif = "";
+            LocalDate datePrestation = null;
+            var codePrestation = "";
+            var libellePrestation = "";
+            var qtePrestation = 0;
+            var puPrestation = new BigDecimal(0);
+            var prixPrestation = new BigDecimal(0); 
+
+
+            for (VPmsEditionBalanceAppartement listeBalance : listeBalanceAppartement) {
+                if (idSejourInitial.equals(listeBalance.getIdSejour())) { 
+                    codePrestation      = listeBalance.getCodePrestation();
+                    libellePrestation   = listeBalance.getLibellePrestation();
+                    qtePrestation       = listeBalance.getQtePrestation();
+                    puPrestation        = listeBalance.getPuPrestation();
+                    prixPrestation      = listeBalance.getPrixPrestation();           
+                    idSejourInitial     = listeBalance.getIdSejour();
+                    numChambre          = listeBalance.getNumChambre();
+                    nom                 = listeBalance.getNom();
+                    dateArrivee         = listeBalance.getDateArrivee();
+                    dateDepart          = listeBalance.getDateDepart();
+                    nbPax               = listeBalance.getNbPax();
+                    enfant              = listeBalance.getDontEnfant();
+                    tarif               = listeBalance.getTarif();
+                    datePrestation      = listeBalance.getDatePrestation();
+                    
+                    var balanceList = Json.createObjectBuilder()
+                            .add("codePrestation", codePrestation)
+                            .add("libellePrestation", libellePrestation)
+                            .add("qtePrestation", qtePrestation)
+                            .add("puPrestation", puPrestation)
+                            .add("prixPrestation", prixPrestation).build();
+                    balanceResults.add(balanceList);
+                } else {
+                    var object = Json.createObjectBuilder()
+                            .add("idSejour", idSejourInitial)
+                            .add("numChambre", numChambre)
+                            .add("nom", nom)
+                            .add("dateArrivee", dateArrivee.toString())
+                            .add("dateDepart", dateDepart.toString())
+                            .add("nbPax", nbPax)
+                            .add("dontEnfant", enfant)
+                            .add("tarif", tarif)
+                            .add("datePrestation", datePrestation.toString())
+                            .add("listBalancePrestation", balanceResults).build();
+
+                    balanceAppartementResults.add(object);
+                    
+                    codePrestation      = listeBalance.getCodePrestation();
+                    libellePrestation   = listeBalance.getLibellePrestation();
+                    qtePrestation       = listeBalance.getQtePrestation();
+                    puPrestation        = listeBalance.getPuPrestation();
+                    prixPrestation      = listeBalance.getPrixPrestation();
+                    idSejourInitial     = listeBalance.getIdSejour();
+                    numChambre          = listeBalance.getNumChambre();
+                    nom                 = listeBalance.getNom();
+                    dateArrivee         = listeBalance.getDateArrivee();
+                    dateDepart          = listeBalance.getDateDepart();
+                    nbPax               = listeBalance.getNbPax();
+                    enfant              = listeBalance.getDontEnfant();
+                    tarif               = listeBalance.getTarif();
+                    datePrestation      = listeBalance.getDatePrestation();
+                    
+                    var balanceList = Json.createObjectBuilder()
+                            .add("codePrestation", codePrestation)
+                            .add("libellePrestation", libellePrestation)
+                            .add("qtePrestation", qtePrestation)
+                            .add("puPrestation", puPrestation)
+                            .add("prixPrestation", prixPrestation).build();
+                    
+                    balanceResults = Json.createArrayBuilder();
+                    balanceResults.add(balanceList);
+                    idSejourInitial = idSejourInitial;
+                }
+            }
+            var object = Json.createObjectBuilder()
+                            .add("idSejour", idSejourInitial)
+                            .add("numChambre", numChambre)
+                            .add("nom", nom)
+                            .add("dateArrivee", dateArrivee.toString())
+                            .add("dateDepart", dateDepart.toString())
+                            .add("nbPax", nbPax)
+                            .add("dontEnfant", enfant)
+                            .add("tarif", tarif)
+                            .add("datePrestation", datePrestation.toString())
+                            .add("listBalancePrestation", balanceResults).build();
+
+            balanceAppartementResults.add(object);
+        }
+        return balanceAppartementResults.build();
     }
 
     public List<VPmsEditionPlanningMensuelChambre> getAllPlanningMonthRoom() {
