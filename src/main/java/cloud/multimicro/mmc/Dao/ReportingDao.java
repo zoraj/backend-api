@@ -3411,14 +3411,14 @@ public class ReportingDao {
                     String previousDateCAformatted = previousDateCA.format(dateTimeFormatter);
                     String dateCAformatted = dateCA.format(dateTimeFormatter);
                     boolean sameMonth = previousDateCAformatted.equals(dateCAformatted);
-                    boolean sameChbr = previousTypeClient.equals(typeClient);
+                    boolean sameTypeClient = previousTypeClient.equals(typeClient);
                     
                     if (!resultat.containsKey(previousTypeClient)) {
                         resultat.put(previousTypeClient, new ArrayList<BigDecimal>());
                     }
                     
                     if (sameMonth) {
-                        if (sameChbr) {
+                        if (sameTypeClient) {
                             totalCAtypeClient = totalCAtypeClient.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
                         } else {
                             List<BigDecimal> listeCAtypeClient = resultat.get(previousTypeClient);
