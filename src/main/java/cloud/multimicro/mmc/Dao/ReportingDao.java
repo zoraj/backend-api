@@ -47,6 +47,7 @@ import cloud.multimicro.mmc.Entity.VPmsEditionListePrestationArrivee;
 import cloud.multimicro.mmc.Entity.VPmsEditionListeVerifArrivee;
 import cloud.multimicro.mmc.Entity.VPmsEditionPlanningMensuelChambre;
 import cloud.multimicro.mmc.Entity.VPmsEditionSoldeNoteOuverte;
+import cloud.multimicro.mmc.Entity.VPmsFreqJour;
 import cloud.multimicro.mmc.Entity.VPosCa;
 import cloud.multimicro.mmc.Entity.VPosEditionCaActivite;
 import cloud.multimicro.mmc.Entity.VPosEditionJournalOffert;
@@ -70,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -3324,6 +3326,40 @@ public class ReportingDao {
                 .add("body", body)
                 .add("footer", footer)
                 .build();
+        return results;
+    }
+    
+    public JsonObject getEditionStatistiqueFreqJour(String dateBegin, String dateEnd) throws ParseException {
+        StringBuilder hql = new StringBuilder();
+        hql.append("from VPmsFreqJour");
+        String body = "<tbody>";
+        boolean vide = true;
+        if (!dateBegin.equals("") && !dateEnd.equals("")) {
+            hql.append(" where ( dateArrivee <= '" + dateBegin + "' and dateDepart <= '" + dateEnd + "' and dateDepart >= '" + dateBegin + "' ) or ");
+            hql.append("  ( dateArrivee >= '" + dateBegin + "' and dateArrivee <= '" + dateEnd + "' and dateDepart <= '" + dateEnd + "' ) or ");
+            hql.append(" ( dateArrivee >= '" + dateBegin + "' and dateArrivee <= '" + dateEnd + "' and dateDepart >= '" + dateEnd + "' ) ");
+            hql.append(" order by numeroChambre");
+            List<VPmsFreqJour> tmp = entityManager.createQuery(hql.toString()).getResultList();
+            LinkedList<VPmsFreqJour> liste = new LinkedList();
+            liste.addAll(tmp);
+            if (!liste.isEmpty()) {
+                vide = false;
+                for(int i = 0 ; i < liste.size() ; i++) {
+                    body += "<tr><td class=\"text-center\">"+liste.get(i).getNumeroChambre()+"</td><td>"+liste.get(i).getClient()+"</td><td class=\"text-center\">"+liste.get(i).getDateArrivee()+"</td><td class=\"text-center\">"+liste.get(i).getDateDepart()+"</td><td class=\"c_nb_adult text-center\">"+liste.get(i).getNbAdultes()+"</td><td class=\"c_nb_enft text-center\">"+liste.get(i).getNbEnfants()+"</td><td class=\"c_nb_pax text-center\">"+liste.get(i).getNbPax()+"</td></tr>";
+                }
+            }
+        }
+        body += "</tbody>";
+        String footer = "";
+        if (!vide) {
+            footer += "<tfoot>";
+            footer += "<tr><td colspan=\"4\" style=\"border: none;\"></td><td id=\"total_adults\" class=\"text-right\"></td><td id=\"total_enfts\" class=\"text-right\"></td><td id=\"total_pax\" class=\"text-right\"></td></tr>";
+            footer += "</tfoot>";
+        }
+        JsonObject results = Json.createObjectBuilder()
+                                    .add("body", body)
+                                    .add("footer", footer)
+                                    .build();
         return results;
     }
 
