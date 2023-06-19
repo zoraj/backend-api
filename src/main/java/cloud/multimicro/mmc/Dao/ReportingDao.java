@@ -3326,5 +3326,189 @@ public class ReportingDao {
                 .build();
         return results;
     }
+    
+    public JsonObject getEditionStatistiqueCAparNationalite(String dateBegin, String dateEnd, Locale locale) throws ParseException {
+
+        // construction entête tableau
+        String entete = "<thead><tr role=\"row\">";
+        int nbMois = 0;
+        if (!dateBegin.equals("") && !dateEnd.equals("")) {
+            entete += "<th class=\"text-center\">Nationalité</th>";
+            DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd", locale);
+            Date dateFrom = df1.parse(dateBegin);
+            Date dateTo = df1.parse(dateEnd);
+            DateFormat df2 = new SimpleDateFormat("MMM yyyy", locale);
+            Calendar calendar = Calendar.getInstance(locale);
+            calendar.setTime(dateFrom);
+            String previousMonthYear = df1.format(calendar.getTime());
+            String[] tab = previousMonthYear.split("-");
+            previousMonthYear = tab[1].concat(tab[0]); // MMyyyy
+            String enteteMois = df2.format(calendar.getTime());
+            enteteMois = enteteMois.substring(0, 1).toUpperCase() + enteteMois.substring(1).toLowerCase();
+            entete = entete.concat("<th class=\"text-center\">" + enteteMois + "</th>");
+            nbMois++;
+            while ((calendar.getTime()).compareTo(dateTo) < 0) {
+                calendar.add(Calendar.DATE, 1);
+                String encoursMonthYear = df1.format(calendar.getTime());
+                String[] tabs = encoursMonthYear.split("-");
+                encoursMonthYear = tabs[1].concat(tabs[0]); // MMyyyy
+                if (!previousMonthYear.equals(encoursMonthYear)) {
+                    enteteMois = df2.format(calendar.getTime());
+                    enteteMois = enteteMois.substring(0, 1).toUpperCase() + enteteMois.substring(1).toLowerCase();
+                    entete = entete.concat("<th class=\"text-center\">" + enteteMois + "</th>");
+                    previousMonthYear = encoursMonthYear;
+                    nbMois++;
+                }
+            }
+        }
+        if (nbMois > 1) {
+            entete = entete.concat("<th class=\"text-center\">Total</th></tr></thead>");
+        } else {
+            entete = entete.concat("</tr></thead>");
+        }
+        
+        // construction liste enregistrements
+        BigDecimal totals = BigDecimal.ZERO;
+        String body = "<tbody>";
+        String footer = "";
+        StringBuilder hql = new StringBuilder();
+        hql.append("from VPmsCa where 1 = 1");
+        
+        if (!dateBegin.equals("") && !dateEnd.equals("")) {
+            
+            hql.append(" and dateCa >= '" + dateBegin + "' and dateCa <= '" + dateEnd + "'");
+            hql.append(" order by dateCa, numeroChambre");
+            List<VPmsCa> listVPmsCa = entityManager.createQuery(hql.toString()).getResultList();
+            
+            if (!listVPmsCa.isEmpty()) {
+                
+                footer = "<tfoot><tr><td  style=\"font-weight: bold; text-align: right;\">Total :</td>";
+                
+                HashMap<String, List> resultat = new HashMap<String, List>(); // groupement par chambre
+                TreeMap<String, List> resultatSorted = new TreeMap<>(); // groupement par chambre trié
+                
+                BigDecimal totalCAchbr = BigDecimal.ZERO;
+                
+                LocalDate previousDateCA = null;
+                String previousChbr = null;
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy");
+                
+                int moisIndex = 0;
+
+                for (int i = 0; i < listVPmsCa.size(); i++) {
+
+                    VPmsCa pmsCa = listVPmsCa.get(i);
+                    LocalDate dateCA = pmsCa.getDateCa();
+                    String chbr = pmsCa.getNumeroChambre();
+
+                    if (i == 0) {
+                        previousChbr = chbr;
+                        previousDateCA = dateCA;
+                    }
+
+                    String previousDateCAformatted = previousDateCA.format(dateTimeFormatter);
+                    String dateCAformatted = dateCA.format(dateTimeFormatter);
+                    boolean sameMonth = previousDateCAformatted.equals(dateCAformatted);
+                    boolean sameChbr = previousChbr.equals(chbr);
+                    
+                    if (!resultat.containsKey(previousChbr)) {
+                        resultat.put(previousChbr, new ArrayList<BigDecimal>());
+                    }
+                    
+                    if (sameMonth) {
+                        if (sameChbr) {
+                            totalCAchbr = totalCAchbr.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+                        } else {
+                            List<BigDecimal> listeCAchbr = resultat.get(previousChbr);
+                            if (listeCAchbr.isEmpty()) {
+                                listeCAchbr.add(totalCAchbr);
+                            } else {
+                                BigDecimal lastCAchbr = listeCAchbr.get(moisIndex);
+                                listeCAchbr.set(moisIndex, lastCAchbr.add(totalCAchbr));
+                            }
+                            resultat.replace(previousChbr, listeCAchbr);
+                            previousChbr = chbr;
+                            totalCAchbr = BigDecimal.ZERO;
+                            totalCAchbr = totalCAchbr.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+                            if (!resultat.containsKey(previousChbr)) {
+                                resultat.put(previousChbr, new ArrayList<BigDecimal>());
+                            }
+                        }
+                    }
+                    else {
+                        List<BigDecimal> listeCAchbr = resultat.get(previousChbr);
+                        BigDecimal lastCAchbr = listeCAchbr.get(moisIndex);
+                        listeCAchbr.set(moisIndex, lastCAchbr.add(totalCAchbr));
+                        resultat.replace(previousChbr, listeCAchbr);
+                        totalCAchbr = BigDecimal.ZERO;
+                        totalCAchbr = totalCAchbr.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+                        previousChbr = chbr;
+                        previousDateCA = dateCA;
+                        moisIndex++;
+                        listeCAchbr.set(moisIndex, totalCAchbr);
+                    }
+                    
+                }
+                List<BigDecimal> listeCAchbr = resultat.get(previousChbr);
+                if (listeCAchbr.isEmpty()) {
+                    listeCAchbr.add(totalCAchbr);
+                } else {
+                    BigDecimal lastCAchbr = listeCAchbr.get(moisIndex);
+                    listeCAchbr.set(moisIndex, lastCAchbr.add(totalCAchbr));
+                }
+                resultat.replace(previousChbr, listeCAchbr);
+                resultatSorted.putAll(resultat);
+                
+                for (Map.Entry<String, List> entry : resultatSorted.entrySet()) {
+                    String ligne = "<tr><td>" + entry.getKey() + "</td>";
+                    List<BigDecimal> listCAchbr = entry.getValue();
+                    for(int c = 0; c < listCAchbr.size(); c++) {
+                        ligne += "<td>" + listCAchbr.get(c).toString() + "</td>";
+                    }
+                    if (listCAchbr.size() < nbMois) {
+                        int colonnesManquants = nbMois - listCAchbr.size();
+                        for(int cm = 1; cm <= colonnesManquants; cm++) {
+                            ligne += "<td></td>";
+                        }
+                    }
+                    if (nbMois > 1) {
+                        BigDecimal totalLigne = Util.sumValuesListOfBigDecimals(listCAchbr);
+                        ligne += "<td>" + totalLigne.toString() + "</td>";
+                        totals = totals.add(totalLigne);
+                    }
+                    ligne += "</tr>";
+                    body += ligne;
+                }
+                
+                for(int m = 0; m <= moisIndex; m++) {
+                    BigDecimal total = BigDecimal.ZERO;
+                    for (Map.Entry<String, List> entry : resultatSorted.entrySet()) {
+                        List<BigDecimal> CAs = entry.getValue();
+                        total = total.add(CAs.get(m));
+                    }
+                    footer += "<td style=\"padding-top: 8px;padding-right: 8px;padding-bottom: 8px;padding-left: 8px;\">"+total.toString()+"</td>";
+                }
+                if (moisIndex < nbMois && nbMois > 1) {
+                    int colonnesManquants = nbMois - moisIndex;
+                    for(int cm = 1; cm <= colonnesManquants; cm++) {
+                        if (cm == colonnesManquants) {
+                            footer += "<td style=\"padding-top: 8px;padding-right: 8px;padding-bottom: 8px;padding-left: 8px;\">" + totals.toString() + "</td>";
+                        } else {
+                            footer += "<td></td>";
+                        }
+                    }
+                }
+                footer += "</tr></tfoot>";
+            }
+        }
+        body += "</tbody>";
+
+        JsonObject results = Json.createObjectBuilder()
+                .add("header", entete)
+                .add("body", body)
+                .add("footer", footer)
+                .build();
+        return results;
+    }
 
 }

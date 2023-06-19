@@ -853,4 +853,22 @@ public class ReportingService {
         }
     }
     
+    @GET
+    @Path("/pms/report-statistique-analyse-par-nationalite")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEditionStatistiqueCAparNationalite(@Context UriInfo info) {
+        try {
+            String dateStart = info.getQueryParameters().getFirst("dateStart");
+            String dateEnd = info.getQueryParameters().getFirst("dateEnd");
+            String locale = info.getQueryParameters().getFirst("locale");
+            JsonObject ret = reportingDao.getEditionStatistiqueCAparNationalite(dateStart, dateEnd, Locale.forLanguageTag(locale));
+            if (ret.isEmpty()) {
+                throw new NotFoundException();
+            }
+            return Response.ok(ret, MediaType.APPLICATION_JSON).build();
+        } catch (ParseException ex) {
+            throw new NotFoundException();
+        }
+    }
+    
 }
