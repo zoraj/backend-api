@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -3144,6 +3145,8 @@ public class ReportingDao {
     }
 
     public JsonObject getEditionStatistiqueCAparChambre(String dateBegin, String dateEnd, Locale locale) throws ParseException {
+        
+        LinkedList<String> moisAparcourir = new LinkedList<>();
 
         // construction entête tableau
         String entete = "<thead><tr role=\"row\">";
@@ -3158,7 +3161,8 @@ public class ReportingDao {
             calendar.setTime(dateFrom);
             String previousMonthYear = df1.format(calendar.getTime());
             String[] tab = previousMonthYear.split("-");
-            previousMonthYear = tab[1].concat(tab[0]); // MMyyyy
+            previousMonthYear = tab[1].concat("-").concat(tab[0]); // MM-yyyy
+            moisAparcourir.add(previousMonthYear);
             String enteteMois = df2.format(calendar.getTime());
             enteteMois = enteteMois.substring(0, 1).toUpperCase() + enteteMois.substring(1).toLowerCase();
             entete = entete.concat("<th class=\"text-center\">" + enteteMois + "</th>");
@@ -3167,12 +3171,13 @@ public class ReportingDao {
                 calendar.add(Calendar.DATE, 1);
                 String encoursMonthYear = df1.format(calendar.getTime());
                 String[] tabs = encoursMonthYear.split("-");
-                encoursMonthYear = tabs[1].concat(tabs[0]); // MMyyyy
+                encoursMonthYear = tabs[1].concat("-").concat(tabs[0]); // MM-yyyy
                 if (!previousMonthYear.equals(encoursMonthYear)) {
                     enteteMois = df2.format(calendar.getTime());
                     enteteMois = enteteMois.substring(0, 1).toUpperCase() + enteteMois.substring(1).toLowerCase();
                     entete = entete.concat("<th class=\"text-center\">" + enteteMois + "</th>");
                     previousMonthYear = encoursMonthYear;
+                    moisAparcourir.add(previousMonthYear);
                     nbMois++;
                 }
             }
@@ -3200,13 +3205,18 @@ public class ReportingDao {
                 
                 footer = "<tfoot><tr><td  style=\"font-weight: bold; text-align: right;\">Total :</td>";
                 
-                HashMap<String, List> resultat = new HashMap<String, List>(); // groupement par chambre
-                TreeMap<String, List> resultatSorted = new TreeMap<>(); // groupement par chambre trié
+                HashMap<String, TreeMap> resultat = new HashMap<>(); // groupement par chambre
+                TreeMap<String, TreeMap> resultatSorted = new TreeMap<>(); // groupement par chambre trié
+                TreeMap<String, BigDecimal> totalVerticalParMois = new TreeMap<>();
+                for(int m = 0 ; m < moisAparcourir.size(); m++) {
+                    totalVerticalParMois.put(moisAparcourir.get(m), BigDecimal.ZERO);
+                }
                 
-                BigDecimal totalCAchbr = BigDecimal.ZERO;
+                BigDecimal totalCAchambre = BigDecimal.ZERO;
                 
                 LocalDate previousDateCA = null;
-                String previousChbr = null;
+                String previousDateCAformatted = null;
+                String previousChambre = null;
                 DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy");
                 
                 int moisIndex = 0;
@@ -3215,104 +3225,91 @@ public class ReportingDao {
 
                     VPmsCa pmsCa = listVPmsCa.get(i);
                     LocalDate dateCA = pmsCa.getDateCa();
-                    String chbr = pmsCa.getNumeroChambre();
+                    String chambre = pmsCa.getNumeroChambre();
 
                     if (i == 0) {
-                        previousChbr = chbr;
+                        previousChambre = chambre;
                         previousDateCA = dateCA;
                     }
 
-                    String previousDateCAformatted = previousDateCA.format(dateTimeFormatter);
+                    previousDateCAformatted = previousDateCA.format(dateTimeFormatter);
                     String dateCAformatted = dateCA.format(dateTimeFormatter);
                     boolean sameMonth = previousDateCAformatted.equals(dateCAformatted);
-                    boolean sameChbr = previousChbr.equals(chbr);
+                    boolean sameChambre = previousChambre.equals(chambre);
                     
-                    if (!resultat.containsKey(previousChbr)) {
-                        resultat.put(previousChbr, new ArrayList<BigDecimal>());
+                    if (!resultat.containsKey(previousChambre)) {
+                        TreeMap<String, BigDecimal> tmp = new TreeMap<>();
+                        for(int m = 0 ; m < moisAparcourir.size(); m++) {
+                            tmp.put(moisAparcourir.get(m), BigDecimal.ZERO);
+                        }
+                        resultat.put(previousChambre, tmp);
                     }
                     
                     if (sameMonth) {
-                        if (sameChbr) {
-                            totalCAchbr = totalCAchbr.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+                        if (sameChambre) {
+                            totalCAchambre = totalCAchambre.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
                         } else {
-                            List<BigDecimal> listeCAchbr = resultat.get(previousChbr);
-                            if (listeCAchbr.isEmpty()) {
-                                listeCAchbr.add(totalCAchbr);
-                            } else {
-                                BigDecimal lastCAchbr = listeCAchbr.get(moisIndex);
-                                listeCAchbr.set(moisIndex, lastCAchbr.add(totalCAchbr));
-                            }
-                            resultat.replace(previousChbr, listeCAchbr);
-                            previousChbr = chbr;
-                            totalCAchbr = BigDecimal.ZERO;
-                            totalCAchbr = totalCAchbr.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
-                            if (!resultat.containsKey(previousChbr)) {
-                                resultat.put(previousChbr, new ArrayList<BigDecimal>());
+                            TreeMap<String, BigDecimal> listeCAchambre = resultat.get(previousChambre);
+                            BigDecimal lastCAchambre = listeCAchambre.get(previousDateCAformatted);
+                            listeCAchambre.replace(previousDateCAformatted, lastCAchambre.add(totalCAchambre));
+                            resultat.replace(previousChambre, listeCAchambre);
+                            previousChambre = chambre;
+                            totalCAchambre = BigDecimal.ZERO;
+                            totalCAchambre = totalCAchambre.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+                            if (!resultat.containsKey(previousChambre)) {
+                                TreeMap<String, BigDecimal> tmp = new TreeMap<>();
+                                for(int m = 0 ; m < moisAparcourir.size(); m++) {
+                                    tmp.put(moisAparcourir.get(m), BigDecimal.ZERO);
+                                }
+                                resultat.put(previousChambre, tmp);
                             }
                         }
                     }
                     else {
-                        List<BigDecimal> listeCAchbr = resultat.get(previousChbr);
-                        BigDecimal lastCAchbr = listeCAchbr.get(moisIndex);
-                        listeCAchbr.set(moisIndex, lastCAchbr.add(totalCAchbr));
-                        resultat.replace(previousChbr, listeCAchbr);
-                        totalCAchbr = BigDecimal.ZERO;
-                        totalCAchbr = totalCAchbr.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
-                        previousChbr = chbr;
+                        TreeMap<String, BigDecimal> listeCAchambre = resultat.get(previousChambre);
+                        BigDecimal lastCAchambre = listeCAchambre.get(previousDateCAformatted);
+                        listeCAchambre.replace(previousDateCAformatted, lastCAchambre.add(totalCAchambre));
+                        resultat.replace(previousChambre, listeCAchambre);
+                        totalCAchambre = BigDecimal.ZERO;
+                        totalCAchambre = totalCAchambre.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+                        previousChambre = chambre;
                         previousDateCA = dateCA;
+                        previousDateCAformatted = previousDateCA.format(dateTimeFormatter);
                         moisIndex++;
-                        listeCAchbr.set(moisIndex, totalCAchbr);
+                        listeCAchambre = resultat.get(previousChambre);
+                        lastCAchambre = listeCAchambre.get(previousDateCAformatted);
+                        listeCAchambre.replace(previousDateCAformatted, lastCAchambre.add(totalCAchambre));
                     }
                     
                 }
-                List<BigDecimal> listeCAchbr = resultat.get(previousChbr);
-                if (listeCAchbr.isEmpty()) {
-                    listeCAchbr.add(totalCAchbr);
-                } else {
-                    BigDecimal lastCAchbr = listeCAchbr.get(moisIndex);
-                    listeCAchbr.set(moisIndex, lastCAchbr.add(totalCAchbr));
-                }
-                resultat.replace(previousChbr, listeCAchbr);
+                TreeMap<String, BigDecimal> listeCAchambre = resultat.get(previousChambre);
+                BigDecimal lastCAchambre = listeCAchambre.get(previousDateCAformatted);
+                listeCAchambre.replace(previousDateCAformatted, lastCAchambre.add(totalCAchambre));
+                resultat.replace(previousChambre, listeCAchambre);
+                
                 resultatSorted.putAll(resultat);
                 
-                for (Map.Entry<String, List> entry : resultatSorted.entrySet()) {
-                    String ligne = "<tr><td>" + entry.getKey() + "</td>";
-                    List<BigDecimal> listCAchbr = entry.getValue();
-                    for(int c = 0; c < listCAchbr.size(); c++) {
-                        ligne += "<td>" + listCAchbr.get(c).toString() + "</td>";
-                    }
-                    if (listCAchbr.size() < nbMois) {
-                        int colonnesManquants = nbMois - listCAchbr.size();
-                        for(int cm = 1; cm <= colonnesManquants; cm++) {
-                            ligne += "<td></td>";
-                        }
+                for (Map.Entry<String, TreeMap> entry : resultatSorted.entrySet()) {
+                    String ligne = "<tr><td class=\"text-center\">" + entry.getKey() + "</td>";
+                    TreeMap<String, BigDecimal> listCAchambre = entry.getValue();
+                    for (Map.Entry<String, BigDecimal> entri : listCAchambre.entrySet()) {
+                        ligne += "<td class=\"text-center\">" + entri.getValue().toString() + "</td>";
+                        totalVerticalParMois.replace(entri.getKey(), totalVerticalParMois.get(entri.getKey()).add(entri.getValue()));
                     }
                     if (nbMois > 1) {
-                        BigDecimal totalLigne = Util.sumValuesListOfBigDecimals(listCAchbr);
-                        ligne += "<td>" + totalLigne.toString() + "</td>";
+                        BigDecimal totalLigne = Util.sumValuesListOfBigDecimals(listCAchambre);
+                        ligne += "<td class=\"text-center\">" + totalLigne.toString() + "</td>";
                         totals = totals.add(totalLigne);
                     }
                     ligne += "</tr>";
                     body += ligne;
                 }
                 
-                for(int m = 0; m <= moisIndex; m++) {
-                    BigDecimal total = BigDecimal.ZERO;
-                    for (Map.Entry<String, List> entry : resultatSorted.entrySet()) {
-                        List<BigDecimal> CAs = entry.getValue();
-                        total = total.add(CAs.get(m));
-                    }
-                    footer += "<td style=\"padding-top: 8px;padding-right: 8px;padding-bottom: 8px;padding-left: 8px;\">"+total.toString()+"</td>";
+                for(int mois = 0; mois < moisAparcourir.size(); mois++) {
+                    footer += "<td style=\"padding-top: 8px;padding-right: 8px;padding-bottom: 8px;padding-left: 8px;\" class=\"text-center\">"+totalVerticalParMois.get(moisAparcourir.get(mois)).toString()+"</td>";
                 }
-                if (moisIndex < nbMois && nbMois > 1) {
-                    int colonnesManquants = nbMois - moisIndex;
-                    for(int cm = 1; cm <= colonnesManquants; cm++) {
-                        if (cm == colonnesManquants) {
-                            footer += "<td style=\"padding-top: 8px;padding-right: 8px;padding-bottom: 8px;padding-left: 8px;\">" + totals.toString() + "</td>";
-                        } else {
-                            footer += "<td></td>";
-                        }
-                    }
+                if (nbMois > 1) {
+                    footer += "<td style=\"padding-top: 8px;padding-right: 8px;padding-bottom: 8px;padding-left: 8px;\" class=\"text-center\">" + totals.toString() + "</td>";
                 }
                 footer += "</tr></tfoot>";
             }
