@@ -56,6 +56,9 @@ public class VPmsCa implements Serializable {
    @Column(name = "numero_chambre")
    private String numeroChambre;
    
+   @Column(name = "nationalite")
+   private String nationalite;
+   
    public VPmsCa() {
 
    }

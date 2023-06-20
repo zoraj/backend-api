@@ -5,7 +5,9 @@ import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.naming.Context;
@@ -89,10 +91,10 @@ public class Util {
         return result;
    }
     
-    public static BigDecimal sumValuesListOfBigDecimals(List<BigDecimal> liste) {
+    public static BigDecimal sumValuesListOfBigDecimals(TreeMap<String, BigDecimal> liste) {
         BigDecimal ret = BigDecimal.ZERO;
-        for(int i=0; i<liste.size(); i++) {
-            ret = ret.add(liste.get(i));
+        for (Map.Entry<String, BigDecimal> entry : liste.entrySet()) {
+            ret = ret.add(entry.getValue());
         }
         return ret;
     }
