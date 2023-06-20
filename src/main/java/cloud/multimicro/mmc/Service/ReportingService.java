@@ -852,5 +852,23 @@ public class ReportingService {
             throw new NotFoundException();
         }
     }
+
+    @GET
+    @Path("/pms/ca_par_typeclient")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEditionStatistiqueCAparTypeclient(@Context UriInfo info) {
+        try {
+            String dateStart = info.getQueryParameters().getFirst("dateStart");
+            String dateEnd = info.getQueryParameters().getFirst("dateEnd");
+            String locale = info.getQueryParameters().getFirst("locale");
+            JsonObject ret = reportingDao.getEditionStatistiqueCAparTypeclient(dateStart, dateEnd, Locale.forLanguageTag(locale));
+            if (ret.isEmpty()) {
+                throw new NotFoundException();
+            }
+            return Response.ok(ret, MediaType.APPLICATION_JSON).build();
+        } catch (ParseException ex) {
+            throw new NotFoundException();
+        }
+    }
     
 }
