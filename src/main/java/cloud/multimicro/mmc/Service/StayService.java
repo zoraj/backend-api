@@ -13,8 +13,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
+
 import cloud.multimicro.mmc.Dao.SettingDao;
 import cloud.multimicro.mmc.Dao.StayDao;
 import cloud.multimicro.mmc.Entity.TMmcParametrage;
@@ -22,6 +22,7 @@ import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
 
 import javax.ws.rs.PUT;
+
 import org.jboss.logging.Logger;
 import cloud.multimicro.mmc.Entity.TPmsSejour;
 import cloud.multimicro.mmc.Entity.TPmsSejourTarif;
@@ -43,8 +44,11 @@ public class StayService {
     @GET
     @Path("/")  
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAll() {
-        List<TPmsSejour> stay = stayDao.getAll();
+    public Response getAll(@Context UriInfo info) {
+        MultivaluedMap<String, String> parameters = info.getQueryParameters();
+        String name = parameters.getFirst("name");
+
+        List<TPmsSejour> stay = stayDao.getAll(name);
         if (stay.isEmpty()) {
             throw new NotFoundException();
         }

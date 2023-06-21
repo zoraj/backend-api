@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.ejb.Stateless;
 import javax.json.JsonObject;
@@ -50,9 +51,13 @@ public class StayDao {
     // TPmsSejour
     
     // SEASON
-    public List<TPmsSejour> getAll() {
-        List<TPmsSejour> pmsSaisonList = entityManager.createQuery("FROM TPmsSejour s WHERE s.dateDeletion is null ").getResultList();
-        return pmsSaisonList;
+    public List<TPmsSejour> getAll(String name) {
+        if(!Objects.isNull(name)) {
+            return entityManager.createQuery("FROM TPmsSejour s WHERE nom LIKE '%" + name + "%' AND s.dateDeletion is null ").getResultList();
+        }
+        else {
+            return entityManager.createQuery("FROM TPmsSejour s WHERE s.dateDeletion is null ").getResultList();
+        }
     }
 
     public TPmsSejour getStayById(int id) {
