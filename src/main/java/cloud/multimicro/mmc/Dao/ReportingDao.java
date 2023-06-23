@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -3324,6 +3325,97 @@ public class ReportingDao {
                 .add("body", body)
                 .add("footer", footer)
                 .build();
+        return results;
+    }
+    
+    public JsonObject getEditionStatistiqueCArestauration(String dateBegin, String dateEnd) {
+        
+        StringBuilder sql = new StringBuilder();
+        sql.append("select m.client,");
+        sql.append("sum(m.ca_midi) as ca_midi, sum(m.cvrt_midi) as cvt_midi, case when sum(m.cvrt_midi) = 0 then 0 else sum(m.ca_midi) / sum(m.cvrt_midi) end as pm_midi,");
+        sql.append("sum(s.ca_soir) as ca_soir, sum(s.cvrt_soir) as cvt_soir, case when sum(s.cvrt_soir) = 0 then 0 else sum(s.ca_soir) / sum(s.cvrt_soir) end as pm_soir,");
+        sql.append("sum(m.ca_midi) + sum(s.ca_soir) as ca_total, sum(m.cvrt_midi) + sum(s.cvrt_soir) as cvt_total,");
+        sql.append("case when sum(m.cvrt_midi) + sum(s.cvrt_soir) = 0 then 0 else ( sum(m.ca_midi) + sum(s.ca_soir) ) / ( sum(m.cvrt_midi) + sum(s.cvrt_soir) ) end as pm_total ");
+        sql.append("from (select client, sum(montant_ca) as ca_midi, nb_couvert as cvrt_midi, date_ca");
+        sql.append("	  from v_pos_ca where service = 'M'");
+        sql.append("	  group by note_ent_id");
+        sql.append("	) as m ");
+        sql.append("join");
+        sql.append("	(select client, sum(montant_ca) as ca_soir, nb_couvert as cvrt_soir, date_ca");
+        sql.append("	 from v_pos_ca where service = 'S'");
+        sql.append("	 group by note_ent_id");
+        sql.append("	) as s ");
+        sql.append("on m.client = s.client and m.date_ca = s.date_ca ");
+        
+        String body = "<tbody>";
+        boolean vide = true;
+        List<Double> CAmidiList = new ArrayList<>();
+        List<Double> PMmidiList = new ArrayList<>();
+        List<Double> CAsoirList = new ArrayList<>();
+        List<Double> PMsoirList = new ArrayList<>();
+        List<Double> CAtotalList = new ArrayList<>();
+        List<Double> PMtotalList = new ArrayList<>();
+        List<Integer> CvrMidiList = new ArrayList<>();
+        List<Integer> CvrSoirList = new ArrayList<>();
+        List<Integer> CvrTotalList = new ArrayList<>();
+        
+        if (!dateBegin.equals("") && !dateEnd.equals("")) {
+            
+            sql.append("where ( m.date_ca >= '" + dateBegin + "' and m.date_ca <= '" + dateEnd + "' ) ");
+            sql.append("group by m.client");
+            List<Object[]> tmpliste = entityManager.createNativeQuery(sql.toString()).getResultList();
+            if (!tmpliste.isEmpty()) {
+                vide = false;
+                LinkedList<Object[]> liste = new LinkedList();
+                liste.addAll(tmpliste);
+                for(int i = 0 ; i < liste.size() ; i++) {
+                    Object[] posCa = liste.get(i);
+                    body += "<tr>"+
+                            "<td class=\"text-left\">"+posCa[0]+"</td>"+
+                            "<td class=\"c_ca_midi text-right\">"+posCa[1]+"</td>"+
+                            "<td class=\"c_cvt_midi text-right\">"+posCa[2]+"</td>"+
+                            "<td class=\"c_pm_midi text-right\">"+posCa[3]+"</td>"+
+                            "<td class=\"c_ca_soir text-right\">"+posCa[4]+"</td>"+
+                            "<td class=\"c_cvt_soir text-right\">"+posCa[5]+"</td>"+
+                            "<td class=\"c_pm_soir text-right\">"+posCa[6]+"</td>"+
+                            "<td class=\"c_ca_total text-right\">"+posCa[7]+"</td>"+
+                            "<td class=\"c_cvt_total text-right\">"+posCa[8]+"</td>"+
+                            "<td class=\"c_pm_total text-right\">"+posCa[9]+"</td>"+
+                            "</tr>";
+                    CAmidiList.add(Double.parseDouble(posCa[1].toString()));
+                    CvrMidiList.add(Integer.parseInt(posCa[2].toString()));
+                    PMmidiList.add(Double.parseDouble(posCa[3].toString()));
+                    CAsoirList.add(Double.parseDouble(posCa[4].toString()));
+                    CvrSoirList.add(Integer.parseInt(posCa[5].toString()));
+                    PMsoirList.add(Double.parseDouble(posCa[6].toString()));
+                    CAtotalList.add(Double.parseDouble(posCa[7].toString()));
+                    CvrTotalList.add(Integer.parseInt(posCa[8].toString()));
+                    PMtotalList.add(Double.parseDouble(posCa[9].toString()));
+                }
+            }
+        }
+        body += "</tbody>";
+        String footer = "";
+        if (!vide) {
+            footer += "<tfoot>";
+            footer += "<tr>"+
+                    "<td class=\"text-right\" style=\"border: none;\">Total :</td>"+
+                    "<td id=\"total_general_ca_midi\" class=\"text-right\">"+Util.sumValuesListOfDoubles(CAmidiList)+"</td>"+
+                    "<td id=\"total_general_ca_midi\" class=\"text-right\">"+Util.sumValuesListOfInts(CvrMidiList)+"</td>"+
+                    "<td id=\"total_general_ca_midi\" class=\"text-right\">"+Util.sumValuesListOfDoubles(PMmidiList)+"</td>"+
+                    "<td id=\"total_general_ca_midi\" class=\"text-right\">"+Util.sumValuesListOfDoubles(CAsoirList)+"</td>"+
+                    "<td id=\"total_general_ca_midi\" class=\"text-right\">"+Util.sumValuesListOfInts(CvrSoirList)+"</td>"+
+                    "<td id=\"total_general_ca_midi\" class=\"text-right\">"+Util.sumValuesListOfDoubles(PMsoirList)+"</td>"+
+                    "<td id=\"total_general_ca_midi\" class=\"text-right\">"+Util.sumValuesListOfDoubles(CAtotalList)+"</td>"+
+                    "<td id=\"total_general_ca_midi\" class=\"text-right\">"+Util.sumValuesListOfInts(CvrTotalList)+"</td>"+
+                    "<td id=\"total_general_ca_midi\" class=\"text-right\">"+Util.sumValuesListOfDoubles(PMtotalList)+"</td>"+
+                    "</tr>";
+            footer += "</tfoot>";
+        }
+        JsonObject results = Json.createObjectBuilder()
+                                    .add("body", body)
+                                    .add("footer", footer)
+                                    .build();
         return results;
     }
 

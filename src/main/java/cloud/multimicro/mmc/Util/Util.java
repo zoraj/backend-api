@@ -97,4 +97,20 @@ public class Util {
         return ret;
     }
     
+    public static Double sumValuesListOfDoubles(List<Double> liste) {
+        double ret = 0.0;
+        for (double data : liste) {
+            ret += data;
+        }
+        return ret;
+    }
+    
+    public static int sumValuesListOfInts(List<Integer> liste) {
+        int ret = 0;
+        for (int data : liste) {
+            ret += data;
+        }
+        return ret;
+    }
+    
 }
