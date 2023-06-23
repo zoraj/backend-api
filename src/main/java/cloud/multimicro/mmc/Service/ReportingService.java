@@ -853,4 +853,17 @@ public class ReportingService {
         }
     }
     
+    @GET
+    @Path("/pms/report-statistique-analyse-restauration")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEditionStatistiqueCAparRestauration(@Context UriInfo info) {
+        String dateStart = info.getQueryParameters().getFirst("dateStart");
+        String dateEnd = info.getQueryParameters().getFirst("dateEnd");
+        JsonObject ret = reportingDao.getEditionStatistiqueCArestauration(dateStart, dateEnd);
+        if (ret.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(ret, MediaType.APPLICATION_JSON).build();
+    }
+    
 }
