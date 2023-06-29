@@ -853,4 +853,18 @@ public class ReportingService {
         }
     }
     
+    @GET
+    @Path("/pms/report-statistique-facture-resa")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEditionStatistiqueFactureResa(@Context UriInfo info) {
+        String dateStart = info.getQueryParameters().getFirst("dateStart");
+        String dateEnd = info.getQueryParameters().getFirst("dateEnd");
+        String numeroresa = info.getQueryParameters().getFirst("numeroresa");
+        JsonObject ret = reportingDao.getEditionStatistiqueFactureResa(dateStart, dateEnd, numeroresa);
+        if (ret.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(ret, MediaType.APPLICATION_JSON).build();
+    }
+    
 }
