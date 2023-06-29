@@ -3326,5 +3326,86 @@ public class ReportingDao {
                 .build();
         return results;
     }
+    
+    public JsonObject getEditionStatistiqueFactureResa(String dateStart, String dateEnd, String numresa) {
+        StringBuilder hql = new StringBuilder();
+        hql.append("from VPmsCa where 1 = 1");
+        String body = "";
+        boolean nodata = true;
+        BigDecimal total_ca_brut = BigDecimal.ZERO;
+        BigDecimal total_ca_net = BigDecimal.ZERO;
+        if (!dateStart.equals("") && !dateEnd.equals("") && !numresa.equals("")) {
+            List<BigDecimal> CAbruts = new ArrayList<>();
+            List<BigDecimal> CAnets = new ArrayList<>();
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            String previousDateCAformatted = null;
+            String previousChbr = null;
+            String previousClient = null;
+            hql.append(" and dateCa >= '" + dateStart + "' and dateCa <= '" + dateEnd + "'");
+            hql.append(" and numresa = :numresa");
+            hql.append(" order by dateCa, numeroChambre, client, prestation");
+            List<VPmsCa> listVPmsCa = entityManager.createQuery(hql.toString())
+                                        .setParameter("numresa", numresa)
+                                        .getResultList();
+            if (!listVPmsCa.isEmpty()) {
+                nodata = false;
+                boolean firstDisplayFor3Columns = true;
+                for(int i = 0 ; i < listVPmsCa.size() ; i++) {
+                    VPmsCa pmsCa = listVPmsCa.get(i);
+                    LocalDate dateCA = pmsCa.getDateCa();
+                    String chbr = pmsCa.getNumeroChambre();
+                    String client = pmsCa.getClient();
+                    if (i == 0) {
+                        previousDateCAformatted = dateCA.format(dateTimeFormatter);
+                        previousChbr = chbr;
+                        previousClient = client;
+                    }
+                    String dateCAformatted = dateCA.format(dateTimeFormatter);
+                    boolean same3columns = ( previousDateCAformatted.equals(dateCAformatted) && previousChbr.equals(chbr) && previousClient.equals(client) );
+                    if (same3columns) {
+                        if (firstDisplayFor3Columns) {
+                            firstDisplayFor3Columns = false;
+                            body += "<tr>";
+                            body += "<td class=\"text-center\">"+dateCAformatted+"</td><td class=\"text-center\">"+chbr+"</td><td>"+client+"</td><td>"+pmsCa.getPrestation()+"</td><td class=\"text-center\">"+pmsCa.getQte()+"</td><td class=\"text-right\">"+pmsCa.getMontantCa()+"</td><td class=\"text-right\">"+pmsCa.getMontantCaNet()+"</td>";
+                            body += "</tr>";
+                        }
+                        else {
+                            body += "<tr>";
+                            body += "<td colspan=\"3\"></td><td>"+pmsCa.getPrestation()+"</td><td class=\"text-center\">"+pmsCa.getQte()+"</td><td class=\"text-right\">"+pmsCa.getMontantCa()+"</td><td class=\"text-right\">"+pmsCa.getMontantCaNet()+"</td>";
+                            body += "</tr>";
+                        }
+                    }
+                    else {
+                        previousDateCAformatted = dateCA.format(dateTimeFormatter);
+                        previousChbr = chbr;
+                        previousClient = client;
+                        body += "<tr>";
+                        body += "<td class=\"text-center\">"+dateCAformatted+"</td><td class=\"text-center\">"+chbr+"</td><td>"+client+"</td><td>"+pmsCa.getPrestation()+"</td><td class=\"text-center\">"+pmsCa.getQte()+"</td><td class=\"text-right\">"+pmsCa.getMontantCa()+"</td><td class=\"text-right\">"+pmsCa.getMontantCaNet()+"</td>";
+                        body += "</tr>";
+                        firstDisplayFor3Columns = false;
+                    }
+                    CAbruts.add(pmsCa.getMontantCa());
+                    CAnets.add(pmsCa.getMontantCaNet());
+                }
+                if (!CAbruts.isEmpty()) {
+                    for (int i = 0 ; i < CAbruts.size() ; i++) {
+                        total_ca_brut = total_ca_brut.add(CAbruts.get(i));
+                    }
+                    for (int i = 0 ; i < CAnets.size() ; i++) {
+                        total_ca_net = total_ca_net.add(CAnets.get(i));
+                    }
+                }
+            }
+        }
+        
+        JsonObject results = Json.createObjectBuilder()
+                .add("nodata", nodata)
+                .add("body", body)
+                .add("total_ca_brut", total_ca_brut.toString())
+                .add("total_ca_net", total_ca_net.toString())
+                .build();
+        
+        return results;
+    }
 
 }

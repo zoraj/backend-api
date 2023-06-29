@@ -41,6 +41,9 @@ public class VPmsCa implements Serializable {
    @Column(name = "montant_ca")
    private BigDecimal montantCa;
    
+   @Column(name = "montant_ca_net")
+   private BigDecimal montantCaNet;
+   
    @Column(name = "id_sous_famille")
    private Integer idSousFamille;
     
@@ -55,6 +58,18 @@ public class VPmsCa implements Serializable {
    
    @Column(name = "numero_chambre")
    private String numeroChambre;
+   
+   @Column(name = "numresa")
+   private String numresa;
+   
+   @Column(name = "client")
+   private String client;
+   
+   @Column(name = "prestation")
+   private String prestation;
+   
+   @Column(name = "qte")
+   private Integer qte;
    
    public VPmsCa() {
 
