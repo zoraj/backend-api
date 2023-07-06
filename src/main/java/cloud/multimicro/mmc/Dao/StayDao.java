@@ -64,6 +64,11 @@ public class StayDao {
         TPmsSejour pmsSejour = entityManager.find(TPmsSejour.class, id);
         return pmsSejour;
     }
+    
+    public List<TPmsSejour> getCheckingPlanning(String arrival) {
+        List<TPmsSejour> result = entityManager.createQuery("FROM TPmsSejour WHERE (dateArrivee >= '" + arrival + "' OR dateArrivee < '" + arrival + "') AND dateDepart >= '" + arrival + "' AND pmsReservationId IS null AND dateDeletion IS null ").getResultList();
+        return result;
+    }
 
     public void add(TPmsSejour pmsSejour) throws CustomConstraintViolationException {
         try {

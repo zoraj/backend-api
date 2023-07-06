@@ -66,6 +66,19 @@ public class StayService {
         return Response.ok(stay, MediaType.APPLICATION_JSON).build();   
     }
     
+    @GET
+    @Path("/planning")  
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCheckingPlanning(@Context UriInfo info) {
+        MultivaluedMap<String, String> parameters = info.getQueryParameters();
+        String arrival = parameters.getFirst("dateArrivee");
+        List<TPmsSejour> checking = stayDao.getCheckingPlanning(arrival);
+        if (checking.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(checking, MediaType.APPLICATION_JSON).build();       
+    }
+    
     @Path("/")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
