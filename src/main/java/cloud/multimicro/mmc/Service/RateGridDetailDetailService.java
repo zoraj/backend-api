@@ -7,6 +7,7 @@ package cloud.multimicro.mmc.Service;
 
 import cloud.multimicro.mmc.Dao.RateGridDetailDetailDao;
 import cloud.multimicro.mmc.Entity.TPmsTarifGrilleDetailDetail;
+import cloud.multimicro.mmc.Entity.VPmsTarifGrilleDetailDetail;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -116,5 +117,16 @@ public class RateGridDetailDetailService {
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
+    }
+    
+    @GET
+    @Path("/{dateTarif}/{mmcClientId}/{tarifGrilleId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllTarifGrilleDetailDetail(@PathParam("dateTarif") String dateTarif, @PathParam("mmcClientId") int mmcClientId, @PathParam("tarifGrilleId") int tarifGrilleId) {
+        List<VPmsTarifGrilleDetailDetail> value = rateGridDetailDetailDao.getAllTarifGrilleDetailDetail(dateTarif, mmcClientId, tarifGrilleId);
+        if (value.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(value, MediaType.APPLICATION_JSON).build();
     }
 }

@@ -7,6 +7,7 @@ package cloud.multimicro.mmc.Dao;
 
 import cloud.multimicro.mmc.Entity.TPmsPrestation;
 import cloud.multimicro.mmc.Entity.TPmsTarifGrilleDetailDetail;
+import cloud.multimicro.mmc.Entity.VPmsTarifGrilleDetailDetail;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -160,5 +161,13 @@ public class RateGridDetailDetailDao {
                         "DELETE FROM t_pms_tarif_grille_detail "
                                 + "WHERE date_tarif >= '" + dateStart + "' AND date_tarif <= '" + dateFin + "' "
                                 + "AND pms_model_tarif_id = '" + modelTarifId + "' AND base = '" + base + "'").executeUpdate();
+    }
+    
+    public List<VPmsTarifGrilleDetailDetail> getAllTarifGrilleDetailDetail(String dateTarif, Integer mmcClientId, Integer tarifGrilleId) {
+        List<VPmsTarifGrilleDetailDetail> result = entityManager
+                .createQuery("FROM VPmsTarifGrilleDetailDetail "
+                            + "WHERE dateTarif = '" + dateTarif + "' AND mmcClientId = '"+mmcClientId+"' AND "
+                            + "pmsTarifGrilleId = '" + tarifGrilleId + "'").getResultList();
+        return result;
     }
 }
