@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -3326,5 +3327,183 @@ public class ReportingDao {
                 .build();
         return results;
     }
+    
+    public JsonObject getStatistiqueCaByFamily(String dateBegin, String dateEnd, Locale locale) throws ParseException {
+	
+	LinkedList<String> moisAparcourir = new LinkedList<>();
+	String entete = "<thead><tr role=\"row\">";
+	int nbMois = 0;
+	if (!dateBegin.equals("") && !dateEnd.equals("")) {
+		entete += "<th class=\"text-center\">FAMILLE C.A</th>";
+		DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd", locale);
+		Date dateFrom = df1.parse(dateBegin);
+		Date dateTo = df1.parse(dateEnd);
+		DateFormat df2 = new SimpleDateFormat("MMM yyyy", locale);
+		Calendar calendar = Calendar.getInstance(locale);
+		calendar.setTime(dateFrom);
+		String previousMonthYear = df1.format(calendar.getTime());
+		String[] tab = previousMonthYear.split("-");
+		previousMonthYear = tab[1].concat("-").concat(tab[0]); // MM-yyyy
+		moisAparcourir.add(previousMonthYear);
+		String enteteMois = df2.format(calendar.getTime());
+		enteteMois = enteteMois.substring(0, 1).toUpperCase() + enteteMois.substring(1).toLowerCase();
+		entete = entete.concat("<th class=\"text-center\">" + enteteMois + "</th>");
+		nbMois++;
+		while ((calendar.getTime()).compareTo(dateTo) < 0) {
+			calendar.add(Calendar.DATE, 1);
+			String encoursMonthYear = df1.format(calendar.getTime());
+			String[] tabs = encoursMonthYear.split("-");
+			encoursMonthYear = tabs[1].concat("-").concat(tabs[0]); // MM-yyyy
+			if (!previousMonthYear.equals(encoursMonthYear)) {
+				enteteMois = df2.format(calendar.getTime());
+				enteteMois = enteteMois.substring(0, 1).toUpperCase() + enteteMois.substring(1).toLowerCase();
+				entete = entete.concat("<th class=\"text-center\">" + enteteMois + "</th>");
+				previousMonthYear = encoursMonthYear;
+				moisAparcourir.add(previousMonthYear);
+				nbMois++;
+			}
+		}
+	}
+	if (nbMois > 1) {
+		entete = entete.concat("<th class=\"text-center\">Total</th></tr></thead>");
+	} else {
+		entete = entete.concat("</tr></thead>");
+	}
+	
+	// construction liste enregistrements
+	BigDecimal totals = BigDecimal.ZERO;
+	String body = "<tbody>";
+	String footer = "";
+	StringBuilder hql = new StringBuilder();
+	hql.append("from VPmsCa where 1 = 1");
+	
+	if (!dateBegin.equals("") && !dateEnd.equals("")) {
+		
+		hql.append(" and dateCa >= '" + dateBegin + "' and dateCa <= '" + dateEnd + "'");
+		hql.append(" order by dateCa, idFamille");
+		List<VPmsCa> listVPmsCa = entityManager.createQuery(hql.toString()).getResultList();
+		
+		if (!listVPmsCa.isEmpty()) {
+			
+			footer = "<tfoot><tr><td  style=\"font-weight: bold; text-align: right;\">Total :</td>";
+			
+			HashMap<String, TreeMap> resultat = new HashMap<>(); // groupement par nationalite
+			TreeMap<String, TreeMap> resultatSorted = new TreeMap<>(); // groupement par nationalite trié
+			TreeMap<String, BigDecimal> totalVerticalParMois = new TreeMap<>();
+			for(int m = 0 ; m < moisAparcourir.size(); m++) {
+				totalVerticalParMois.put(moisAparcourir.get(m), BigDecimal.ZERO);
+			}
+			
+			BigDecimal totalCAFamille = BigDecimal.ZERO;
+			
+			LocalDate previousDateCA = null;
+			String previousDateCAformatted = null;
+			String previousFamille = null;
+			DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy");
+			
+			int moisIndex = 0;
+
+			for (int i = 0; i < listVPmsCa.size(); i++) {
+
+				VPmsCa pmsCa = listVPmsCa.get(i);
+				LocalDate dateCA = pmsCa.getDateCa();
+				String famille = pmsCa.getLibelleFamille();
+
+				if (i == 0) {
+					previousFamille = famille;
+					previousDateCA = dateCA;
+				}
+
+				previousDateCAformatted = previousDateCA.format(dateTimeFormatter);
+				String dateCAformatted = dateCA.format(dateTimeFormatter);
+				boolean sameMonth = previousDateCAformatted.equals(dateCAformatted);
+				boolean sameFamille = previousFamille.equals(famille);
+				
+				if (!resultat.containsKey(previousFamille)) {
+					TreeMap<String, BigDecimal> tmp = new TreeMap<>();
+					for(int m = 0 ; m < moisAparcourir.size(); m++) {
+						tmp.put(moisAparcourir.get(m), BigDecimal.ZERO);
+					}
+					resultat.put(previousFamille, tmp);
+				}
+				
+				if (sameMonth) {
+					if (sameFamille) {
+						totalCAFamille = totalCAFamille.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+					} else {
+						TreeMap<String, BigDecimal> listeCAFamille = resultat.get(previousFamille);
+						BigDecimal lastCAFamille = listeCAFamille.get(previousDateCAformatted);
+						listeCAFamille.replace(previousDateCAformatted, lastCAFamille.add(totalCAFamille));
+						resultat.replace(previousFamille, listeCAFamille);
+						previousFamille = famille;
+						totalCAFamille = BigDecimal.ZERO;
+						totalCAFamille = totalCAFamille.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+						if (!resultat.containsKey(previousFamille)) {
+							TreeMap<String, BigDecimal> tmp = new TreeMap<>();
+							for(int m = 0 ; m < moisAparcourir.size(); m++) {
+								tmp.put(moisAparcourir.get(m), BigDecimal.ZERO);
+							}
+							resultat.put(previousFamille, tmp);
+						}
+					}
+				}
+				else {
+					TreeMap<String, BigDecimal> listeCAFamille = resultat.get(previousFamille);
+					BigDecimal lastCAFamille = listeCAFamille.get(previousDateCAformatted);
+					listeCAFamille.replace(previousDateCAformatted, lastCAFamille.add(totalCAFamille));
+					resultat.replace(previousFamille, listeCAFamille);
+					totalCAFamille = BigDecimal.ZERO;
+					totalCAFamille = totalCAFamille.add(pmsCa.getMontantCa() == null ? BigDecimal.ZERO : pmsCa.getMontantCa());
+					previousFamille = famille;
+					previousDateCA = dateCA;
+					previousDateCAformatted = previousDateCA.format(dateTimeFormatter);
+					moisIndex++;
+					listeCAFamille = resultat.get(previousFamille);
+					lastCAFamille = listeCAFamille.get(previousDateCAformatted);
+					listeCAFamille.replace(previousDateCAformatted, lastCAFamille.add(totalCAFamille));
+				}
+				
+			}
+			TreeMap<String, BigDecimal> listeCAFamille = resultat.get(previousFamille);
+			BigDecimal lastCAFamille = listeCAFamille.get(previousDateCAformatted);
+			listeCAFamille.replace(previousDateCAformatted, lastCAFamille.add(totalCAFamille));
+			resultat.replace(previousFamille, listeCAFamille);
+			
+			resultatSorted.putAll(resultat);
+			
+			for (Map.Entry<String, TreeMap> entry : resultatSorted.entrySet()) {
+				String ligne = "<tr><td class=\"text-center\">" + entry.getKey() + "</td>";
+				TreeMap<String, BigDecimal> listCAnationalite = entry.getValue();
+				for (Map.Entry<String, BigDecimal> entri : listCAnationalite.entrySet()) {
+					ligne += "<td class=\"text-center\">" + entri.getValue().toString() + "</td>";
+					totalVerticalParMois.replace(entri.getKey(), totalVerticalParMois.get(entri.getKey()).add(entri.getValue()));
+				}
+				if (nbMois > 1) {
+					BigDecimal totalLigne = Util.sumValuesListOfBigDecimal(listCAnationalite);
+					ligne += "<td class=\"text-center\">" + totalLigne.toString() + "</td>";
+					totals = totals.add(totalLigne);
+				}
+				ligne += "</tr>";
+				body += ligne;
+			}
+			
+			for(int mois = 0; mois < moisAparcourir.size(); mois++) {
+				footer += "<td style=\"padding-top: 8px;padding-right: 8px;padding-bottom: 8px;padding-left: 8px;\" class=\"text-center\">"+totalVerticalParMois.get(moisAparcourir.get(mois)).toString()+"</td>";
+			}
+			if (nbMois > 1) {
+				footer += "<td style=\"padding-top: 8px;padding-right: 8px;padding-bottom: 8px;padding-left: 8px;\" class=\"text-center\">" + totals.toString() + "</td>";
+			}
+			footer += "</tr></tfoot>";
+		}
+	}
+	body += "</tbody>";
+
+	JsonObject results = Json.createObjectBuilder()
+			.add("header", entete)
+			.add("body", body)
+			.add("footer", footer)
+			.build();
+	return results;
+}
 
 }
