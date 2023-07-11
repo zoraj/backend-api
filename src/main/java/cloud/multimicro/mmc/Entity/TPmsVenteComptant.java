@@ -7,7 +7,9 @@ package cloud.multimicro.mmc.Entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
+import javax.json.bind.annotation.JsonbDateFormat;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,6 +42,10 @@ public class TPmsVenteComptant implements Serializable {
     @Size(min = 1, max = 100)
     @NotNull @NotBlank @Column(name = "nom_note")
     private String nomNote;
+    
+    @Column(name = "date_note")
+    @JsonbDateFormat("yyyy-MM-dd")
+    private LocalDate dateNote;
     
     @NotNull @Column(name = "mmc_segment_client_id")
     private Integer mmcSegmentClientId;
