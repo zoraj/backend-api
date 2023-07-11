@@ -14,6 +14,7 @@ import cloud.multimicro.mmc.Entity.TPosPrestation;
 import cloud.multimicro.mmc.Entity.TPosPrestationGroupe;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import cloud.multimicro.mmc.Exception.DataException;
+import java.text.ParseException;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -116,12 +117,14 @@ public class CashSaleService {
         return Response.ok(cashSaleDetail, MediaType.APPLICATION_JSON).build();
     }
     
-    @Path("/detail")
+    @Path("/{pmsVenteComptantId}")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addCashSaleDetail(TPmsVenteComptantDetail cashSaleDetail) {
+    public Response addCashSaleDetail(List<TPmsVenteComptantDetail> cashSaleDetail, @PathParam("pmsVenteComptantId") int pmsVenteComptantId) throws DataException, ParseException  {
         try {
-            cashSaleDao.setCashSalesDetail(cashSaleDetail);
+            for(int i = 0; i < cashSaleDetail.size(); i++){
+                cashSaleDao.setCashSalesDetail(cashSaleDetail.get(i), pmsVenteComptantId);
+            }
             return Response.status(Response.Status.CREATED).entity(cashSaleDetail).build();
         } catch (CustomConstraintViolationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
