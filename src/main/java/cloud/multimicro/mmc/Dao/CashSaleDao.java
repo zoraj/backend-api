@@ -93,8 +93,9 @@ public class CashSaleDao {
         return cashSalesDetail;
     }
     
-    public void setCashSalesDetail(TPmsVenteComptantDetail cashSalesDetail) throws CustomConstraintViolationException {
+    public void setCashSalesDetail(TPmsVenteComptantDetail cashSalesDetail, Integer pmsVenteComptantId) throws CustomConstraintViolationException {
         try {
+            cashSalesDetail.setPmsVenteComptantId(pmsVenteComptantId);
             cashSalesDetail.setDevise(settingDao.getSettingByKey("DEFAULT_CURRENCY").getValeur());
             cashSalesDetail.setTva(getMmcTvaFromPmsPrestationId(cashSalesDetail.getPmsPrestationId()).getValeur());
             entityManager.persist(cashSalesDetail);
