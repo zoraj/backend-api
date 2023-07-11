@@ -16,6 +16,7 @@ import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -54,9 +55,12 @@ public class CashSaleDao {
     }
 
     public void setCashSales(TPmsVenteComptant cashSales) throws CustomConstraintViolationException{
-         try {
-        entityManager.persist(cashSales);
-         } catch (ConstraintViolationException ex) {
+        String dateLogicielle = settingDao.getSettingByKey("DATE_LOGICIELLE").getValeur();
+        LocalDate dateLog = LocalDate.parse(dateLogicielle);
+        try {
+            cashSales.setDateNote(dateLog);
+            entityManager.persist(cashSales);
+        } catch (ConstraintViolationException ex) {
             throw new CustomConstraintViolationException(ex);
         }
     }
