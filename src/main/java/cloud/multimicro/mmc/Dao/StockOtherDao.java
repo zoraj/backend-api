@@ -5,6 +5,7 @@
  */
 package cloud.multimicro.mmc.Dao;
 
+import cloud.multimicro.mmc.Entity.TPmsReservationStockAutre;
 import cloud.multimicro.mmc.Entity.TPmsStockAutre;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
 import java.util.List;
@@ -54,6 +55,42 @@ public class StockOtherDao {
         entityManager.createNativeQuery("UPDATE t_pms_stock_autre SET date_deletion = CURRENT_TIMESTAMP WHERE id=:id")              
              .setParameter("id", id)               
              .executeUpdate();
+    }
+    
+    public List<TPmsReservationStockAutre> getAllResaStockOther() {
+        List<TPmsReservationStockAutre> stockResa = entityManager.createQuery("FROM TPmsReservationStockAutre WHERE dateDeletion = null").getResultList();
+        return stockResa;
+    }
+    
+    public List<TPmsReservationStockAutre> getResaStockOtherByIdReservation(int idReservation) {
+        List<TPmsReservationStockAutre> stockResa = entityManager.createQuery("FROM TPmsReservationStockAutre WHERE pmsReservationId =:idReservation")
+                .setParameter("idReservation", idReservation) 
+                .getResultList();
+        return stockResa;
+    }
+    
+    public void setResaStockOther(TPmsReservationStockAutre stockResa) throws CustomConstraintViolationException {
+        try {
+            entityManager.persist(stockResa);
+        } catch (ConstraintViolationException ex) {
+            throw new CustomConstraintViolationException(ex);
+        }
+    }
+    
+    public TPmsReservationStockAutre updateResaStockOther(TPmsReservationStockAutre stockResa) throws CustomConstraintViolationException {
+        try {
+            return entityManager.merge(stockResa);
+        } catch (ConstraintViolationException ex) {
+            throw new CustomConstraintViolationException(ex);
+        }
+    }
+    
+    public void deleteResaStockOther(int idReservation, int idStockAutre) {
+        entityManager.createNativeQuery("UPDATE t_pms_reservation_stock_autre SET date_deletion = CURRENT_TIMESTAMP "
+                + "WHERE pms_reservation_id=:idReservation AND pms_stock_autre_id=:idStockAutre")              
+            .setParameter("idReservation", idReservation)
+            .setParameter("idStockAutre", idStockAutre)
+            .executeUpdate();
     }
     
 }

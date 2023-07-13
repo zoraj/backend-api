@@ -8,6 +8,7 @@ package cloud.multimicro.mmc.Service;
 import cloud.multimicro.mmc.Dao.PlanningDao;
 import cloud.multimicro.mmc.Dao.RoomDao;
 import cloud.multimicro.mmc.Entity.VPmsEditionPlanningMensuelChambre;
+import cloud.multimicro.mmc.Entity.VPmsEditionPlanningMensuelStockAutre;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -40,6 +41,19 @@ public class PlanningService {
     public Response getAllPlanningRoomMonth(@Context UriInfo info) {
         String dateDebut = info.getQueryParameters().getFirst("dateStart");
         List<VPmsEditionPlanningMensuelChambre>  planningMonth = palnningDao.getAllPlanningRoomMonth(dateDebut);
+        if (planningMonth.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(planningMonth, MediaType.APPLICATION_JSON).build();
+    }
+    
+    //Planning mensuel stock autre
+    @GET
+    @Path("/planning-mensuel-stock-autre")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllPlanningStockAutreMonth(@Context UriInfo info) {
+        String dateDebut = info.getQueryParameters().getFirst("dateStart");
+        List<VPmsEditionPlanningMensuelStockAutre>  planningMonth = palnningDao.getAllPlanningStockAutreMonth(dateDebut);
         if (planningMonth.isEmpty()) {
             throw new NotFoundException();
         }
