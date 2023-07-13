@@ -6,9 +6,12 @@
 package cloud.multimicro.mmc.Service;
 
 import cloud.multimicro.mmc.Dao.StockOtherDao;
+import cloud.multimicro.mmc.Entity.TPmsReservationStockAutre;
 import cloud.multimicro.mmc.Entity.TPmsStockAutre;
 import cloud.multimicro.mmc.Entity.TPosPrestation;
 import cloud.multimicro.mmc.Exception.CustomConstraintViolationException;
+import cloud.multimicro.mmc.Exception.DataException;
+import java.text.ParseException;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -90,6 +93,66 @@ public class StockOtherService {
         try {
             stockOtherDaoDao.deleteStockOther(id);
            return Response.ok(id, MediaType.APPLICATION_JSON).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }   
+    }
+    
+    @GET
+    @Path("/reservation")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllResaStockOther() {
+        List<TPmsReservationStockAutre> stockResa = stockOtherDaoDao.getAllResaStockOther();
+        if (stockResa.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(stockResa, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
+    @Path("/reservation/{idReservation}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getResaStockOtherByIdReservation(@PathParam("idReservation") int idReservation) {
+        List<TPmsReservationStockAutre> stockResa = stockOtherDaoDao.getResaStockOtherByIdReservation(idReservation);
+        if (stockResa == null) {
+            throw new NotFoundException();
+        }
+        return Response.ok(stockResa, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @Path("/reservation")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response setResaStockOther(List<TPmsReservationStockAutre> stockResa) throws DataException, ParseException  {
+        try {
+            for(int i = 0; i < stockResa.size(); i++){
+                stockOtherDaoDao.setResaStockOther(stockResa.get(i));
+            }
+            return Response.status(Response.Status.CREATED).entity(stockResa).build();
+        } catch (CustomConstraintViolationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+    
+    @Path("/reservation")
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateResaStockOther(TPmsReservationStockAutre stockResa) {
+        try {
+            stockOtherDaoDao.updateResaStockOther(stockResa);
+            return Response.status(Response.Status.OK).entity(stockResa).build();
+        } catch (CustomConstraintViolationException ex) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+        }
+    }
+    
+    @Path("/reservation/{idReservation}/{idStockAutre}")
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteResaStockOther(@PathParam("idReservation") Integer idReservation, @PathParam("idStockAutre") Integer idStockAutre) {
+        try {
+            stockOtherDaoDao.deleteResaStockOther(idReservation, idStockAutre);
+           return Response.ok(idReservation, MediaType.APPLICATION_JSON).build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }   

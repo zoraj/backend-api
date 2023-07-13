@@ -6,6 +6,7 @@
 package cloud.multimicro.mmc.Dao;
 
 import cloud.multimicro.mmc.Entity.VPmsEditionPlanningMensuelChambre;
+import cloud.multimicro.mmc.Entity.VPmsEditionPlanningMensuelStockAutre;
 import java.time.LocalDate;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -34,5 +35,11 @@ public class PlanningDao {
                 .getResultList();
         
         return  planningRoom;
+    }
+    
+    public List<VPmsEditionPlanningMensuelStockAutre> getAllPlanningStockAutreMonth(String dateDebut) {    
+        List<VPmsEditionPlanningMensuelStockAutre> planningStock = entityManager.createQuery("FROM VPmsEditionPlanningMensuelStockAutre ")
+                .getResultList();
+        return  planningStock;
     }
 }
