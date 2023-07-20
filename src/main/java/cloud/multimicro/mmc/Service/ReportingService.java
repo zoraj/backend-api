@@ -58,6 +58,7 @@ import cloud.multimicro.mmc.Entity.VPosEditionNoteSoldeJour;
 import cloud.multimicro.mmc.Entity.VPosEditionPrestationVendue;
 import cloud.multimicro.mmc.Entity.VPosEditionVisualisationModeEncaissement;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -285,19 +286,33 @@ public class ReportingService {
     @GET
     @Path("/pms/report-etat-debit")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllEtatDebit() {
-        List<VPmsEditionEtatDebit> etatDebit = reportingDao.getAllEtatDebit();
-        if (etatDebit.isEmpty()) {
+    public Response getAllEtatDebit(@Context UriInfo info) {
+        LocalDate dateReference = LocalDate.parse(info.getQueryParameters().getFirst("dateReference"));
+        JsonArray listCaEtatdebit = reportingDao.getAllEtatDebit(dateReference);
+        if (listCaEtatdebit.isEmpty()) {
             throw new NotFoundException();
         }
-        return Response.ok(etatDebit, MediaType.APPLICATION_JSON).build();
+        return Response.ok(listCaEtatdebit, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
+    @Path("/pms/report-etat-debit-recep")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllEditionClosure(@Context UriInfo info) {
+        LocalDate dateReference = LocalDate.parse(info.getQueryParameters().getFirst("dateReference"));
+        JsonObject caList = reportingDao.getEtatDebitReception(dateReference);
+        if (caList.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return Response.ok(caList, MediaType.APPLICATION_JSON).build();
     }
 
     @GET
     @Path("/pms/report-etat-debit-room")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllEtatDebitRoom() {
-        List<VPmsEditionEtatDebitChambre> etatDebitChbr = reportingDao.getAllEtatDebitRoom();
+    public Response getAllEtatDebitRoom(@Context UriInfo info) {
+        LocalDate dateReference = LocalDate.parse(info.getQueryParameters().getFirst("dateReference"));
+        JsonObject etatDebitChbr = reportingDao.getAllEtatDebitRoom(dateReference);
         if (etatDebitChbr.isEmpty()) {
             throw new NotFoundException();
         }

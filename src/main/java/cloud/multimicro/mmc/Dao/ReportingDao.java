@@ -76,6 +76,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -93,6 +94,8 @@ public class ReportingDao {
 
     @PersistenceContext
     EntityManager entityManager;
+    @Inject
+    TurnoverDao turnoverDao;
     private static final Logger LOGGER = Logger.getLogger(ReportingDao.class);
 
     public JsonArray getEditionPrestationVendue(String dateStart, String dateEnd) {
@@ -683,15 +686,234 @@ public class ReportingDao {
         return soldeNote;
     }
 
-    public List<VPmsEditionEtatDebit> getAllEtatDebit() {
-        List<VPmsEditionEtatDebit> etatDebit = entityManager.createQuery("FROM VPmsEditionEtatDebit").getResultList();
-        return etatDebit;
+    public JsonArray getAllEtatDebit(LocalDate dateReference) {  
+        var dateMonthEntry = "";
+        var dateYearEntry = "";
+        List<VPosCa> listCa = entityManager
+                .createQuery("FROM VPosCa WHERE dateCa =:dateReference ORDER BY posActiviteId ")
+                .setParameter("dateReference", dateReference).getResultList();
+        String dateEntry = dateReference.toString();
+        dateMonthEntry = dateEntry.substring(0, 7);
+        dateYearEntry = dateEntry.substring(0, 4);
+        var caResults = Json.createArrayBuilder();
+
+        if (listCa.size() > 0) {
+            VPosCa valueListCa = listCa.get(0);
+            Integer idActiviteInitial = valueListCa.getPosActiviteId();
+            var libelleActivite = "";
+            var caMidiDay           = new BigDecimal("0");
+            var caMidiMonth         = new BigDecimal("0");
+            var caMidiYear          = new BigDecimal("0");
+            var caSoirDay           = new BigDecimal("0");
+            var caSoirMonth         = new BigDecimal("0");
+            var caSoirYear          = new BigDecimal("0");
+            var caDay               = new BigDecimal("0");
+            var caMonth             = new BigDecimal("0");
+            var caYear              = new BigDecimal("0");
+            var nbCouvertMidiDay    = new BigDecimal("0");
+            var nbCouvertMidiMonth  = new BigDecimal("0");
+            var nbCouvertMidiYear   = new BigDecimal("0");
+            var nbCouvertSoirDay    = new BigDecimal("0");
+            var nbCouvertSoirMonth  = new BigDecimal("0");
+            var nbCouvertSoirYear   = new BigDecimal("0");
+            var nbCouvertDay        = new BigDecimal("0");
+            var nbCouvertMonth      = new BigDecimal("0");
+            var nbCouvertYear       = new BigDecimal("0");
+
+            for (VPosCa caList : listCa) {
+                if (idActiviteInitial.equals(caList.getPosActiviteId())) {
+                    libelleActivite             = caList.getLibelleActivite();
+                    caMidiDay                   = turnoverDao.sumCaDayByActivityMidi(idActiviteInitial, dateReference);
+                    caMidiMonth                 = turnoverDao.sumCaMonthByActivityMidi(idActiviteInitial, dateReference, dateMonthEntry);
+                    caMidiYear                  = turnoverDao.sumCaYearByActivityMidi(idActiviteInitial, dateReference, dateYearEntry);
+                    caSoirDay                   = turnoverDao.sumCaDayByActivitySoir(idActiviteInitial, dateReference);
+                    caSoirMonth                 = turnoverDao.sumCaMonthByActivitySoir(idActiviteInitial, dateReference, dateMonthEntry);
+                    caSoirYear                  = turnoverDao.sumCaYearByActivitySoir(idActiviteInitial, dateReference, dateYearEntry);
+                    caDay                       = turnoverDao.sumCaDayByActivity(idActiviteInitial, dateReference);
+                    caMonth                     = turnoverDao.sumCaMonthByActivity(idActiviteInitial, dateReference, dateMonthEntry);
+                    caYear                      = turnoverDao.sumCaYearByActivity(idActiviteInitial, dateReference, dateYearEntry);
+                    nbCouvertMidiDay            = turnoverDao.totalNbCouvertDayByActivityMidi(idActiviteInitial, dateReference);
+                    nbCouvertMidiMonth          = turnoverDao.totalNbCouvertMonthByActivityMidi(idActiviteInitial, dateReference, dateMonthEntry);
+                    nbCouvertMidiYear           = turnoverDao.totalNbCouvertYearByActivityMidi(idActiviteInitial, dateReference, dateYearEntry);
+                    nbCouvertSoirDay            = turnoverDao.totalNbCouvertDayByActivitySoir(idActiviteInitial, dateReference);
+                    nbCouvertSoirMonth          = turnoverDao.totalNbCouvertMonthByActivitySoir(idActiviteInitial, dateReference, dateMonthEntry);
+                    nbCouvertSoirYear           = turnoverDao.totalNbCouvertYearByActivitySoir(idActiviteInitial, dateReference, dateYearEntry);
+                    nbCouvertDay                = turnoverDao.totalNbCouvertDayByActivity(idActiviteInitial, dateReference);
+                    nbCouvertMonth              = turnoverDao.totalNbCouvertMonthByActivity(idActiviteInitial, dateReference, dateMonthEntry);
+                    nbCouvertYear               = turnoverDao.totalNbCouvertYearByActivity(idActiviteInitial, dateReference, dateYearEntry);
+                    
+                    
+                }else {                    
+                    var object = Json.createObjectBuilder()
+                            .add("libelleActivite", libelleActivite)
+                            .add("caMidiDay", caMidiDay)
+                            .add("caMidiMonth", caMidiMonth)
+                            .add("caMidiYear", caMidiYear)
+                            .add("caSoirDay", caSoirDay)
+                            .add("caSoirMonth", caSoirMonth)
+                            .add("caSoirYear", caSoirYear)
+                            .add("caDay", caDay)
+                            .add("caMonth", caMonth)
+                            .add("caYear", caYear)
+                            .add("nbCouvertMidiDay", nbCouvertMidiDay)
+                            .add("nbCouvertMidiMonth", nbCouvertMidiMonth)
+                            .add("nbCouvertMidiYear", nbCouvertMidiYear)
+                            .add("nbCouvertSoirDay", nbCouvertSoirDay)
+                            .add("nbCouvertSoirMonth", nbCouvertSoirMonth)
+                            .add("nbCouvertSoirYear", nbCouvertSoirYear)
+                            .add("nbCouvertDay", nbCouvertDay)
+                            .add("nbCouvertMonth", nbCouvertMonth)
+                            .add("nbCouvertYear", nbCouvertYear).build();
+                    
+                    caResults.add(object);
+                    
+                    libelleActivite             = caList.getLibelleActivite();
+                    caMidiDay                   = turnoverDao.sumCaDayByActivityMidi(idActiviteInitial, dateReference);
+                    caMidiMonth                 = turnoverDao.sumCaMonthByActivityMidi(idActiviteInitial, dateReference, dateMonthEntry);
+                    caMidiYear                  = turnoverDao.sumCaYearByActivityMidi(idActiviteInitial, dateReference, dateYearEntry);
+                    caSoirDay                   = turnoverDao.sumCaDayByActivitySoir(idActiviteInitial, dateReference);
+                    caSoirMonth                 = turnoverDao.sumCaMonthByActivitySoir(idActiviteInitial, dateReference, dateMonthEntry);
+                    caSoirYear                  = turnoverDao.sumCaYearByActivitySoir(idActiviteInitial, dateReference, dateYearEntry);
+                    caDay                       = turnoverDao.sumCaDayByActivity(idActiviteInitial, dateReference);
+                    caMonth                     = turnoverDao.sumCaMonthByActivity(idActiviteInitial, dateReference, dateMonthEntry);
+                    caYear                      = turnoverDao.sumCaYearByActivity(idActiviteInitial, dateReference, dateYearEntry);
+                    nbCouvertMidiDay            = turnoverDao.totalNbCouvertDayByActivityMidi(idActiviteInitial, dateReference);
+                    nbCouvertMidiMonth          = turnoverDao.totalNbCouvertMonthByActivityMidi(idActiviteInitial, dateReference, dateMonthEntry);
+                    nbCouvertMidiYear           = turnoverDao.totalNbCouvertYearByActivityMidi(idActiviteInitial, dateReference, dateYearEntry);
+                    nbCouvertSoirDay            = turnoverDao.totalNbCouvertDayByActivitySoir(idActiviteInitial, dateReference);
+                    nbCouvertSoirMonth          = turnoverDao.totalNbCouvertMonthByActivitySoir(idActiviteInitial, dateReference, dateMonthEntry);
+                    nbCouvertSoirYear           = turnoverDao.totalNbCouvertYearByActivitySoir(idActiviteInitial, dateReference, dateYearEntry);
+                    nbCouvertDay                = turnoverDao.totalNbCouvertDayByActivity(idActiviteInitial, dateReference);
+                    nbCouvertMonth              = turnoverDao.totalNbCouvertMonthByActivity(idActiviteInitial, dateReference, dateMonthEntry);
+                    nbCouvertYear               = turnoverDao.totalNbCouvertYearByActivity(idActiviteInitial, dateReference, dateYearEntry);
+                    
+                    idActiviteInitial = caList.getPosActiviteId();
+                }  
+            } 
+
+            var object = Json.createObjectBuilder()
+                            .add("libelleActivite", libelleActivite)
+                            .add("caMidiDay", caMidiDay)
+                            .add("caMidiMonth", caMidiMonth)
+                            .add("caMidiYear", caMidiYear)
+                            .add("caSoirDay", caSoirDay)
+                            .add("caSoirMonth", caSoirMonth)
+                            .add("caSoirYear", caSoirYear)
+                            .add("caDay", caDay)
+                            .add("caMonth", caMonth)
+                            .add("caYear", caYear)
+                            .add("nbCouvertMidiDay", nbCouvertMidiDay)
+                            .add("nbCouvertMidiMonth", nbCouvertMidiMonth)
+                            .add("nbCouvertMidiYear", nbCouvertMidiYear)
+                            .add("nbCouvertSoirDay", nbCouvertSoirDay)
+                            .add("nbCouvertSoirMonth", nbCouvertSoirMonth)
+                            .add("nbCouvertSoirYear", nbCouvertSoirYear)
+                            .add("nbCouvertDay", nbCouvertDay)
+                            .add("nbCouvertMonth", nbCouvertMonth)
+                            .add("nbCouvertYear", nbCouvertYear).build();
+            
+            caResults.add(object);
+        }
+        return caResults.build();
+    }
+    
+    public JsonObject getEtatDebitReception(LocalDate dateReference) {  
+        var dateMonthEntry = "";
+        var dateYearEntry = "";
+        List<VPmsCa> listCa = entityManager
+                .createQuery("FROM VPmsCa WHERE dateCa =:dateReference ")
+                .setParameter("dateReference", dateReference).getResultList();
+        String dateEntry = dateReference.toString();
+        dateMonthEntry = dateEntry.substring(0, 7);
+        dateYearEntry = dateEntry.substring(0, 4);
+        var caPdjObject = Json.createObjectBuilder().build();
+        if (listCa.size() > 0) {
+            var caDayPdj = turnoverDao.sumCaDayPdj(dateReference);
+            var caMonthPdj = turnoverDao.sumCaMonthPdj(dateReference, dateMonthEntry);
+            var caYearPdj = turnoverDao.sumCaYearPdj(dateReference, dateYearEntry);
+
+            caPdjObject = Json.createObjectBuilder()
+                    .add("caDayPdj", caDayPdj)
+                    .add("caMonthPdj", caMonthPdj)
+                    .add("caYearPdj", caYearPdj).build();
+        }
+        return caPdjObject;
+    }
+    
+    //NOMBRE CHAMBRE LOUABLE
+    public BigInteger nbrRoomDayLouable(LocalDate dateReference) {
+        return (BigInteger) entityManager.createNativeQuery("SELECT COUNT(*) FROM v_pms_chambre_louable "
+                + "WHERE Date(date_debut) >:dateReference OR (Date(date_debut) <:dateReference AND Date(date_fin) <:dateReference) "
+                + "OR (date_debut is NULL AND date_fin is NULL)")
+                .setParameter("dateReference", dateReference).getSingleResult();       
+    }
+    
+    public BigInteger nbrRoomMonthLouable(LocalDate dateReference, String dateMois) {
+        return (BigInteger) entityManager.createNativeQuery("SELECT COUNT(*) FROM v_pms_chambre_louable "
+                + "WHERE Date(date_debut) >:dateReference AND date_debut_mois =:dateMois "
+                + "OR (date_debut is NULL AND date_fin is NULL)")
+                .setParameter("dateReference", dateReference)
+                .setParameter("dateMois", dateMois).getSingleResult();       
+    }
+    
+    public BigInteger nbrRoomYearLouable(LocalDate dateReference, String dateAnnee) {
+        return (BigInteger) entityManager.createNativeQuery("SELECT COUNT(*) FROM v_pms_chambre_louable "
+                + "WHERE Date(date_debut) >:dateReference AND date_debut_annee =:dateAnnee "
+                + "OR (date_debut is NULL AND date_fin is NULL)")
+                .setParameter("dateReference", dateReference)
+                .setParameter("dateAnnee", dateAnnee).getSingleResult();       
+    }
+    
+    //NOMBRE CHAMBRE VENDUES
+    public BigInteger nbrRoomDaySolde(LocalDate dateReference) {
+        return (BigInteger) entityManager.createNativeQuery("SELECT COUNT(pms_chambre_id) FROM t_pms_sejour "
+                + "WHERE Date(date_arrivee) <=:dateReference AND Date(date_depart) >=:dateReference ")
+                .setParameter("dateReference", dateReference).getSingleResult();       
+    }
+    
+    public BigInteger nbrRoomMonthSolde(LocalDate dateReference, String dateMois) {
+        return (BigInteger) entityManager.createNativeQuery("SELECT COUNT(pms_chambre_id) FROM t_pms_sejour "
+                + "WHERE Date(date_arrivee) <=:dateReference AND date_arrivee_mois =:dateMois ")
+                .setParameter("dateReference", dateReference)
+                .setParameter("dateMois", dateMois).getSingleResult();       
+    }
+    
+    public BigInteger nbrRoomYearSolde(LocalDate dateReference, String dateAnnee) {
+        return (BigInteger) entityManager.createNativeQuery("SELECT COUNT(pms_chambre_id) FROM t_pms_sejour "
+                + "WHERE Date(date_arrivee) <=:dateReference AND date_arrivee_annee =:dateAnnee ")
+                .setParameter("dateReference", dateReference)
+                .setParameter("dateAnnee", dateAnnee).getSingleResult();       
     }
 
-    public List<VPmsEditionEtatDebitChambre> getAllEtatDebitRoom() {
-        List<VPmsEditionEtatDebitChambre> etatDebitChbr = entityManager.createQuery("FROM VPmsEditionEtatDebitChambre")
-                .getResultList();
-        return etatDebitChbr;
+    public JsonObject getAllEtatDebitRoom(LocalDate dateReference) {
+        var dateMonthEntry = "";
+        var dateYearEntry = "";
+        String dateEntry = dateReference.toString();
+        dateMonthEntry = dateEntry.substring(0, 7);
+        dateYearEntry = dateEntry.substring(0, 4);
+
+        var nbrRoomLouableDay = nbrRoomDayLouable(dateReference);
+        var nbrRoomLouableMonth = nbrRoomMonthLouable(dateReference, dateMonthEntry);
+        var nbrRoomLouableYear = nbrRoomYearLouable(dateReference, dateYearEntry);
+        var caHebergementDay = turnoverDao.sumCaDayChb(dateReference);
+        var caHebergementMonth = turnoverDao.sumCaMonthChb(dateReference, dateMonthEntry);
+        var caHebergementYear = turnoverDao.sumCaYearChb(dateReference, dateYearEntry);
+        var nbrRoomSoldeDay = nbrRoomDaySolde(dateReference);
+        var nbrRoomSoldeMonth = nbrRoomMonthSolde(dateReference, dateMonthEntry);
+        var nbrRoomSoldeYear = nbrRoomYearSolde(dateReference, dateYearEntry);
+
+        var etatRoomObject = Json.createObjectBuilder()
+                .add("nbrRoomLouableDay", nbrRoomLouableDay)
+                .add("nbrRoomLouableMonth", nbrRoomLouableMonth)
+                .add("nbrRoomLouableYear", nbrRoomLouableYear)
+                .add("caHebergementDay", caHebergementDay)
+                .add("caHebergementMonth", caHebergementMonth)
+                .add("caHebergementYear", caHebergementYear)
+                .add("nbrRoomSoldeDay", nbrRoomSoldeDay)
+                .add("nbrRoomSoldeMonth", nbrRoomSoldeMonth)
+                .add("nbrRoomSoldeYear", nbrRoomSoldeYear).build();
+
+        return etatRoomObject;
     }
 
     public List<VPmsEditionEtatControl> getAllEtatControl() {
