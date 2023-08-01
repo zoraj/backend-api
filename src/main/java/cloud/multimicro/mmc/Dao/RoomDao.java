@@ -600,4 +600,31 @@ public class RoomDao {
                 .build();
         return resultJson;
     }
+    
+     public BigInteger countChambreClean() {
+        return (BigInteger) entityManager
+                .createNativeQuery("SELECT COUNT(*) FROM t_pms_chambre WHERE etat_chambre = 'CLEAN' ")
+                .getSingleResult();
+    }
+    
+    public BigInteger countChambreDirty() {
+        return (BigInteger) entityManager
+                .createNativeQuery("SELECT COUNT(*) FROM t_pms_chambre WHERE etat_chambre = 'DIRTY' ")
+                .getSingleResult();
+    }
+    
+    public BigInteger countChambreBusy() {
+        return (BigInteger) entityManager
+                .createNativeQuery("SELECT COUNT(*) FROM t_pms_chambre WHERE etat_chambre = 'BUSY' ")
+                .getSingleResult();
+    }
+    
+    public JsonObject getRoomsConditions() {       
+        JsonObject resultJson = Json.createObjectBuilder()
+                .add("clean", countChambreClean())
+                .add("busy", countChambreBusy())
+                .add("dirty", countChambreDirty())
+                .build();
+        return resultJson;
+    }
 }
