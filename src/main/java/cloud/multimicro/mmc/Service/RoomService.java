@@ -485,5 +485,19 @@ public class RoomService {
         }
         return Response.ok(roomTypesByRateModel, MediaType.APPLICATION_JSON).build();
     }
+    
+
+    @GET
+    @Path("/roomsConditions")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRoomsConditions(@Context UriInfo info) {
+        JsonObject roomsConditions = roomDao.getRoomsConditions();
+        if (roomsConditions == null) {
+            throw new NotFoundException();
+        }
+        return Response.ok(roomsConditions, MediaType.APPLICATION_JSON).build();
+    }
+    
+    
 
 }

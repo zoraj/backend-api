@@ -21,7 +21,10 @@ import cloud.multimicro.mmc.Entity.VPosDashboard;
 import cloud.multimicro.mmc.Entity.VPosDashboardCaDetail;
 import cloud.multimicro.mmc.Entity.VPosDashboardGrapheCaMensuel;
 import cloud.multimicro.mmc.Entity.VStatistiqueDashboard;
+import java.time.LocalDate;
 import javassist.NotFoundException;
+import javax.json.JsonObject;
+import javax.ws.rs.PathParam;
 
 /**
  *
@@ -165,5 +168,17 @@ public class DashboardService {
         }
         return Response.ok(dashboard, MediaType.APPLICATION_JSON).build();
     }
+    
+    @GET
+    @Path("/pms/arrivals/{dateLogiciel}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getNbArriveeReservation( @PathParam("dateLogiciel")String  dateLogiciel) {
+        //LocalDate dateLogiciel;
+        JsonObject dashboard = dashboardDao.getNbArriveeReservation(dateLogiciel);
+        return Response.ok(dashboard, MediaType.APPLICATION_JSON).build();
+    }
+    
+   
+    
 
 }

@@ -16,6 +16,10 @@ import cloud.multimicro.mmc.Entity.VPosDashboard;
 import cloud.multimicro.mmc.Entity.VPosDashboardCaDetail;
 import cloud.multimicro.mmc.Entity.VPosDashboardGrapheCaMensuel;
 import cloud.multimicro.mmc.Entity.VStatistiqueDashboard;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import javax.json.Json;
+import javax.json.JsonObject;
 
 @Stateless
 @SuppressWarnings("unchecked")
@@ -89,5 +93,18 @@ public class DashboardDao {
         List<VCollectiviteDashboardGrapheCaMensuel> dashboardList = entityManager
                 .createQuery("FROM VCollectiviteDashboardGrapheCaMensuel").getResultList();
         return dashboardList;
+    }
+    
+    public BigInteger countNbArriveeReservation(String dateLogiciel) {
+        return (BigInteger) entityManager
+                .createNativeQuery("SELECT COUNT(*) FROM t_pms_reservation WHERE date_arrivee >= :dateLogiciel AND day(date_arrivee) = day(:dateLogiciel) AND MONTH(date_arrivee) = MONTH(:dateLogiciel) AND YEAR(date_arrivee) = YEAR(:dateLogiciel)  ")
+                .setParameter("dateLogiciel", dateLogiciel).getSingleResult();
+    }
+    
+    public JsonObject getNbArriveeReservation(String dateLogiciel) {       
+        JsonObject resultJson = Json.createObjectBuilder()
+                .add("JOUR", countNbArriveeReservation(dateLogiciel))
+                .build();
+        return resultJson;
     }
 }
