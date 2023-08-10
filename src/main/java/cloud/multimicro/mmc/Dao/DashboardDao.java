@@ -1,5 +1,6 @@
 package cloud.multimicro.mmc.Dao;
 
+import cloud.multimicro.mmc.Entity.TMmcParametrage;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -12,10 +13,13 @@ import cloud.multimicro.mmc.Entity.VPmsDashboard;
 import cloud.multimicro.mmc.Entity.VPmsDashboardCaDetail;
 import cloud.multimicro.mmc.Entity.VPmsDashboardGrapheCaMensuel;
 import cloud.multimicro.mmc.Entity.VPmsDashboardGrapheNombreArrivee;
+import cloud.multimicro.mmc.Entity.VPmsDashboardMonth;
+import cloud.multimicro.mmc.Entity.VPmsDashboardYear;
 import cloud.multimicro.mmc.Entity.VPosDashboard;
 import cloud.multimicro.mmc.Entity.VPosDashboardCaDetail;
 import cloud.multimicro.mmc.Entity.VPosDashboardGrapheCaMensuel;
 import cloud.multimicro.mmc.Entity.VStatistiqueDashboard;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import javax.json.Json;
@@ -107,4 +111,66 @@ public class DashboardDao {
                 .build();
         return resultJson;
     }
+    
+    // GET DASHBOARD MONTH
+    public VPmsDashboardMonth getDashBoardMonth() {
+        VPmsDashboardMonth dashboardMonth = (VPmsDashboardMonth) entityManager.createQuery("FROM VPmsDashboardMonth").getSingleResult();
+        return dashboardMonth;
+    }
+    // GET DASHBOARD YEAR
+    public VPmsDashboardYear getDashBoardYear() {
+        VPmsDashboardYear dashboardYear = (VPmsDashboardYear) entityManager.createQuery("FROM VPmsDashboardYear").getSingleResult();
+        return dashboardYear;
+    }
+    
+    
+    
+    public BigDecimal caJour(String dateLogiciel) {
+        return (BigDecimal) entityManager
+                .createNativeQuery("SELECT IFNULL(SUM(qte*pu),0) FROM t_pms_note_detail where date_note = :dateLogiciel")
+                .setParameter("dateLogiciel", dateLogiciel).getSingleResult();
+    }
+    
+    public JsonObject getCaJour(String dateLogiciel) {       
+        JsonObject resultJson = Json.createObjectBuilder()
+                .add("JOUR", caJour(dateLogiciel))
+                .build();
+        return resultJson;
+    }
+    
+    public BigDecimal caAnnee(String dateLogiciel) {
+        return (BigDecimal) entityManager
+                .createNativeQuery("SELECT IFNULL(SUM(qte*pu),0) FROM t_pms_note_detail where  YEAR(date_note) = YEAR(:dateLogiciel)")
+                .setParameter("dateLogiciel", dateLogiciel).getSingleResult();
+    }
+    
+    public JsonObject getcaAnnee(String dateLogiciel) {       
+        JsonObject resultJson = Json.createObjectBuilder()
+                .add("annee", caAnnee(dateLogiciel))
+                .build();
+        return resultJson;
+    }
+    
+    public BigInteger countNbArriveeReservationAnnuel(String dateLogiciel) {
+        return (BigInteger) entityManager
+                .createNativeQuery("SELECT COUNT(*) FROM t_pms_reservation WHERE YEAR(date_arrivee) = YEAR(:dateLogiciel)  ")
+                .setParameter("dateLogiciel", dateLogiciel).getSingleResult();
+    }
+    //t_pms_sejour
+    public BigInteger countNbArriveeSejourAnnuel(String dateLogiciel) {
+        return (BigInteger) entityManager
+                .createNativeQuery("SELECT COUNT(*) FROM t_pms_sejour WHERE YEAR(date_arrivee) = YEAR(:dateLogiciel) AND pms_reservation_id is NULL  ")
+                .setParameter("dateLogiciel", dateLogiciel).getSingleResult();
+    }
+    
+    public JsonObject getNbArriveeReservationAnnuel(String dateLogiciel) {
+        BigInteger sum;
+        sum = countNbArriveeReservationAnnuel(dateLogiciel).add(countNbArriveeSejourAnnuel(dateLogiciel));
+        JsonObject resultJson = Json.createObjectBuilder()
+                .add("annee", sum)
+                .build();
+        return resultJson;
+    }
+    
+    
 }

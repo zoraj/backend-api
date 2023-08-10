@@ -17,6 +17,8 @@ import cloud.multimicro.mmc.Entity.VPmsDashboard;
 import cloud.multimicro.mmc.Entity.VPmsDashboardCaDetail;
 import cloud.multimicro.mmc.Entity.VPmsDashboardGrapheCaMensuel;
 import cloud.multimicro.mmc.Entity.VPmsDashboardGrapheNombreArrivee;
+import cloud.multimicro.mmc.Entity.VPmsDashboardMonth;
+import cloud.multimicro.mmc.Entity.VPmsDashboardYear;
 import cloud.multimicro.mmc.Entity.VPosDashboard;
 import cloud.multimicro.mmc.Entity.VPosDashboardCaDetail;
 import cloud.multimicro.mmc.Entity.VPosDashboardGrapheCaMensuel;
@@ -178,7 +180,62 @@ public class DashboardService {
         return Response.ok(dashboard, MediaType.APPLICATION_JSON).build();
     }
     
-   
+        // GET
+    @GET
+    @Path("/pms/month")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDashBoardMonth() throws NotFoundException {
+        VPmsDashboardMonth dashboard = dashboardDao.getDashBoardMonth();
+        if (dashboard == null) {
+            throw new NotFoundException(null);
+            // return Response.status(Response.Status.NOT_FOUND).entity("Object not
+            // found.").build();
+        }
+        return Response.ok(dashboard, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
+    @Path("/pms/year")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDashBoardYear() throws NotFoundException {
+        VPmsDashboardYear dashboard = dashboardDao.getDashBoardYear();
+        if (dashboard == null) {
+            throw new NotFoundException(null);
+            // return Response.status(Response.Status.NOT_FOUND).entity("Object not
+            // found.").build();
+        }
+        return Response.ok(dashboard, MediaType.APPLICATION_JSON).build();
+    }
+    
+
+    
+    @GET
+    @Path("/pms/caJour/{dateLogiciel}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCaJour( @PathParam("dateLogiciel")String  dateLogiciel) {
+        //LocalDate dateLogiciel;
+        JsonObject dashboard = dashboardDao.getCaJour(dateLogiciel);
+        return Response.ok(dashboard, MediaType.APPLICATION_JSON).build();
+    }//getcaAnnee
+    
+    @GET
+    @Path("/pms/caAnnee/{dateLogiciel}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getcaAnnee( @PathParam("dateLogiciel")String  dateLogiciel) {
+        //LocalDate dateLogiciel;
+        JsonObject dashboard = dashboardDao.getcaAnnee(dateLogiciel);
+        return Response.ok(dashboard, MediaType.APPLICATION_JSON).build();
+    }
+    
+    
+   @GET
+    @Path("/pms/arrivals-year/{dateLogiciel}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getNbArriveeReservationAnnuel( @PathParam("dateLogiciel")String  dateLogiciel) {
+        //LocalDate dateLogiciel;
+        JsonObject dashboard = dashboardDao.getNbArriveeReservationAnnuel(dateLogiciel);
+        return Response.ok(dashboard, MediaType.APPLICATION_JSON).build();
+    }
     
 
 }
