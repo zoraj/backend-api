@@ -8,10 +8,12 @@ package cloud.multimicro.mmc.Service;
 import cloud.multimicro.mmc.Dao.PlanningDao;
 import cloud.multimicro.mmc.Dao.RoomDao;
 import cloud.multimicro.mmc.Entity.VPmsEditionPlanningMensuelChambre;
+import java.time.LocalDate;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
@@ -44,6 +46,18 @@ public class PlanningService {
             throw new NotFoundException();
         }
         return Response.ok(planningMonth, MediaType.APPLICATION_JSON).build();
+    }
+    
+    @GET
+    @Path("/nbArriveeDepart")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getNbArriveeAndDepart(@Context UriInfo info) {
+        LocalDate dateEffective = LocalDate.parse(info.getQueryParameters().getFirst("dateEffective"));
+        JsonObject nbrArriveeDepart = palnningDao.getNbArriveeAndDepart(dateEffective);
+        if (nbrArriveeDepart == null) {
+            throw new NotFoundException();
+        }
+        return Response.ok(nbrArriveeDepart, MediaType.APPLICATION_JSON).build();
     }
     
 }
